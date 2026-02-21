@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPushToUser } from "@/lib/push/web-push";
+import { touchOrderInteraction } from "@/lib/pos/order-cache";
 
 const VALID_STATUSES = ["IN_PROGRESS", "READY", "SERVED"] as const;
 type ValidStatus = typeof VALID_STATUSES[number];
@@ -104,6 +105,9 @@ export async function PATCH(
         });
       }
     }
+
+    // Aktualizuj timestamp interakcji
+    await touchOrderInteraction(orderId);
 
     return NextResponse.json({ ok: true });
   } catch (e) {

@@ -4,13 +4,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import "@/components/ui/dialog";
 import { Settings, Building2, Printer, Users } from "lucide-react";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
@@ -373,7 +367,7 @@ export default function SettingsPageClient() {
     },
   });
 
-  const { data: rooms = [], refetch: refetchRooms } = useQuery({
+  const { data: rooms = [] } = useQuery({
     queryKey: ["rooms-all"],
     queryFn: async () => {
       const r = await fetch("/api/rooms?all=true");
@@ -397,7 +391,7 @@ export default function SettingsPageClient() {
     },
   });
 
-  const { data: printers = [], refetch: refetchPrinters } = useQuery({
+  const { data: printers = [] } = useQuery({
     queryKey: ["printers"],
     queryFn: async () => {
       const r = await fetch("/api/printers");

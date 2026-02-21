@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
+import { recalculateOrderCache } from "@/lib/pos/order-cache";
 
 export async function POST(
   request: NextRequest,
@@ -41,6 +42,9 @@ export async function POST(
         cancelReason: cancelReason.slice(0, 255),
       },
     });
+
+    // Przelicz cache po anulowaniu pozycji
+    await recalculateOrderCache(orderId);
 
     await auditLog(null, "ORDER_ITEM_CANCELLED", "OrderItem", itemId, { status: item.status }, { status: "CANCELLED", reason: cancelReason });
     return NextResponse.json({ ok: true });

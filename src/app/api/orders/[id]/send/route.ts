@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, sendOrderSchema } from "@/lib/validation";
+import { recalculateOrderCache } from "@/lib/pos/order-cache";
 
 export async function POST(
   request: NextRequest,
@@ -73,6 +74,9 @@ export async function POST(
         where: { id: orderId },
         data: { status: "SENT_TO_KITCHEN" },
       });
+      
+      // Przelicz cache zamówienia
+      await recalculateOrderCache(orderId, tx);
     });
 
     return NextResponse.json({ ok: true });

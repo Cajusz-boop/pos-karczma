@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileSpreadsheet, BarChart3, Users, Package, Receipt, UtensilsCrossed, FileText, Shield } from "lucide-react";
+import { FileSpreadsheet, BarChart3, Users, Package, Receipt, UtensilsCrossed, Shield } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { pl } from "date-fns/locale";
 

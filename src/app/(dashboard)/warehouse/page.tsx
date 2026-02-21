@@ -200,7 +200,7 @@ function WarehousesSection({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [type, setType] = useState("MAIN");
-  const [saving, setSaving] = useState(false);
+  const [_saving, _setSaving] = useState(false);
 
   const createMutation = useMutation({
     mutationFn: async () => {

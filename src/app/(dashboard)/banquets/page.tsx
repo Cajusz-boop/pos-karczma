@@ -13,7 +13,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Plus, Pencil, Play, FileText, UtensilsCrossed, Calendar } from "lucide-react";
+import { Plus, Play, FileText, UtensilsCrossed, Calendar } from "lucide-react";
 
 const EVENT_LABELS: Record<string, string> = {
   WEDDING: "Wesele",
@@ -477,7 +477,7 @@ function MenusSection({
   const [eventType, setEventType] = useState("");
   const [pricePerPerson, setPricePerPerson] = useState("");
   const [menuItems, setMenuItems] = useState<Array<{ productId: string; name: string; quantity: number; courseNumber: number }>>([]);
-  const [saving, setSaving] = useState(false);
+  const [_saving, _setSaving] = useState(false);
 
   const addItem = () => setMenuItems((prev) => [...prev, { productId: "", name: "", quantity: 1, courseNumber: 1 }]);
   const removeItem = (idx: number) => setMenuItems((prev) => prev.filter((_, i) => i !== idx));
