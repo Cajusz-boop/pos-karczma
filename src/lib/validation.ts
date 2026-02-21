@@ -313,6 +313,9 @@ export const printKitchenSchema = z.object({
 }).passthrough();
 
 // ─── Products ────────────────────────────────────────────────────────
+const productTypeEnum = z.enum(["REGULAR", "SET", "HELPER_SET", "ADDON", "ADDON_GLOBAL"]);
+const setPriceModeEnum = z.enum(["OWN_PRICE", "CALCULATED", "CALCULATED_SINGLE"]);
+
 export const createProductSchema = z.object({
   name: z.string().min(1, "Wymagana nazwa produktu").max(100),
   nameShort: z.string().max(40).optional(),
@@ -321,6 +324,22 @@ export const createProductSchema = z.object({
   priceGross: z.number().min(0),
   color: z.string().optional(),
   sortOrder: z.number().int().optional(),
+  productType: productTypeEnum.optional(),
+  isSet: z.boolean().optional(),
+  setPriceMode: setPriceModeEnum.optional(),
+  maxComponents: z.number().int().positive().optional().nullable(),
+  freeComponents: z.number().int().min(0).optional().nullable(),
+  superGroupId: z.string().optional().nullable(),
+  isAddonOnly: z.boolean().optional(),
+  isHidden: z.boolean().optional(),
+  noPrintKitchen: z.boolean().optional(),
+  printWithMinus: z.boolean().optional(),
+  canRepeat: z.boolean().optional(),
+  alwaysOnePortion: z.boolean().optional(),
+  noQuantityChange: z.boolean().optional(),
+  askForComponents: z.boolean().optional(),
+  afterSelectGoTo: z.string().optional().nullable(),
+  afterSelectAction: z.string().optional().nullable(),
 }).passthrough();
 
 export const updateProductSchema = z.object({
@@ -333,6 +352,22 @@ export const updateProductSchema = z.object({
   isAvailable: z.boolean().optional(),
   color: z.string().optional().nullable(),
   sortOrder: z.number().int().optional(),
+  productType: productTypeEnum.optional(),
+  isSet: z.boolean().optional(),
+  setPriceMode: setPriceModeEnum.optional(),
+  maxComponents: z.number().int().positive().optional().nullable(),
+  freeComponents: z.number().int().min(0).optional().nullable(),
+  superGroupId: z.string().optional().nullable(),
+  isAddonOnly: z.boolean().optional(),
+  isHidden: z.boolean().optional(),
+  noPrintKitchen: z.boolean().optional(),
+  printWithMinus: z.boolean().optional(),
+  canRepeat: z.boolean().optional(),
+  alwaysOnePortion: z.boolean().optional(),
+  noQuantityChange: z.boolean().optional(),
+  askForComponents: z.boolean().optional(),
+  afterSelectGoTo: z.string().optional().nullable(),
+  afterSelectAction: z.string().optional().nullable(),
 }).passthrough();
 
 // ─── Users ──────────────────────────────────────────────────────────

@@ -126,10 +126,11 @@ export async function syncPendingActions(): Promise<{
 
 /**
  * Check if the server is reachable.
+ * Uses /api/ping (edge runtime) for minimal latency.
  */
 export async function checkConnectivity(): Promise<boolean> {
   try {
-    const response = await fetch("/api/health", {
+    const response = await fetch("/api/ping", {
       method: "HEAD",
       cache: "no-store",
     });

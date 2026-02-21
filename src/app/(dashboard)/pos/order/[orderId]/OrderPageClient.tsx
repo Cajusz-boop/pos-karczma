@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, lazy, Suspense, useDeferredValue } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOrderStore, type OrderItemLine } from "@/store/useOrderStore";
@@ -15,9 +15,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { OrderPageView } from "./OrderPageView";
-import { PaymentDialog } from "./PaymentDialog";
 import { SuggestionPopup, type SuggestionProduct } from "@/components/pos/SuggestionPopup";
 import type { CategoryNode } from "./orderPageTypes";
+
+const PaymentDialog = lazy(() => import("./PaymentDialog").then(m => ({ default: m.PaymentDialog })));
 
 type ProductRow = import("./orderPageTypes").ProductRow;
 
@@ -127,6 +128,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
 
   const [categoryStack, setCategoryStack] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [lastAddedProductId, setLastAddedProductId] = useState<string | null>(null);
   const [recentProductIds, setRecentProductIds] = useState<string[]>([]);
   const [excludedAllergens, setExcludedAllergens] = useState<string[]>([]);
@@ -163,6 +165,9 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       if (!res.ok) throw new Error("Błąd sal");
       return res.json();
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
   const { data: openOrders = [] } = useQuery<OpenOrderRow[]>({
     queryKey: ["orders", "open"],
@@ -192,6 +197,10 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       if (!res.ok) throw new Error("Błąd produktów");
       return res.json();
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   const { data: popularProducts = [] } = useQuery<Array<{ id: string; name: string; priceGross: number; taxRateId: string; color: string | null; categoryName: string; orderCount: number }>>({
@@ -201,6 +210,9 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       if (!res.ok) return [];
       return res.json();
     },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -259,8 +271,8 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       return !p.allergens.some((a) => excludedAllergens.includes(a.code));
     };
 
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase();
+    if (deferredSearchQuery.trim()) {
+      const q = deferredSearchQuery.trim().toLowerCase();
       return [...products]
         .filter(
           (p) =>
@@ -274,7 +286,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     return [...products]
       .filter((p) => categoryIdsToShow.includes(p.categoryId) && allergenFilter(p))
       .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [products, categoryIdsToShow, searchQuery, excludedAllergens]);
+  }, [products, categoryIdsToShow, deferredSearchQuery, excludedAllergens]);
 
   const sendMutation = useMutation({
     mutationFn: async () => {
@@ -703,28 +715,32 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <PaymentDialog
-        open={paymentDialogOpen}
-        onOpenChange={setPaymentDialogOpen}
-        order={orderData ? {
-          id: orderData.id,
-          orderNumber: orderData.orderNumber,
-          userId: orderData.userId,
-          items: orderData.items
-            .filter((i) => i.status !== "CANCELLED")
-            .map((i) => ({
-              id: i.id,
-              productName: i.productName,
-              quantity: i.quantity,
-              unitPrice: i.unitPrice,
-              taxRatePercent: i.taxRatePercent ?? 0,
-              taxRateSymbol: i.taxRateSymbol ?? "?",
-            })),
-          discountJson: orderData.discountJson,
-        } : null}
-        currentUserId={currentUser?.id ?? null}
-        onSuccess={() => queryClient.invalidateQueries({ queryKey: ["order", orderId] })}
-      />
+      {paymentDialogOpen && (
+        <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80"><div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
+          <PaymentDialog
+            open={paymentDialogOpen}
+            onOpenChange={setPaymentDialogOpen}
+            order={orderData ? {
+              id: orderData.id,
+              orderNumber: orderData.orderNumber,
+              userId: orderData.userId,
+              items: orderData.items
+                .filter((i) => i.status !== "CANCELLED")
+                .map((i) => ({
+                  id: i.id,
+                  productName: i.productName,
+                  quantity: i.quantity,
+                  unitPrice: i.unitPrice,
+                  taxRatePercent: i.taxRatePercent ?? 0,
+                  taxRateSymbol: i.taxRateSymbol ?? "?",
+                })),
+              discountJson: orderData.discountJson,
+            } : null}
+            currentUserId={currentUser?.id ?? null}
+            onSuccess={() => queryClient.invalidateQueries({ queryKey: ["order", orderId] })}
+          />
+        </Suspense>
+      )}
 
       <Dialog open={cancelOrderConfirm} onOpenChange={setCancelOrderConfirm}>
         <DialogContent>

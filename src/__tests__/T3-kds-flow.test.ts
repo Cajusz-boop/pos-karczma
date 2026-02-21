@@ -2,17 +2,16 @@
  * T3: KDS flow — zamówienie, zaczynam, gotowe, push
  */
 import { describe, it, expect } from "vitest";
-
-const BASE_URL = process.env.TEST_BASE_URL || "http://localhost:3000";
+import { authFetch, url } from "./helpers/auth";
 
 describe("T3: KDS Flow", () => {
   it("TC-3.1: KDS stations endpoint", async () => {
-    const res = await fetch(`${BASE_URL}/api/kds/stations`);
+    const res = await authFetch(url("/api/kds/stations"));
     expect(res.status).toBe(200);
   });
 
   it("TC-3.2: KDS config endpoint", async () => {
-    const res = await fetch(`${BASE_URL}/api/kds/config`);
+    const res = await authFetch(url("/api/kds/config"));
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.config).toBeDefined();
@@ -21,7 +20,7 @@ describe("T3: KDS Flow", () => {
   });
 
   it("TC-3.3: Push VAPID key endpoint", async () => {
-    const res = await fetch(`${BASE_URL}/api/push`);
+    const res = await authFetch(url("/api/push"));
     expect(res.status).toBe(200);
   });
 });

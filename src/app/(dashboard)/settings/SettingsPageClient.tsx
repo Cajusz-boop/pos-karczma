@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import "@/components/ui/dialog";
-import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone } from "lucide-react";
+import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone, Truck, Package, Tv, CreditCard, BarChart3, Archive, Wrench } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
@@ -686,6 +686,55 @@ export default function SettingsPageClient() {
             <div>
               <p className="font-medium">Drukarki</p>
               <p className="text-xs text-muted-foreground">Kuchenne, bonówka</p>
+            </div>
+          </Link>
+          <Link href="/settings/delivery" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Truck className="h-5 w-5 text-orange-500" />
+            <div>
+              <p className="font-medium">Dostawy</p>
+              <p className="text-xs text-muted-foreground">Strefy, kierowcy</p>
+            </div>
+          </Link>
+          <Link href="/settings/sets" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Package className="h-5 w-5 text-purple-500" />
+            <div>
+              <p className="font-medium">Zestawy</p>
+              <p className="text-xs text-muted-foreground">Nadgrupy, składniki</p>
+            </div>
+          </Link>
+          <Link href="/settings/displays" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Tv className="h-5 w-5 text-pink-500" />
+            <div>
+              <p className="font-medium">Panele TV</p>
+              <p className="text-xs text-muted-foreground">Ekrany dla klientów</p>
+            </div>
+          </Link>
+          <Link href="/settings/card-readers" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <CreditCard className="h-5 w-5 text-teal-500" />
+            <div>
+              <p className="font-medium">Czytniki kart</p>
+              <p className="text-xs text-muted-foreground">NFC, RFID, Dallas</p>
+            </div>
+          </Link>
+          <Link href="/manager" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Wrench className="h-5 w-5 text-red-500" />
+            <div>
+              <p className="font-medium">Menadżer</p>
+              <p className="text-xs text-muted-foreground">Numerator, kopie, fiskalizacja</p>
+            </div>
+          </Link>
+          <Link href="/reports/extended" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <BarChart3 className="h-5 w-5 text-indigo-500" />
+            <div>
+              <p className="font-medium">Raporty rozszerzone</p>
+              <p className="text-xs text-muted-foreground">Stoliki, zmiana</p>
+            </div>
+          </Link>
+          <Link href="/kds/archive" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Archive className="h-5 w-5 text-gray-500" />
+            <div>
+              <p className="font-medium">Archiwum KDS</p>
+              <p className="text-xs text-muted-foreground">Historia, statystyki czasu</p>
             </div>
           </Link>
         </div>

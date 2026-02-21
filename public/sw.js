@@ -1,9 +1,29 @@
-const CACHE_NAME = "pos-karczma-v2";
-const STATIC_ASSETS = ["/icon-192.png", "/icon-512.png"];
+const CACHE_NAME = "pos-karczma-v3";
+const STATIC_ASSETS = [
+  "/icon-192.png",
+  "/icon-512.png",
+  "/manifest.json",
+];
+const API_PRECACHE = [
+  "/api/products",
+  "/api/categories",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await cache.addAll(STATIC_ASSETS);
+      for (const url of API_PRECACHE) {
+        try {
+          const response = await fetch(url);
+          if (response.ok) {
+            await cache.put(url, response);
+          }
+        } catch (e) {
+          console.warn(`[SW] Failed to precache ${url}:`, e);
+        }
+      }
+    })
   );
   self.skipWaiting();
 });

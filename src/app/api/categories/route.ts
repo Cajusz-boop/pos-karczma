@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
+import { cached, cacheDelete, cacheDeletePattern } from "@/lib/redis";
 
 const createCategorySchema = z.object({
   name: z.string().min(1, "Wymagana nazwa").max(50),
@@ -34,20 +35,34 @@ const reorderSchema = z.object({
   })),
 });
 
+export const revalidate = 60;
+
+async function fetchCategoriesWithCount() {
+  return prisma.category.findMany({
+    include: {
+      parent: { select: { id: true, name: true } },
+      _count: { select: { products: true, children: true } },
+    },
+    orderBy: { sortOrder: "asc" },
+  });
+}
+
 /**
  * GET /api/categories — list all categories with product count
  */
 export async function GET() {
   try {
-    const categories = await prisma.category.findMany({
-      include: {
-        parent: { select: { id: true, name: true } },
-        _count: { select: { products: true, children: true } },
-      },
-      orderBy: { sortOrder: "asc" },
-    });
+    const categories = await cached(
+      "categories-list",
+      fetchCategoriesWithCount,
+      { ttl: 120, prefix: "pos" }
+    );
 
-    return NextResponse.json({ categories });
+    return NextResponse.json({ categories }, {
+      headers: {
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+      },
+    });
   } catch (e) {
     console.error("[Categories GET]", e);
     return NextResponse.json({ error: "Błąd pobierania kategorii" }, { status: 500 });
@@ -83,6 +98,11 @@ export async function POST(request: NextRequest) {
     });
 
     autoExportConfigSnapshot();
+    await Promise.all([
+      cacheDelete("categories-list", "pos"),
+      cacheDelete("categories", "pos"),
+      cacheDeletePattern("products:*", "pos"),
+    ]);
 
     return NextResponse.json({ category }, { status: 201 });
   } catch (e) {
@@ -115,6 +135,10 @@ export async function PATCH(request: NextRequest) {
       );
 
       autoExportConfigSnapshot();
+      await Promise.all([
+        cacheDelete("categories-list", "pos"),
+        cacheDelete("categories", "pos"),
+      ]);
 
       return NextResponse.json({ ok: true });
     }
@@ -147,6 +171,11 @@ export async function PATCH(request: NextRequest) {
     });
 
     autoExportConfigSnapshot();
+    await Promise.all([
+      cacheDelete("categories-list", "pos"),
+      cacheDelete("categories", "pos"),
+      cacheDeletePattern("products:*", "pos"),
+    ]);
 
     return NextResponse.json({ category });
   } catch (e) {
@@ -193,6 +222,11 @@ export async function DELETE(request: NextRequest) {
     await prisma.category.delete({ where: { id } });
 
     autoExportConfigSnapshot();
+    await Promise.all([
+      cacheDelete("categories-list", "pos"),
+      cacheDelete("categories", "pos"),
+      cacheDeletePattern("products:*", "pos"),
+    ]);
 
     return NextResponse.json({ ok: true });
   } catch (e) {

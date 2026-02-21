@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
+import { sendPushToRole, sendPushToUser } from "@/lib/push/web-push";
 
 const createDeliverySchema = z.object({
   type: z.enum(["PHONE", "DELIVERY"]),
@@ -10,6 +11,8 @@ const createDeliverySchema = z.object({
   deliveryNote: z.string().optional(),
   estimatedMinutes: z.number().int().min(5).max(240).optional(),
   customerId: z.string().optional(),
+  deliveryZoneId: z.string().optional(),
+  deliveryCost: z.number().min(0).optional(),
 });
 
 const updateStatusSchema = z.object({
@@ -45,6 +48,7 @@ export async function GET(request: NextRequest) {
       include: {
         user: { select: { id: true, name: true } },
         customer: { select: { id: true, name: true, phone: true } },
+        deliveryZone: { select: { id: true, number: true, name: true } },
         items: {
           where: { status: { not: "CANCELLED" } },
           include: {
@@ -56,31 +60,48 @@ export async function GET(request: NextRequest) {
       take: 50,
     });
 
+    const driverIds = orders.map((o) => o.assignedDriverId).filter((id): id is string => id !== null);
+    const drivers = driverIds.length > 0
+      ? await prisma.deliveryDriver.findMany({
+          where: { id: { in: driverIds } },
+          include: { user: { select: { id: true, name: true } } },
+        })
+      : [];
+    const driverMap = new Map(drivers.map((d) => [d.id, d]));
+
     return NextResponse.json({
-      orders: orders.map((o) => ({
-        id: o.id,
-        orderNumber: o.orderNumber,
-        type: o.type,
-        status: o.status,
-        deliveryStatus: o.deliveryStatus,
-        deliveryPhone: o.deliveryPhone,
-        deliveryAddress: o.deliveryAddress,
-        deliveryNote: o.deliveryNote,
-        estimatedAt: o.estimatedAt?.toISOString() ?? null,
-        createdAt: o.createdAt.toISOString(),
-        user: o.user,
-        customer: o.customer,
-        items: o.items.map((i) => ({
-          id: i.id,
-          productName: i.product.name,
-          quantity: Number(i.quantity),
-          unitPrice: Number(i.unitPrice),
-        })),
-        total: o.items.reduce(
-          (sum, i) => sum + Number(i.quantity) * Number(i.unitPrice) - Number(i.discountAmount ?? 0),
-          0
-        ),
-      })),
+      orders: orders.map((o) => {
+        const driver = o.assignedDriverId ? driverMap.get(o.assignedDriverId) : null;
+        return {
+          id: o.id,
+          orderNumber: o.orderNumber,
+          type: o.type,
+          status: o.status,
+          deliveryStatus: o.deliveryStatus,
+          deliveryPhone: o.deliveryPhone,
+          deliveryAddress: o.deliveryAddress,
+          deliveryNote: o.deliveryNote,
+          estimatedAt: o.estimatedAt?.toISOString() ?? null,
+          deliveredAt: o.deliveredAt?.toISOString() ?? null,
+          deliveryCost: o.deliveryCost ? Number(o.deliveryCost) : null,
+          driverCommission: o.driverCommission ? Number(o.driverCommission) : null,
+          createdAt: o.createdAt.toISOString(),
+          user: o.user,
+          customer: o.customer,
+          zone: o.deliveryZone,
+          driver: driver ? { id: driver.id, name: driver.user.name } : null,
+          items: o.items.map((i) => ({
+            id: i.id,
+            productName: i.product.name,
+            quantity: Number(i.quantity),
+            unitPrice: Number(i.unitPrice),
+          })),
+          total: o.items.reduce(
+            (sum, i) => sum + Number(i.quantity) * Number(i.unitPrice) - Number(i.discountAmount ?? 0),
+            0
+          ) + (o.deliveryCost ? Number(o.deliveryCost) : 0),
+        };
+      }),
     });
   } catch (e) {
     console.error("[Delivery GET]", e);
@@ -102,7 +123,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { type, deliveryPhone, deliveryAddress, deliveryNote, estimatedMinutes, customerId } = parsed.data;
+    const { type, deliveryPhone, deliveryAddress, deliveryNote, estimatedMinutes, customerId, deliveryZoneId, deliveryCost } = parsed.data;
 
     const userId = request.headers.get("x-user-id");
     if (!userId) {
@@ -118,6 +139,40 @@ export async function POST(request: NextRequest) {
       ? new Date(Date.now() + estimatedMinutes * 60_000)
       : null;
 
+    let zoneId = deliveryZoneId ?? null;
+    let finalDeliveryCost = deliveryCost ?? null;
+    let driverCommission = null;
+
+    if (type === "DELIVERY" && !zoneId && deliveryAddress) {
+      const normalizedAddress = deliveryAddress.toLowerCase().trim();
+      const streetMatch = normalizedAddress.match(/^(ul\.?\s*)?([a-ząćęłńóśźż\s]+)/i);
+      const streetName = streetMatch?.[2]?.trim() ?? normalizedAddress;
+
+      const matchingStreet = await prisma.deliveryStreet.findFirst({
+        where: {
+          streetName: { contains: streetName },
+          zone: { isActive: true },
+        },
+        include: { zone: true },
+      });
+
+      if (matchingStreet) {
+        zoneId = matchingStreet.zoneId;
+        finalDeliveryCost = finalDeliveryCost ?? Number(matchingStreet.zone.deliveryCost);
+        driverCommission = Number(matchingStreet.zone.driverCommission);
+      }
+    }
+
+    if (type === "DELIVERY" && zoneId && finalDeliveryCost === null) {
+      const zone = await prisma.deliveryZone.findUnique({
+        where: { id: zoneId },
+      });
+      if (zone) {
+        finalDeliveryCost = Number(zone.deliveryCost);
+        driverCommission = Number(zone.driverCommission);
+      }
+    }
+
     const order = await prisma.order.create({
       data: {
         orderNumber: (maxOrder?.orderNumber ?? 0) + 1,
@@ -131,6 +186,9 @@ export async function POST(request: NextRequest) {
         deliveryStatus: "PENDING",
         estimatedAt,
         customerId: customerId ?? null,
+        deliveryZoneId: zoneId,
+        deliveryCost: finalDeliveryCost,
+        driverCommission,
         note: type === "DELIVERY"
           ? `Dostawa: ${deliveryAddress || deliveryPhone}`
           : `Tel: ${deliveryPhone}`,
@@ -149,6 +207,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Błąd tworzenia zamówienia" }, { status: 500 });
   }
 }
+
+const STATUS_NOTIFICATIONS: Record<string, { title: string; body: (orderNum: number) => string }> = {
+  PREPARING: {
+    title: "Zamówienie w przygotowaniu",
+    body: (n) => `Zamówienie #${n} jest przygotowywane`,
+  },
+  READY_FOR_PICKUP: {
+    title: "Zamówienie gotowe!",
+    body: (n) => `Zamówienie #${n} czeka na kierowcę`,
+  },
+  OUT_FOR_DELIVERY: {
+    title: "W drodze!",
+    body: (n) => `Zamówienie #${n} jedzie do klienta`,
+  },
+  DELIVERED: {
+    title: "Dostarczono",
+    body: (n) => `Zamówienie #${n} zostało dostarczone`,
+  },
+};
 
 /**
  * PATCH /api/orders/delivery — update delivery status
@@ -169,12 +246,52 @@ export async function PATCH(request: NextRequest) {
     const order = await prisma.order.update({
       where: { id: orderId },
       data: { deliveryStatus },
+      select: {
+        id: true,
+        orderNumber: true,
+        userId: true,
+        deliveryStatus: true,
+        assignedDriverId: true,
+      },
     });
 
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "DELIVERY_STATUS_UPDATED", "Order", orderId, undefined, {
       deliveryStatus,
     });
+
+    const notifConfig = STATUS_NOTIFICATIONS[deliveryStatus];
+    if (notifConfig) {
+      if (deliveryStatus === "READY_FOR_PICKUP") {
+        sendPushToRole("ADMIN", {
+          title: notifConfig.title,
+          body: notifConfig.body(order.orderNumber),
+          data: { type: "DELIVERY_STATUS", orderId },
+        }).catch(console.error);
+      }
+
+      if (order.userId) {
+        sendPushToUser(order.userId, {
+          title: notifConfig.title,
+          body: notifConfig.body(order.orderNumber),
+          data: { type: "DELIVERY_STATUS", orderId },
+        }).catch(console.error);
+      }
+
+      if (order.assignedDriverId) {
+        const driver = await prisma.deliveryDriver.findUnique({
+          where: { id: order.assignedDriverId },
+          select: { userId: true },
+        });
+        if (driver) {
+          sendPushToUser(driver.userId, {
+            title: notifConfig.title,
+            body: notifConfig.body(order.orderNumber),
+            data: { type: "DELIVERY_STATUS", orderId },
+          }).catch(console.error);
+        }
+      }
+    }
 
     return NextResponse.json({ order });
   } catch (e) {

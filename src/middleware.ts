@@ -6,6 +6,7 @@ const PUBLIC_API_ROUTES = [
   "/api/auth/login",
   "/api/auth/token-login",
   "/api/auth/users",
+  "/api/users",
   "/api/health",
 ];
 

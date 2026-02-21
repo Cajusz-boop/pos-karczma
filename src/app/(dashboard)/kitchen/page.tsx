@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useKdsStream } from "@/lib/hooks/useKdsStream";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -462,6 +463,17 @@ export default function KitchenPage() {
     if (stations.length && !stationId) setStationId(stations[0].id);
   }, [stations, stationId]);
 
+  // Real-time KDS data via SSE
+  const { 
+    active: sseActive, 
+    served: sseServed, 
+    isConnected: sseConnected 
+  } = useKdsStream({ 
+    stationId, 
+    enabled: !!stationId 
+  });
+
+  // Fallback to polling if SSE not available
   const { data: ordersData, refetch: refetchOrders } = useQuery<{
     active: KDSCard[];
     served: Array<{
@@ -481,8 +493,11 @@ export default function KitchenPage() {
       if (!r.ok) throw new Error("Błąd zamówień");
       return r.json();
     },
-    refetchInterval: 3000,
-    enabled: !!stationId,
+    refetchInterval: sseConnected ? false : 3000,
+    staleTime: 2000,
+    enabled: !!stationId && !sseConnected,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
   });
 
   const { data: messages = [], refetch: refetchMessages } = useQuery<KDSMessage[]>({
@@ -493,10 +508,12 @@ export default function KitchenPage() {
       return r.json();
     },
     refetchInterval: 5000,
+    staleTime: 3000,
+    refetchOnWindowFocus: false,
   });
 
-  const active = ordersData?.active ?? [];
-  const served = ordersData?.served ?? [];
+  const active = sseConnected ? (sseActive as KDSCard[]) : (ordersData?.active ?? []);
+  const served = sseConnected ? sseServed : (ordersData?.served ?? []);
   const unreadCount = messages.filter((m) => !m.readAt).length;
   const hasRedCard = active.some((c) => getTimerState(c.sentAt).color === "red");
 

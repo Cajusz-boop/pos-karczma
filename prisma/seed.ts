@@ -631,6 +631,237 @@ async function main() {
   }
   console.log("  ✓ SystemConfig: nazwa firmy, timeout 5 min, próg rabatu 10%, KDS retencja 30 min, alarm 20 min");
 
+  // 12. Promocje / Happy Hour
+  const now = new Date();
+  const yearFromNow = new Date(now);
+  yearFromNow.setFullYear(yearFromNow.getFullYear() + 1);
+
+  const happyHourPromo = await prisma.promotion.findFirst({ where: { name: "Happy Hour Piwa" } });
+  if (!happyHourPromo) {
+    await prisma.promotion.create({
+      data: {
+        name: "Happy Hour Piwa",
+        type: "happy_hour",
+        rulesJson: {
+          categoryId: catPiwa.id,
+          discountPercent: 20,
+          timeFrom: "15:00",
+          timeTo: "18:00",
+        },
+        daysOfWeek: [1, 2, 3, 4, 5], // Mon-Fri
+        isActive: true,
+        validFrom: now,
+        validTo: yearFromNow,
+      },
+    });
+  }
+
+  const lunchPromo = await prisma.promotion.findFirst({ where: { name: "Lunch Special" } });
+  if (!lunchPromo) {
+    await prisma.promotion.create({
+      data: {
+        name: "Lunch Special",
+        type: "daily_special",
+        rulesJson: {
+          categoryId: catZupy.id,
+          discountPercent: 15,
+          timeFrom: "11:00",
+          timeTo: "14:00",
+        },
+        daysOfWeek: [1, 2, 3, 4, 5],
+        isActive: true,
+        validFrom: now,
+        validTo: yearFromNow,
+      },
+    });
+  }
+  console.log("  ✓ Promocje: Happy Hour Piwa, Lunch Special");
+
+  // 13. Rabaty (Discount)
+  const ensureDiscount = async (name: string, type: "PERCENT" | "AMOUNT" | "PROMO", value: number) => {
+    let d = await prisma.discount.findFirst({ where: { name } });
+    if (!d) {
+      d = await prisma.discount.create({
+        data: { name, type, value, isActive: true },
+      });
+    }
+    return d;
+  };
+  await ensureDiscount("Rabat 10%", "PERCENT", 10);
+  await ensureDiscount("Rabat 20%", "PERCENT", 20);
+  await ensureDiscount("Rabat 50 zł", "AMOUNT", 50);
+  await ensureDiscount("Rabat VIP", "PERCENT", 15);
+  await ensureDiscount("Kod promocyjny", "PROMO", 25);
+  console.log("  ✓ Rabaty: 10%, 20%, 50zł, VIP, Kod promocyjny");
+
+  // 14. Vouchery / Bony podarunkowe
+  const ensureGiftVoucher = async (code: string, value: number, balance?: number) => {
+    let v = await prisma.giftVoucher.findFirst({ where: { code } });
+    if (!v) {
+      const expiresAt = new Date();
+      expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+      v = await prisma.giftVoucher.create({
+        data: {
+          code,
+          initialValue: value,
+          balance: balance ?? value,
+          isActive: true,
+          expiresAt,
+        },
+      });
+    }
+    return v;
+  };
+  await ensureGiftVoucher("BON100", 100);
+  await ensureGiftVoucher("BON200", 200);
+  await ensureGiftVoucher("BON500", 500);
+  await ensureGiftVoucher("TESTBON50", 50);
+  await ensureGiftVoucher("ZEROSALDO", 100, 0); // voucher z zerowym saldem do testów negatywnych
+  console.log("  ✓ Vouchery: BON100, BON200, BON500, TESTBON50, ZEROSALDO");
+
+  // 15. Strefy dostawy
+  const ensureDeliveryZone = async (number: number, name: string, deliveryCost: number, estimatedMinutes: number, minOrderFree?: number) => {
+    let z = await prisma.deliveryZone.findFirst({ where: { number } });
+    if (!z) {
+      z = await prisma.deliveryZone.create({
+        data: {
+          number,
+          name,
+          deliveryCost,
+          driverCommission: deliveryCost * 0.5,
+          estimatedMinutes,
+          minOrderForFreeDelivery: minOrderFree ?? null,
+          isActive: true,
+          sortOrder: number,
+        },
+      });
+    }
+    return z;
+  };
+  await ensureDeliveryZone(1, "Centrum", 0, 20, 50);
+  await ensureDeliveryZone(2, "Obrzeża miasta", 10, 35, 100);
+  await ensureDeliveryZone(3, "Przedmieścia", 15, 45, 150);
+  await ensureDeliveryZone(4, "Okolice (daleko)", 25, 60, 200);
+  console.log("  ✓ Strefy dostawy: Centrum, Obrzeża, Przedmieścia, Okolice");
+
+  // 16. Upewnij się, że stoliki mają status FREE
+  const tablesUpdated = await prisma.table.updateMany({
+    where: { status: { not: "FREE" } },
+    data: { status: "FREE" },
+  });
+  if (tablesUpdated.count > 0) {
+    console.log(`  ✓ Reset ${tablesUpdated.count} stolików na FREE`);
+  }
+
+  // 17. Aktywna zmiana dla testów
+  const testUser = await prisma.user.findFirst({ where: { name: "Kelner 1" } });
+  if (testUser) {
+    const existingShift = await prisma.shift.findFirst({
+      where: { userId: testUser.id, status: "OPEN" },
+    });
+    if (!existingShift) {
+      await prisma.shift.create({
+        data: {
+          userId: testUser.id,
+          cashStart: 500,
+          status: "OPEN",
+        },
+      });
+      console.log("  ✓ Otwarta zmiana dla Kelner 1");
+    } else {
+      console.log("  ✓ Zmiana dla Kelner 1 już istnieje");
+    }
+  }
+
+  // 18. Testowi kierowcy dostawy (powiązani z User)
+  const ensureDeliveryDriver = async (userName: string, pin: string, phone: string, vehicleType: string, isAvailable: boolean) => {
+    let user = await prisma.user.findFirst({ where: { name: userName } });
+    const pinHash = await hashPin(pin);
+    if (!user) {
+      user = await prisma.user.create({
+        data: { name: userName, pin: pinHash, roleId: roleWaiter.id, isOwner: false },
+      });
+    }
+    let driver = await prisma.deliveryDriver.findFirst({ where: { userId: user.id } });
+    if (!driver) {
+      driver = await prisma.deliveryDriver.create({
+        data: { userId: user.id, phoneNumber: phone, vehicleType, isAvailable },
+      });
+    }
+    return driver;
+  };
+  await ensureDeliveryDriver("Kierowca Jan", "5555", "500100200", "car", true);
+  await ensureDeliveryDriver("Kierowca Adam", "6666", "500200300", "scooter", true);
+  await ensureDeliveryDriver("Kierowca Piotr", "7777", "500300400", "bike", false); // nieaktywny
+  console.log("  ✓ Kierowcy: Kierowca Jan, Kierowca Adam, Kierowca Piotr");
+
+  // 19. Testowe zamówienie (otwarte) dla testów
+  const firstTable = await prisma.table.findFirst({ where: { status: "FREE" } });
+  const testWaiter = await prisma.user.findFirst({ where: { name: "Kelner 1" } });
+  if (firstTable && testWaiter) {
+    const existingTestOrder = await prisma.order.findFirst({
+      where: { tableId: firstTable.id, status: "OPEN" },
+    });
+    if (!existingTestOrder) {
+      const testProduct = await prisma.product.findFirst({ where: { name: "Kotlet schabowy" } });
+      const testProduct2 = await prisma.product.findFirst({ where: { name: "Żurek w chlebie" } });
+      if (testProduct && testProduct2) {
+        const order = await prisma.order.create({
+          data: {
+            tableId: firstTable.id,
+            roomId: firstTable.roomId,
+            userId: testWaiter.id,
+            status: "OPEN",
+            type: "DINE_IN",
+            guestCount: 2,
+          },
+        });
+        // Dodaj pozycje
+        await prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: testProduct.id,
+            quantity: 2,
+            unitPrice: testProduct.priceGross,
+            taxRateId: testProduct.taxRateId,
+            courseNumber: 2,
+          },
+        });
+        await prisma.orderItem.create({
+          data: {
+            orderId: order.id,
+            productId: testProduct2.id,
+            quantity: 2,
+            unitPrice: testProduct2.priceGross,
+            taxRateId: testProduct2.taxRateId,
+            courseNumber: 1,
+          },
+        });
+        // Oznacz stolik jako zajęty
+        await prisma.table.update({
+          where: { id: firstTable.id },
+          data: { status: "OCCUPIED" },
+        });
+        console.log(`  ✓ Testowe zamówienie #${order.orderNumber} na stoliku ${firstTable.number}`);
+      }
+    } else {
+      console.log("  ✓ Testowe zamówienie już istnieje");
+    }
+  }
+
+  // 20. Pozostaw co najmniej 5 wolnych stolików do testów
+  const occupiedTables = await prisma.table.findMany({ where: { status: "OCCUPIED" } });
+  const freeTables = await prisma.table.findMany({ where: { status: "FREE" } });
+  if (freeTables.length < 5 && occupiedTables.length > 1) {
+    // Zwolnij część stolików (nie ruszaj pierwszego zajętego z testowym zamówieniem)
+    const toFree = occupiedTables.slice(1, Math.min(5, occupiedTables.length));
+    for (const t of toFree) {
+      await prisma.table.update({ where: { id: t.id }, data: { status: "FREE" } });
+    }
+    console.log(`  ✓ Zwolniono ${toFree.length} stolików`);
+  }
+  console.log(`  ✓ Wolne stoliki: ${freeTables.length >= 5 ? freeTables.length : '>=5'}`);
+
   console.log("✅ Seed zakończony.");
 }
 

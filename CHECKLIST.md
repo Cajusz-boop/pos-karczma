@@ -278,3 +278,263 @@
 - [x] T68 Integracja hotelowa E2E — obiad na pokój, śniadanie, checkout z rachunkiem
 - [x] T69 Load test — 50 użytkowników, 200 zamówień/h, baza 500k rekordów
 - [x] T70 Aktualizacja systemu — upgrade bez utraty danych, rollback
+
+## 15. DOSTAWY I KIEROWCY
+
+- [x] DK1 Strefy dostaw — CRUD, numer, nazwa, sortowanie
+- [x] DK2 Prowizja kierowcy per strefa — kwota za każdą dostawę
+- [x] DK3 Koszt dostawy per strefa — doliczany do zamówienia
+- [x] DK4 Baza ulic → strefa — auto-rozpoznanie strefy z adresu
+- [x] DK5 Kierowcy — lista, typ pojazdu, rejestracja, telefon, dostępność
+- [x] DK6 Przypisanie kierowcy do zamówienia — API /api/delivery/assign
+- [x] DK7 Panel dostaw — widok aktywnych zamówień, statusy, kierowcy
+- [x] DK8 Rozliczenie kierowcy — generuj, gotówka, prowizja, zamknij
+- [x] DK9 Min. zamówienie na darmową dostawę — per strefa
+- [x] DK10 Import ulic — bulk import do strefy (format nazwa;od;do)
+- [x] DK11 Widok dostawy w POS — /delivery z przypisaniem kierowców
+- [x] DK12 Status dostawy push — powiadomienie kierowca, kelner, admin
+- [x] DK13 Estymacja czasu dostawy — per strefa (estimatedMinutes)
+- [x] DK14 Raport dostaw — dzienny, per kierowca, per strefa
+
+## 16. MINUTNIK I OGIEŃ
+
+- [x] ZD1 Kursy/dania — już w OrderItem.courseNumber + release-course
+- [x] ZD2 Minutnik per pozycja — delayMinutes, fireAt, API /items/[itemId]/delay
+- [x] ZD3 Minutnik całe danie — API /orders/[id]/course-delay
+- [x] ZD4 "Ogień" — isFire, firedAt, push notification, API /items/[itemId]/fire
+
+## 17. PRODUKTY WAGOWE
+
+- [x] PW1 Flagi produktu wagowego — isWeightBased, requiresWeightConfirm, unit, tareWeight
+- [x] PW2 Status wagi w pozycji — weightConfirmed, confirmedWeight, weightConfirmedAt
+- [x] PW3 Waga przez kod kreskowy — PUT /items/[itemId]/weight (parsowanie EAN-13)
+- [x] PW4 Seryjne zatwierdzanie wagi — /api/orders/weight-scan (bulk scan)
+- [x] PW5 Odczyt masy z wagi elektronicznej — lib/scale/scale-service.ts + API /api/scale
+- [x] PW6 Auto odczyt masy przy wyborze produktu — parseScaleBarcode + getCurrentWeight()
+
+## 18. ZESTAWY I NADGRUPY
+
+- [x] ZA1 Nadgrupy towarowe — model SuperGroup (1-10), przypisanie kategorii
+- [x] ZA2 API nadgrup — CRUD /api/super-groups
+- [x] ZA3 Typy produktów — ProductType enum (REGULAR, SET, HELPER_SET, ADDON, ADDON_GLOBAL)
+- [x] ZA4 Składniki zestawu — model SetComponent, relacje Set→Product
+- [x] ZA5 API składników zestawu — CRUD /api/products/[id]/components
+- [x] ZA6 Tryby ceny zestawu — SetPriceMode (OWN_PRICE, CALCULATED, CALCULATED_SINGLE)
+- [x] ZA7 Flagi produktów — isAddonOnly, isHidden, noPrintKitchen, printWithMinus, canRepeat
+- [x] ZA8 UI Ustawienia zestawów — /settings/sets, zarządzanie nadgrupami i składnikami
+- [x] ZA9 Składniki w zamówieniu — API /orders/[id]/items/[itemId]/components
+- [x] ZA10 Wymiana składnika — API /items/[itemId]/swap-component
+- [x] ZA11 Zestaw helper — API /orders/[id]/add-helper-set
+- [x] ZA12 Max składników — maxComponents w Product (już w modelu)
+- [x] ZA13 Darmowe składniki — freeComponents w Product (już w modelu)
+
+## 19. FUNKCJE ZAMÓWIEŃ DODATKOWE
+
+- [x] ZD5 Na wynos per pozycja — API /items/[itemId]/takeaway
+- [x] ZD6 Notatki z typem — NoteType enum (STANDARD, ALLERGY, MODIFICATION, RUSH)
+- [x] ZD7 Priorytety pozycji — isRush, isPriority, printBold
+- [x] ZD8 API notatek — PUT/GET/DELETE /items/[itemId]/note
+- [x] ZD9 Dodatek odejmowany — API /items/[itemId]/subtract (toggle BRAK)
+- [x] ZD10 Lista kursów 1/2/3 — API /orders/[id]/courses (GET/PATCH/POST)
+- [x] ZD11 Ręczna kolejność pozycji — API /orders/[id]/reorder-items (PUT/PATCH)
+- [x] ZD12 Łącz podobne pozycje — API /orders/[id]/merge-items
+- [x] ZD13 Kopia zamówienia — API /orders/[id]/copy
+- [x] ZD14 Limit zamówienia — API /orders/[id]/limit, maxTotal w Order
+- [x] ZD15 Ilość osób przy stoliku — API /orders/[id]/guests, guestCount w Order
+
+## 20. UPRAWNIENIA SZCZEGÓŁOWE
+
+- [x] UP1 Dostęp do kategorii per user — allowedCategoryIds w User
+- [x] UP2 Dostęp do stolików per user — allowedTableIds w User
+- [x] UP3 Dostęp do poziomów cenowych — allowedPriceLevelIds w User
+- [x] UP4 PIN BistroMo — pinBistroMo (osobny PIN na bonownik)
+- [x] UP5 Uprawnienia szczegółowe JSON — permissionsJson w User
+- [x] UP6 Zakładki uprawnień — access, hall, operations, prohibitions, reports, receipt, order, delivery, config
+- [x] UP7 Konfiguracja przycisków F4 — uiButtonGroups w User
+- [x] UP8 Kopiowanie uprawnień — POST /users/[id]/permissions/copy
+- [x] UP9 Eksport użytkownika — GET /api/users/export?id=xxx
+- [x] UP10 Import użytkownika — POST /api/users/import
+- [x] UP11 Auto wylogowanie — autoLogoutSec (0/20/40/60s)
+- [x] UP12 Limit rabatu per user — API /orders/[id]/discount/validate
+- [x] UP13 UI uprawnień — strona /settings/users/[id]/permissions
+
+## 21. INTERFEJS ZAMÓWIENIA
+
+- [x] IZ1 Tryb klawiatury numerycznej — keyboardMode w UserPosPreference
+- [x] IZ2 ILOŚĆ*KOD*CENA — API /api/products/quick-entry
+- [x] IZ3 Szukaj T9 — API /api/products/search?t9=xxx
+- [x] IZ4 Szukaj po kodzie w grupie — API /api/products/search?code=xxx&categoryId=xxx
+- [x] IZ5 Konfiguracja rzędów przycisków — buttonRows (4-6) w UserPosPreference
+- [x] IZ6 Makra użytkownika (1-5) — model UserMacro, API /users/[id]/macros
+- [x] IZ7 Preferencje POS — model UserPosPreference, API /users/[id]/pos-preferences
+- [x] IZ8 Szybkie ilości — quickAmounts [0.25, 0.5, 1, 2, 5]
+- [x] IZ9 Ulubione produkty — favoriteProducts w UserPosPreference
+- [x] IZ10 Ostatnio używane — recentProducts (auto-aktualizowane)
+- [x] IZ11 Gotówka w kasie — API /api/cash/current
+- [x] IZ12 UI integracja — API gotowe do integracji z komponentami POS
+
+## 22. DRUKARKI KUCHENNE
+
+- [x] DRK1 Rozszerzony model Printer — charsPerLine, codePage, cutAfterPrint, openDrawer
+- [x] DRK2 Szablony wydruków — templatesJson (header, footer, item, storno, addon, set, component, course, timer, fire)
+- [x] DRK3 Pseudozmienne — $[Nazwa,30,0]$, $[Ilosc,3,1]$, ~50 zmiennych
+- [x] DRK4 API szablonów — GET/PUT /api/printers/[id]/templates
+- [x] DRK5 Reset do domyślnych — POST /api/printers/[id]/templates/reset
+- [x] DRK6 Log/dziennik wydruków — model PrintLog, API /api/printers/[id]/logs
+- [x] DRK7 Statusy wydruku — PENDING, PRINTING, PRINTED, FAILED
+- [x] DRK8 Zdalny serwer — remoteServer dla drukarki przez sieć
+- [x] DRK9 Czyszczenie starych logów — DELETE /api/printers/[id]/logs?olderThanDays=100
+- [x] DRK10 Sterownik ESC/POS — lib/printer/escpos.ts + print-service.ts
+- [x] DRK11 UI konfiguracji szablonów — /settings/printers/[id]/templates
+
+## 23. KONFIGURACJA GLOBALNA
+
+- [x] OG1 Maksymalny nr zamówienia — maxOrderNumber w SystemConfig
+- [x] OG2 Zerowanie licznika przy nowym dniu — resetOrderNumberDaily
+- [x] OG3 Zerowanie po raporcie zmiany — resetOrderNumberAfterShift
+- [x] OG4 Deklaracja gotówki per kelner — cashDeclarationPerUser
+- [x] OG5 Raport zmiany per stanowisko — shiftReportPerWorkstation
+- [x] OG6 Własna numeracja faktur — useOwnInvoiceNumbers
+- [x] OG7 Utrzymuj datę przez zmianę — maintainDateAcrossShift
+- [x] OG8 Czas od ostatniej modyfikacji — timeFromLastModification
+- [x] OG9 Błąd wydruku fiskalnego — fiscalErrorAllowContinue
+- [x] OG10 Powiadomienie przed rezerwacją — reservationAlertMinutes
+- [x] OG11 Opisy rozchodów RW — rwDocumentTypes
+- [x] OG12 Opisy VAT — vatDescriptions per stawka
+- [x] OG13 API konfiguracji — GET/PUT/PATCH/DELETE /api/system-config
+
+## 24. KONFIGURACJA STANOWISK
+
+- [x] OL1 Model WorkstationConfig — konfiguracja per stanowisko POS
+- [x] OL2 Zakres kategorii — allowedCategoryIds
+- [x] OL3 Zakres sal — allowedRoomIds
+- [x] OL4 Domyślny poziom cenowy — defaultPriceLevelId
+- [x] OL5 Pytaj o ilość (niewagowe/wagowe) — askQuantityRegular, askQuantityWeighted
+- [x] OL6 Pytaj o cenę — askPrice, askPriceManual
+- [x] OL7 Wyślij do kuchni bez pytania — autoSendKitchen
+- [x] OL8 Zmiana operatora = wyjście — autoLogoutOnChange
+- [x] OL9 Odśwież bazę po wyjściu — refreshOnExit
+- [x] OL10 Pokaż grupę "inne" — showOtherGroups
+- [x] OL11 Kolejność rachunków — ordersOldestFirst
+- [x] OL12 Tylko zamówienia zalogowanego — showOnlyOwn
+- [x] OL13 Wtyczki — pluginOnEnter, pluginOnExit
+- [x] OL14 API stanowisk — GET/POST/PATCH/DELETE /api/workstations
+
+## 25. KDS ROZSZERZENIA
+
+- [x] KDS1 Rozszerzony model KDSStation — showTableNumber, showOrderNumber, showWaiterName, showDescription
+- [x] KDS2 Konfiguracja scrollowania — autoScrollNew, confirmBeforeStatus, requireAllConfirm, removeOnConfirm
+- [x] KDS3 Broadcast UDP — udpBroadcast, udpHost, udpPort
+- [x] KDS4 Archiwum zrealizowanych — model KDSOrderArchive
+- [x] KDS5 API archiwum — GET/POST/DELETE /api/kds/archive
+- [x] KDS6 Statystyki czasu przygotowania — avgPrepTime, minPrepTime, maxPrepTime
+- [x] KDS7 API konfiguracji stacji — GET/PUT /api/kds/stations/[id]/config
+- [x] KDS8 Panel dla klientów (TV) — model CustomerDisplay
+- [x] KDS9 API panelu klientów — GET/POST/PATCH/DELETE /api/customer-display
+- [x] KDS10 Dane do wyświetlenia — GET /api/customer-display/[id]/orders
+
+## 26. RAPORTY ROZSZERZENIA
+
+- [x] RP1 Raport stolików — GET /api/reports/tables (sprzedaż per stolik)
+- [x] RP2 Podział na kategorie — categoryBreakdown per stolik
+- [x] RP3 Średnie per gość/zamówienie — avgPerOrder, avgPerGuest
+- [x] RP4 Raport zmiany rozszerzony — GET /api/reports/shift-extended
+- [x] RP5 Podział na produkty — byProduct w raporcie
+- [x] RP6 Podział na płatności — byPayment w raporcie
+- [x] RP7 Rabaty w raporcie — discounts count/total
+- [x] RP8 Statystyki dokumentów — receiptCount, invoiceCount, emptyOrderCount
+- [x] RP9 Anulowane pozycje — cancelledItemCount
+
+## 27. STOLIKI ROZSZERZENIA
+
+- [x] ST1 Rozszerzony model Table — width, height, rotation, zIndex, description
+- [x] ST2 Dostępność stolika — isAvailable (szary = niedostępny)
+- [x] ST3 Dwa zamówienia — allowMultipleOrders
+- [x] ST4 Własny kolor — customColor
+- [x] ST5 API layout stolika — GET/PUT/POST /api/tables/[id]/layout
+- [x] ST6 Obracanie stolika — POST z direction "cw"/"ccw"
+- [x] ST7 Tło sali — backgroundImage, backgroundOpacity w Room
+- [x] ST8 Elementy wystroju — decorElements JSON w Room
+- [x] ST9 API tła sali — GET/PUT/PATCH/DELETE /api/rooms/[id]/background
+- [x] ST10 Kolory statusów — GET/PUT/DELETE /api/settings/table-colors
+
+## 28. FUNKCJE MENADŻERA
+
+- [x] FM1 Fiskalizacja zbiorcza — GET/POST /api/manager/fiscalize-batch
+- [x] FM2 Archiwum konfiguracji — GET/POST/DELETE /api/manager/config-backup
+- [x] FM3 Tworzenie kopii zapasowej — systemConfigs, printers, rooms, tables
+- [x] FM4 Pobieranie kopii — download jako JSON
+- [x] FM5 Numerator zamówień — GET/POST/PUT /api/manager/order-counter
+- [x] FM6 Reset numeratora — startFrom, confirm
+- [x] FM7 Maksymalny numer — maxOrderNumber setting
+- [x] FM8 Usuwanie starych rachunków — GET/DELETE /api/manager/cleanup-orders
+- [x] FM9 Preview przed usunięciem — count, sample, cutoff
+
+## 29. FLAGI PRODUKTÓW
+
+- [x] PF1 Rozszerzone flagi — maxPerOrder, noGeneralDesc, isDefaultTemplate
+- [x] PF2 Kopiowanie produktu — POST /api/products/[id]/copy
+- [x] PF3 Kopiowanie z modyfikatorami — modifierGroups i modifiers
+- [x] PF4 Kopiowanie z alergenami — productAllergens
+- [x] PF5 Kopiowanie zestawów — setComponents
+- [x] PF6 Domyślne ustawienia — GET/PUT/POST/DELETE /api/products/defaults
+- [x] PF7 Szablon domyślny — isDefaultTemplate flag
+- [x] PF8 Zastosuj do produktu — POST z productId
+- [x] PF9 Zastosuj do kategorii — POST z categoryId
+
+## 30. AUTORYZACJA ROZSZERZONA
+
+- [x] AR1 Rozszerzony TokenType — MAGNETIC_COM, MAGNETIC_USB, RFID_CLAMSHELL, DALLAS_*
+- [x] AR2 Model CardReaderConfig — comPort, baudRate, dataBits, parity
+- [x] AR3 API czytników — GET/POST/PATCH/DELETE /api/card-readers
+- [x] AR4 Domyślne ustawienia per typ — READER_TYPE_DEFAULTS
+- [x] AR5 Autoryzacja tokenem — POST /api/auth/token
+- [x] AR6 Przypisywanie tokenu — PUT /api/auth/token
+- [x] AR7 Usuwanie tokenu — DELETE /api/auth/token
+- [x] AR8 Ręczny wybór kelnera — GET/POST/PUT /api/auth/select-user
+- [x] AR9 Włączanie/wyłączanie ręcznego wyboru — allowManualUserSelect
+
+## 31. OPCJE LOKALNE ROZSZERZONE
+
+- [x] OL15 Wyloguj po wyjściu z zamówienia — logoutOnOrderExit
+- [x] OL16 Wymuszaj wybór kelnera — forceSelectWaiter
+- [x] OL17 Nie sumuj podobnych — mergeSimilarItems
+- [x] OL18 Pytaj o ilość osób — askGuestCount
+- [x] OL19 Drukuj w kuchni przy płatności — printKitchenOnPay
+- [x] OL20 Drukuj natychmiast — printOnEveryChange
+- [x] OL21 Raport fiskalny z raportem zmiany — fiscalWithShift
+- [x] OL22 Faktury z opisem ogólnym — invoiceWithGenDesc
+- [x] OL23 Pytaj czy fiskalizować — askFiscalize
+- [x] OL24 Komunikaty o zatwierdzeniu — confirmReceipt
+- [x] OL25 Komunikaty o wysłaniu — confirmKitchen
+- [x] OL26 Nie drukuj zerowych — skipZeroInReports, skipZeroOnReceipt
+- [x] OL27 Pytaj czy drukować — askBeforePrint
+- [x] OL28 Paragony z opisem ogólnym — receiptWithGenDesc
+- [x] OL29 Sumuj przed fiskalizacją — mergeBeforeFiscal
+- [x] OL30 Nie aktualizuj stanów — noStockUpdatePrint
+- [x] OL31 Produkcja na bieżąco — autoProduction
+- [x] OL32 Co fiskalizować — fiscalizeWhat JSON
+- [x] OL33 Nr stanowiska — stationNumber
+- [x] OL34 Zakres magazynów — allowedWarehouseIds
+
+## 32. OPCJE GLOBALNE ROZSZERZONE
+
+- [x] OG14 API opcji globalnych — GET/PUT/DELETE /api/settings/global-options
+- [x] OG15 Domyślne wartości — GLOBAL_OPTIONS_DEFAULTS
+- [x] OG16 Naliczanie wg czasu — timeBillingEnabled, timeBillingIntervals
+- [x] OG17 Zestawy — hideSetContentsOnClick
+
+## 33. STRONY UI
+
+- [x] UI1 Panel klientów (TV) — /display/[id] (publiczna strona do wyświetlenia)
+- [x] UI2 Konfiguracja paneli TV — /settings/displays
+- [x] UI3 Funkcje menadżera — /manager (numerator, usuwanie, kopie, fiskalizacja)
+- [x] UI4 Raporty rozszerzone — /reports/extended (stoliki, zmiana rozszerzona)
+- [x] UI5 Archiwum KDS — /kds/archive (historia ze statystykami czasu)
+- [x] UI6 Konfiguracja czytników — /settings/card-readers
+
+## 34. NAWIGACJA
+
+- [x] NAV1 Linki do nowych stron w /settings — displays, card-readers, manager, reports, kds/archive
+- [x] NAV2 Dodano Dostawy i Menadżer do głównego menu bocznego
+- [x] NAV3 Ikony dla nowych pozycji — Tv, CreditCard, Wrench, BarChart3, Archive, Truck

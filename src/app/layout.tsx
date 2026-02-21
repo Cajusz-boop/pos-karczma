@@ -43,6 +43,21 @@ export default function RootLayout({
     <html lang="pl">
       <head>
         <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="preconnect" href="/" />
+        <link rel="dns-prefetch" href="/" />
+        <link
+          rel="preload"
+          href="/api/products?minimal=true"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/api/categories"
+          as="fetch"
+          crossOrigin="anonymous"
+        />
+        <meta httpEquiv="x-dns-prefetch-control" content="on" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

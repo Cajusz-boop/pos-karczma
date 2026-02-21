@@ -2,11 +2,31 @@
 
 Aplikacja działa na tym samym serwerze co HotelSystem (`65.108.245.25`).
 
-## Szybki deploy (po konfiguracji)
+## Metody deploy
+
+### 1. Webhook (automatyczny) - ZALECANE
+
+Po konfiguracji wystarczy:
+```bash
+git push origin master
+```
+
+GitHub webhook automatycznie uruchomi deploy na serwerze.
+
+**Konfiguracja:** Zobacz [WEBHOOK-SETUP.md](./WEBHOOK-SETUP.md)
+
+### 2. Ręczny deploy (PowerShell)
 
 ```powershell
 .\scripts\deploy-to-hetzner.ps1
 ```
+
+### 3. GitHub Actions (alternatywa)
+
+Push na `master` uruchamia workflow w `.github/workflows/deploy.yml`.
+Wymaga `HETZNER_SSH_KEY` w GitHub Secrets.
+
+---
 
 Pierwszy deploy wymaga jednorazowej konfiguracji serwera (poniżej).
 

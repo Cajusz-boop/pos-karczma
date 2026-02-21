@@ -2,44 +2,106 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createProductSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
+import { cached, cacheDeletePattern } from "@/lib/redis";
+
+const CACHE_TTL = 120;
+
+async function fetchCategoriesFromDb() {
+  return prisma.category.findMany({
+    where: { parentId: null, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      parentId: true,
+      sortOrder: true,
+      color: true,
+      icon: true,
+      children: {
+        where: { isActive: true },
+        orderBy: { sortOrder: "asc" },
+        select: {
+          id: true,
+          name: true,
+          parentId: true,
+          sortOrder: true,
+          color: true,
+          icon: true,
+          children: {
+            where: { isActive: true },
+            orderBy: { sortOrder: "asc" },
+            select: {
+              id: true,
+              name: true,
+              parentId: true,
+              sortOrder: true,
+              color: true,
+              icon: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { sortOrder: "asc" },
+  });
+}
+
+async function fetchProductsFromDb(showAll: boolean, minimal: boolean) {
+  const productWhere = showAll ? {} : { isActive: true, isAvailable: true };
+  
+  return prisma.product.findMany({
+    where: productWhere,
+    select: {
+      id: true,
+      name: true,
+      nameShort: true,
+      categoryId: true,
+      priceGross: true,
+      taxRateId: true,
+      isActive: true,
+      isAvailable: true,
+      color: true,
+      imageUrl: minimal ? false : true,
+      sortOrder: true,
+      category: { select: { id: true, name: true, parentId: true, color: true, icon: true } },
+      taxRate: { select: { id: true, fiscalSymbol: true } },
+      modifierGroups: minimal ? false : {
+        include: {
+          modifierGroup: {
+            select: {
+              name: true,
+              minSelect: true,
+              maxSelect: true,
+              isRequired: true,
+              modifiers: {
+                orderBy: { sortOrder: "asc" },
+                select: { id: true, name: true, priceDelta: true, sortOrder: true },
+              },
+            },
+          },
+        },
+      },
+      allergens: minimal ? false : {
+        include: { allergen: { select: { code: true, name: true, icon: true } } },
+      },
+    },
+    orderBy: [{ categoryId: "asc" }, { sortOrder: "asc" }],
+  });
+}
 
 export async function GET(request: NextRequest) {
   try {
     const showAll = request.nextUrl.searchParams.get("all") === "true";
+    const minimal = request.nextUrl.searchParams.get("minimal") === "true";
+    
+    const cacheKey = `products:${showAll ? "all" : "active"}:${minimal ? "min" : "full"}`;
+    
     const [categories, products] = await Promise.all([
-      prisma.category.findMany({
-        where: { parentId: null },
-        include: {
-          children: {
-            orderBy: { sortOrder: "asc" },
-            include: {
-              children: { orderBy: { sortOrder: "asc" } },
-            },
-          },
-        },
-        orderBy: { sortOrder: "asc" },
-      }),
-      prisma.product.findMany({
-        where: showAll ? {} : { isActive: true },
-        include: {
-          category: { select: { id: true, name: true, parentId: true, color: true, icon: true } },
-          taxRate: { select: { id: true, fiscalSymbol: true } },
-          modifierGroups: {
-            include: {
-              modifierGroup: {
-                include: {
-                  modifiers: { orderBy: { sortOrder: "asc" } },
-                },
-              },
-            },
-          },
-          allergens: { include: { allergen: { select: { code: true, name: true, icon: true } } } },
-        },
-        orderBy: [{ categoryId: "asc" }, { sortOrder: "asc" }],
-      }),
+      cached("categories", fetchCategoriesFromDb, { ttl: CACHE_TTL, prefix: "pos" }),
+      cached(cacheKey, () => fetchProductsFromDb(showAll, minimal), { ttl: CACHE_TTL, prefix: "pos" }),
     ]);
 
-    const productList = products.map((p) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productList = products.map((p: any) => ({
       id: p.id,
       name: p.name,
       nameShort: p.nameShort,
@@ -51,22 +113,22 @@ export async function GET(request: NextRequest) {
       isActive: p.isActive,
       isAvailable: p.isAvailable,
       color: p.color,
-      imageUrl: p.imageUrl,
+      imageUrl: p.imageUrl ?? null,
       sortOrder: p.sortOrder,
-      modifierGroups: p.modifierGroups.map((pm) => ({
+      modifierGroups: (p.modifierGroups ?? []).map((pm: any) => ({
         modifierGroupId: pm.modifierGroupId,
         name: pm.modifierGroup.name,
         minSelect: pm.modifierGroup.minSelect,
         maxSelect: pm.modifierGroup.maxSelect,
         isRequired: pm.modifierGroup.isRequired,
-        modifiers: pm.modifierGroup.modifiers.map((m) => ({
+        modifiers: pm.modifierGroup.modifiers.map((m: any) => ({
           id: m.id,
           name: m.name,
           priceDelta: Number(m.priceDelta),
           sortOrder: m.sortOrder,
         })),
       })),
-      allergens: p.allergens.map((pa) => ({
+      allergens: (p.allergens ?? []).map((pa: any) => ({
         code: pa.allergen.code,
         name: pa.allergen.name,
         icon: pa.allergen.icon,
@@ -147,6 +209,8 @@ export async function POST(request: NextRequest) {
     });
 
     autoExportConfigSnapshot();
+    
+    await cacheDeletePattern("products:*", "pos");
 
     return NextResponse.json({
       id: product.id,

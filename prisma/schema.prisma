@@ -29,6 +29,14 @@ model User {
   expiresAt     DateTime? // pracownik sezonowy
   createdAt     DateTime  @default(now())
 
+  pinBistroMo   String?   // osobny PIN dla BistroMo
+  autoLogoutSec Int?      // auto wyloguj po N sekundach bezczynności (null=domyślny)
+  allowedCategoryIds  Json? // [] = wszystkie, lista ID kategorii
+  allowedTableIds     Json? // [] = wszystkie, lista ID stolików
+  allowedPriceLevelIds Json? // [] = wszystkie, poziomy cenowe
+  uiButtonGroups      Json? // konfiguracja 6 grup przycisków F4
+  permissionsJson     Json? // szczegółowe uprawnienia wg zakładek
+
   orders        Order[]
   shifts        Shift[]
   tips          Tip[]
@@ -41,6 +49,7 @@ model User {
   swapRequests    ShiftSwapRequest[] @relation("SwapRequester")
   swapTargets     ShiftSwapRequest[] @relation("SwapTarget")
   announcements   Announcement[]
+  deliveryDriver  DeliveryDriver?
 }
 
 enum AuthMethod {
@@ -54,6 +63,30 @@ enum TokenType {
   NFC
   BARCODE
   CARD
+  MAGNETIC_COM     // magnetic card reader via COM port
+  MAGNETIC_USB     // magnetic card reader USB wedge
+  RFID_CLAMSHELL   // RFID Clamshell/Unique 19200 8N1
+  DALLAS_DATAPROCESS
+  DALLAS_DEMIURG
+  DALLAS_JARLTECH
+  DALLAS_MP00202
+  FILE_READER      // code from file (external program)
+}
+
+model CardReaderConfig {
+  id          String @id @default(cuid())
+  name        String
+  type        TokenType
+  comPort     String?     // COM1, COM2, etc.
+  baudRate    Int?        // 9600, 19200
+  dataBits    Int?        // 7, 8
+  stopBits    Int?        // 1, 2
+  parity      String?     // none, odd, even
+  filePath    String?     // for FILE_READER type
+  isActive    Boolean @default(true)
+  workstationId String?   // assigned to specific workstation
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Role {
@@ -77,6 +110,10 @@ model Room {
   canMergeWith  Json      @default("[]") // room IDs that can merge (JSON array)
   layoutJson    Json?     // {tables: [{id, x, y, shape, seats}]}
   sortOrder     Int       @default(0)
+
+  backgroundImage String? // URL to custom background image
+  backgroundOpacity Float @default(1.0)
+  decorElements   Json    @default("[]") // [{type, x, y, w, h, rotation, image}]
 
   tables        Table[]
   reservations  Reservation[]
@@ -108,10 +145,19 @@ model Table {
   seats          Int
   positionX      Float       @default(0)
   positionY      Float       @default(0)
+  width          Float       @default(80)
+  height         Float       @default(80)
+  rotation       Int         @default(0) // 0, 90, 180, 270 degrees
+  zIndex         Int         @default(0) // layer order
   shape          TableShape  @default(RECTANGLE)
   status         TableStatus @default(FREE)
   assignedUser   String?     // user ID
   needsAttention Boolean     @default(false) // flaga "wymaga uwagi" dla kelnera
+
+  description    String?     // "Przy kominku", "VIP"
+  isAvailable    Boolean     @default(true) // false = szary, niedostępny
+  allowMultipleOrders Boolean @default(false) // dwa zamówienia na stoliku
+  customColor    String?     // hex color override
 
   orders        Order[]
   reservations  Reservation[]
@@ -155,6 +201,9 @@ model Category {
   products  Product[]
   kdsStations KDSStationCategory[]
   printerAssignments PrinterCategory[]
+
+  @@index([parentId, sortOrder])
+  @@index([isActive])
 }
 
 model Product {
@@ -174,12 +223,89 @@ model Product {
   color           String?
   imageUrl        String?
   recipe          Recipe?
+  isWeightBased   Boolean   @default(false) // sold by weight (kg, g)
+  requiresWeightConfirm Boolean @default(false) // needs weight confirmation after preparation
+  unit            String?   // "kg", "g", "szt", "l"
+  tareWeight      Decimal?  @db.Decimal(10, 3) // default tare for packaging
+
+  productType     ProductType @default(REGULAR)
+  isSet           Boolean   @default(false) // is this a combo/set
+  setPriceMode    SetPriceMode? // how set price is calculated
+  maxComponents   Int?      // max components in set (e.g., max 4 toppings)
+  freeComponents  Int?      // first N components are free
+  superGroupId    String?   // which super group this addon belongs to (for restricted addons)
+  superGroup      SuperGroup? @relation(fields: [superGroupId], references: [id])
+
+  isAddonOnly     Boolean   @default(false) // can only be added as addon, not standalone
+  isHidden        Boolean   @default(false) // hidden from menu, only via sets
+  noPrintKitchen  Boolean   @default(false) // don't print to kitchen (known ingredient)
+  printWithMinus  Boolean   @default(false) // print "BRAK" when removed
+  canRepeat       Boolean   @default(true)  // can appear multiple times in order
+  alwaysOnePortion Boolean  @default(false) // always 1 portion, no quantity change
+  noQuantityChange Boolean  @default(false) // block quantity changes after adding
+  askForComponents Boolean  @default(false) // prompt for set components after adding
+
+  afterSelectGoTo String?   // category ID to navigate to after selection
+  afterSelectAction String? // action to perform (e.g., "openNotes")
+
+  maxPerOrder     Int?      // max times this product can be ordered (e.g., 1 lunch per person)
+  noGeneralDesc   Boolean   @default(false) // forbid general description on invoice
+  isDefaultTemplate Boolean @default(false) // use as template for new products
 
   modifierGroups  ProductModifierGroup[]
   allergens       ProductAllergen[]
   orderItems      OrderItem[]
   suggestionsBase   ProductSuggestion[] @relation("SuggestionBase")
   suggestionsTarget ProductSuggestion[] @relation("SuggestionTarget")
+  setComponents   SetComponent[] @relation("SetParent")
+  componentOf     SetComponent[] @relation("SetChild")
+
+  @@index([categoryId, isActive, isAvailable])
+  @@index([isActive, sortOrder])
+}
+
+enum ProductType {
+  REGULAR     // standard product
+  SET         // combo/set with components
+  HELPER_SET  // helper set - auto-adds components, not a line item
+  ADDON       // addon only, restricted to super groups
+  ADDON_GLOBAL // addon available everywhere
+}
+
+enum SetPriceMode {
+  OWN_PRICE       // set has its own price, components don't add
+  CALCULATED      // price = sum of component prices
+  CALCULATED_SINGLE // calculated but appears as single line on receipt
+}
+
+model SuperGroup {
+  id          String    @id @default(cuid())
+  number      Int       @unique // 1-10
+  name        String    // "Dodatki do pizzy", "Sosy do mięs"
+  categoryIds Json      @default("[]") // which categories can use these addons
+  isActive    Boolean   @default(true)
+
+  products    Product[]
+}
+
+model SetComponent {
+  id              String   @id @default(cuid())
+  set             Product  @relation("SetParent", fields: [setId], references: [id], onDelete: Cascade)
+  setId           String
+  component       Product  @relation("SetChild", fields: [componentId], references: [id])
+  componentId     String
+  quantity        Decimal  @db.Decimal(10, 3) @default(1)
+  isRequired      Boolean  @default(false)
+  isDefault       Boolean  @default(true) // included by default
+  priceDelta      Decimal  @db.Decimal(10, 2) @default(0) // extra price when added
+  sortOrder       Int      @default(0)
+
+  isHidden        Boolean  @default(false) // hidden in UI but affects stock
+  noPrintKitchen  Boolean  @default(false) // don't print (cook knows)
+  printWithMinus  Boolean  @default(false) // print "BRAK" when removed
+
+  @@unique([setId, componentId])
+  @@index([setId])
 }
 
 model TaxRate {
@@ -269,6 +395,15 @@ model Order {
   deliveryStatus  DeliveryStatus?
   deliveryNote    String?
   estimatedAt     DateTime?   // estimated pickup/delivery time
+  deliveryZone    DeliveryZone? @relation(fields: [deliveryZoneId], references: [id])
+  deliveryZoneId  String?
+  assignedDriverId String?    // DeliveryDriver.id
+  deliveryCost    Decimal?    @db.Decimal(10, 2) // actual delivery cost charged
+  driverCommission Decimal?   @db.Decimal(10, 2) // commission for driver
+  deliveredAt     DateTime?   // when order was delivered
+  maxTotal        Decimal?    @db.Decimal(10, 2) // limit kwoty (poczęstunek firmowy)
+  copiedFromId    String?     // original order ID if this is a copy
+  closedButVisible Boolean    @default(false) // pozostaw po zamknięciu do podglądu
   createdAt       DateTime    @default(now())
   closedAt        DateTime?
   // Performance cache fields
@@ -339,10 +474,40 @@ model OrderItem {
   cancelReason    String?
   isBanquetExtra  Boolean        @default(false) // extra beyond banquet menu
   isModifiedAfterSend Boolean   @default(false) // żółte "ZMIANA" na KDS
+  delayMinutes    Int?           // minutnik: opóźnienie startu przygotowania
+  fireAt          DateTime?      // minutnik: kiedy rozpocząć (obliczone z delayMinutes)
+  isFire          Boolean        @default(false) // "Ogień" - priorytet natychmiastowy
+  firedAt         DateTime?      // kiedy kliknięto "Ogień"
+  isTakeaway      Boolean        @default(false) // tylko ta pozycja na wynos
+  requiresWeightConfirm Boolean  @default(false) // copied from product
+  weightConfirmed Boolean        @default(false) // weight confirmed by kitchen
+  confirmedWeight Decimal?       @db.Decimal(10, 3) // actual weight after preparation
+  weightConfirmedAt DateTime?
+  weightConfirmedBy String?      // userId who confirmed
+  weightBarcodeScanned String?   // barcode from scale label if scanned
+
+  parentItemId    String?        // for set components - links to parent set item
+  isSetComponent  Boolean        @default(false) // is this a component of a set
+  componentPriceDelta Decimal?   @db.Decimal(10, 2) // price change for this component
+  removedComponentsJson Json?    // [{productId, name}] for removed default components
+  addedComponentsJson Json?      // [{productId, name, price}] for extra added components
+
+  noteType        NoteType?      // type of note/message
+  isRush          Boolean        @default(false) // "Na ratunek" - expedited prep
+  isPriority      Boolean        @default(false) // "Jako pierwsze" 
+  printBold       Boolean        @default(false) // print in bold on kitchen printer
 
   createdAt       DateTime       @default(now())
 
   @@index([orderId, status])
+  @@index([parentItemId])
+}
+
+enum NoteType {
+  STANDARD        // regular note
+  ALLERGY         // allergy warning (red)
+  MODIFICATION    // modification (yellow)
+  RUSH            // rush order (orange)
 }
 
 enum OrderItemStatus {
@@ -369,6 +534,9 @@ model Payment {
   voucher         GiftVoucher?  @relation(fields: [voucherId], references: [id])
   voucherId       String?
   createdAt       DateTime      @default(now())
+
+  @@index([orderId])
+  @@index([createdAt])
 }
 
 enum PaymentMethod {
@@ -580,7 +748,40 @@ model KDSStation {
   name         String // "Kuchnia Ciepła", "Bar"
   displayOrder Int    @default(0)
 
+  showTableNumber    Boolean @default(true)
+  showOrderNumber    Boolean @default(true)
+  showWaiterName     Boolean @default(true)
+  showDescription    Boolean @default(false)
+
+  autoScrollNew      Boolean @default(true)  // auto-scroll to new orders
+  confirmBeforeStatus Boolean @default(false) // ask before status change
+  requireAllConfirm  Boolean @default(false) // require all items confirmed before course complete
+  removeOnConfirm    Boolean @default(true)  // remove from view when confirmed
+
+  udpBroadcast       Boolean @default(false) // send to UDP 3001
+  udpHost            String? // target host for UDP
+  udpPort            Int?    // target port (default 3001)
+
   categories KDSStationCategory[]
+  archivedOrders KDSOrderArchive[]
+}
+
+model KDSOrderArchive {
+  id              String   @id @default(cuid())
+  station         KDSStation @relation(fields: [stationId], references: [id])
+  stationId       String
+  orderId         String
+  orderNumber     Int
+  tableNumber     Int?
+  waiterName      String?
+  itemsJson       Json     // snapshot of items
+  receivedAt      DateTime
+  completedAt     DateTime
+  totalPrepTime   Int      // seconds from received to completed
+  createdAt       DateTime @default(now())
+
+  @@index([stationId, createdAt])
+  @@index([orderId])
 }
 
 model KDSStationCategory {
@@ -614,6 +815,26 @@ model KitchenMessage {
   createdAt DateTime  @default(now())
 }
 
+model CustomerDisplay {
+  id          String  @id @default(cuid())
+  name        String  // "Ekran TV przy barze"
+  isActive    Boolean @default(true)
+  showLogo    Boolean @default(true)
+  logoUrl     String?
+  backgroundColor String @default("#1a1a2e")
+  textColor   String @default("#ffffff")
+  accentColor String @default("#e94560")
+  fontSize    Int     @default(48) // base font size in px
+  maxOrders   Int     @default(10) // max orders to show
+  showPreparingSection Boolean @default(true)
+  showReadySection     Boolean @default(true)
+  readyTimeoutSec      Int     @default(120) // remove ready after N seconds
+  soundOnReady         Boolean @default(true)
+  soundUrl             String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 // ============================================================
 // PRINTERS
 // ============================================================
@@ -627,8 +848,16 @@ model Printer {
   port           Int?
   model          String?     // "Posnet Thermal"
   isActive       Boolean     @default(true)
+  charsPerLine   Int         @default(42)  // max znaków w linii
+  codePage       String?     // "CP852", "UTF-8"
+  cutAfterPrint  Boolean     @default(true)
+  openDrawer     Boolean     @default(false) // otwórz szufladę po wydruku
+
+  templatesJson  Json?       // szablony: {header, footer, item, storno, addon, set, component, course, timer, fire}
+  remoteServer   String?     // adres comserwer.exe dla zdalnej drukarki
 
   categoryAssignments PrinterCategory[]
+  printLogs      PrintLog[]
 }
 
 enum PrinterType {
@@ -645,6 +874,41 @@ model PrinterCategory {
   categoryId String
 
   @@id([printerId, categoryId])
+}
+
+model PrintLog {
+  id          String    @id @default(cuid())
+  printer     Printer   @relation(fields: [printerId], references: [id])
+  printerId   String
+  printType   PrintType
+  orderId     String?
+  orderNumber Int?
+  contentJson Json      // treść wydruku
+  status      PrintStatus @default(PENDING)
+  errorMessage String?
+  userId      String?
+  createdAt   DateTime  @default(now())
+  printedAt   DateTime?
+
+  @@index([printerId, createdAt])
+  @@index([orderId])
+}
+
+enum PrintType {
+  KITCHEN_ORDER   // bon kuchenny
+  KITCHEN_STORNO  // storno pozycji
+  KITCHEN_CHANGE  // zmiana w zamówieniu
+  RECEIPT         // paragon
+  INVOICE         // faktura
+  REPORT          // raport
+  TEST            // wydruk testowy
+}
+
+enum PrintStatus {
+  PENDING
+  PRINTING
+  PRINTED
+  FAILED
 }
 
 // ============================================================
@@ -771,6 +1035,9 @@ model Shift {
   cashStart Decimal     @db.Decimal(10, 2) @default(0)
   cashEnd   Decimal?    @db.Decimal(10, 2)
   status    ShiftStatus @default(OPEN)
+
+  @@index([userId, status])
+  @@index([startedAt])
 }
 
 enum ShiftStatus {
@@ -873,6 +1140,79 @@ model PushSubscription {
 }
 
 // ============================================================
+// DELIVERY ZONES & DRIVERS
+// ============================================================
+
+model DeliveryZone {
+  id              String   @id @default(cuid())
+  number          Int      @unique // zone number (1, 2, 3...)
+  name            String   // "Centrum", "Obrzeża miasta"
+  driverCommission Decimal @db.Decimal(10, 2) @default(0) // commission per delivery
+  deliveryCost    Decimal  @db.Decimal(10, 2) @default(0) // cost added to order
+  minOrderForFreeDelivery Decimal? @db.Decimal(10, 2) // minimum order for free delivery
+  estimatedMinutes Int     @default(30) // estimated delivery time in minutes
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  streets         DeliveryStreet[]
+  orders          Order[]
+}
+
+model DeliveryStreet {
+  id          String       @id @default(cuid())
+  zone        DeliveryZone @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  zoneId      String
+  streetName  String
+  numberFrom  Int?         // optional range
+  numberTo    Int?
+  postalCode  String?
+  city        String?
+
+  @@index([streetName])
+  @@index([zoneId])
+}
+
+model DeliveryDriver {
+  id              String   @id @default(cuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String   @unique
+  vehicleType     String?  // "car", "bike", "scooter"
+  vehiclePlate    String?
+  phoneNumber     String?
+  isAvailable     Boolean  @default(true)
+  currentOrderId  String?  // currently assigned order
+  createdAt       DateTime @default(now())
+
+  settlements     DriverSettlement[]
+}
+
+model DriverSettlement {
+  id              String         @id @default(cuid())
+  driver          DeliveryDriver @relation(fields: [driverId], references: [id])
+  driverId        String
+  shiftDate       DateTime       @db.Date
+  totalDeliveries Int            @default(0)
+  totalValue      Decimal        @db.Decimal(10, 2) @default(0)
+  totalCommission Decimal        @db.Decimal(10, 2) @default(0)
+  cashCollected   Decimal        @db.Decimal(10, 2) @default(0)
+  status          SettlementStatus @default(PENDING)
+  settledAt       DateTime?
+  settledByUserId String?
+  note            String?
+  createdAt       DateTime       @default(now())
+
+  @@unique([driverId, shiftDate])
+  @@index([shiftDate])
+}
+
+enum SettlementStatus {
+  PENDING
+  SETTLED
+  DISPUTED
+}
+
+// ============================================================
 // SYSTEM CONFIG
 // ============================================================
 
@@ -880,6 +1220,59 @@ model SystemConfig {
   id    String @id @default(cuid())
   key   String @unique
   value Json
+}
+
+model WorkstationConfig {
+  id                  String  @id @default(cuid())
+  name                String  @unique // "POS1", "BAR", "KUCHNIA"
+  description         String?
+
+  allowedCategoryIds  Json?   // które kategorie widoczne
+  allowedRoomIds      Json?   // które sale widoczne
+  defaultPriceLevelId String? // domyślny poziom cenowy
+  defaultRoomId       String? // domyślna sala
+
+  askQuantityRegular  Boolean @default(false) // pytaj o ilość (niewagowe)
+  askQuantityWeighted Boolean @default(true)  // pytaj o ilość (wagowe)
+  askPrice            Boolean @default(false) // pytaj o cenę
+  askPriceManual      Boolean @default(true)  // pytaj o cenę (cena ręczna)
+
+  autoSendKitchen     Boolean @default(false) // wyślij do kuchni bez pytania
+  autoLogoutOnChange  Boolean @default(false) // zmiana operatora = wyjście
+  refreshOnExit       Boolean @default(false) // odśwież bazę po wyjściu
+
+  showOtherGroups     Boolean @default(true)  // pokaż grupę "inne"
+  ordersOldestFirst   Boolean @default(true)  // kolejność rachunków
+  showOnlyOwn         Boolean @default(false) // tylko zamówienia zalogowanego
+
+  logoutOnOrderExit   Boolean @default(false) // wyloguj po wyjściu z zamówienia
+  forceSelectWaiter   Boolean @default(false) // wymuszaj wybór kelnera
+  mergeSimilarItems   Boolean @default(true)  // sumuj podobne pozycje
+  askGuestCount       Boolean @default(false) // pytaj o ilość osób
+  printKitchenOnPay   Boolean @default(false) // drukuj w kuchni przy płatności
+  printOnEveryChange  Boolean @default(false) // drukuj natychmiast po zmianie
+  fiscalWithShift     Boolean @default(false) // raport fiskalny z raportem zmiany
+  invoiceWithGenDesc  String  @default("ask") // "always", "ask", "never"
+  askFiscalize        Boolean @default(false) // pytaj czy fiskalizować
+  confirmReceipt      Boolean @default(true)  // komunikat o zatwierdzeniu
+  confirmKitchen      Boolean @default(true)  // komunikat o wysłaniu
+  skipZeroInReports   Boolean @default(false) // nie drukuj zerowych
+  askBeforePrint      Boolean @default(false) // pytaj czy drukować
+  skipZeroOnReceipt   Boolean @default(false) // nie drukuj zerowych na paragonie
+  receiptWithGenDesc  Boolean @default(false) // paragony z opisem ogólnym
+  mergeBeforeFiscal   Boolean @default(true)  // sumuj przed fiskalizacją
+  noStockUpdatePrint  Boolean @default(false) // nie aktualizuj stanów po wydruku
+  autoProduction      Boolean @default(false) // produkcja na bieżąco (RW/PW)
+  fiscalizeWhat       Json    @default("[\"receipt\", \"invoice\"]") // co fiskalizować
+  stationNumber       Int?    // nr stanowiska dla raportów
+
+  pluginOnEnter       String? // program po wejściu
+  pluginOnExit        String? // program po wyjściu
+  allowedWarehouseIds Json?   // które magazyny widoczne
+
+  isActive            Boolean @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 // ============================================================
@@ -1061,7 +1454,44 @@ enum AnnouncementPriority {
   LOW
   NORMAL
   HIGH
-  URGENT
+}
+
+// ============================================================
+// POS UI MACROS & PREFERENCES
+// ============================================================
+
+model UserMacro {
+  id          String    @id @default(cuid())
+  userId      String
+  slot        Int       // 1-5
+  name        String    // "Lunch menu"
+  actionsJson Json      // [{type: "addProduct", productId: "xxx"}, {type: "setQuantity", value: 2}]
+  hotkey      String?   // "~1", "~2", etc.
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, slot])
+  @@index([userId])
+}
+
+model UserPosPreference {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  keyboardMode      Boolean   @default(false) // tryb klawiatury numerycznej
+  t9Mode            Boolean   @default(false) // szukanie T9
+  buttonRows        Int       @default(4)     // liczba rzędów przycisków (4-6)
+  showPrices        Boolean   @default(true)  // pokazuj ceny na przyciskach
+  showImages        Boolean   @default(false) // pokazuj obrazki produktów
+  confirmQuantity   Boolean   @default(false) // potwierdzaj ilość po dodaniu
+  autoPrintKitchen  Boolean   @default(true)  // automatyczny wydruk do kuchni
+  soundEnabled      Boolean   @default(true)  // dźwięki interfejsu
+  quickAmounts      Json?     // [0.25, 0.5, 1, 2, 5] szybkie ilości
+  favoriteProducts  Json?     // [productId1, productId2] ulubione produkty
+  recentProducts    Json?     // ostatnio używane (auto-aktualizowane)
+  customColors      Json?     // {background, accent, text}
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 // ============================================================

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useFloorStream } from "@/lib/hooks/useFloorStream";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -137,7 +138,7 @@ function getTimeColor(minutes: number): string {
   return "text-rose-300 animate-pulse";
 }
 
-function AlertBar({ 
+const AlertBar = memo(function AlertBar({ 
   alerts, 
   onAlertClick, 
   onDismiss 
@@ -197,9 +198,11 @@ function AlertBar({
       })}
     </div>
   );
-}
+});
 
-function TableCard({ 
+AlertBar.displayName = "AlertBar";
+
+const TableCard = memo(function TableCard({ 
   table, 
   onClick, 
   onHover, 
@@ -388,7 +391,9 @@ function TableCard({
       )}
     </>
   );
-}
+});
+
+TableCard.displayName = "TableCard";
 
 export function PosPageClient() {
   const router = useRouter();
@@ -416,17 +421,24 @@ export function PosPageClient() {
     return () => clearInterval(id);
   }, []);
 
-  // Fetch floor data from optimized API
-  const { data: floorData, isLoading } = useQuery<FloorResponse>({
+  // Real-time floor data via SSE (Server-Sent Events)
+  const { rooms: sseRooms, isLoading: sseLoading, isConnected } = useFloorStream({ enabled: true });
+  
+  // Fallback to polling if SSE not available (kept for compatibility)
+  const { data: floorData } = useQuery<FloorResponse>({
     queryKey: ["floor"],
     queryFn: async () => {
       const res = await fetch("/api/pos/floor");
       if (!res.ok) throw new Error("Błąd pobierania mapy");
       return res.json();
     },
-    refetchInterval: 5_000,
+    refetchInterval: isConnected ? false : 5_000,
     staleTime: 3_000,
+    refetchOnWindowFocus: false,
+    enabled: !isConnected,
   });
+  
+  const isLoading = sseLoading && !floorData;
 
   // Fetch alerts
   const { data: alertsData } = useQuery<AlertsResponse>({
@@ -440,9 +452,10 @@ export function PosPageClient() {
     refetchInterval: 3_000,
     staleTime: 2_000,
     enabled: !!currentUser,
+    refetchOnWindowFocus: false,
   });
 
-  const rooms = floorData?.rooms ?? [];
+  const rooms = isConnected ? sseRooms : (floorData?.rooms ?? []);
   const alerts = (alertsData?.alerts ?? []).filter(a => !dismissedAlerts.has(a.id));
 
   useEffect(() => {
@@ -460,7 +473,7 @@ export function PosPageClient() {
           if (!res.ok) throw new Error("Błąd");
           return res.json();
         },
-        staleTime: 10000,
+        staleTime: 10_000,
       });
       queryClient.prefetchQuery({
         queryKey: ["products"],
@@ -469,7 +482,7 @@ export function PosPageClient() {
           if (!res.ok) throw new Error("Błąd");
           return res.json();
         },
-        staleTime: 60000,
+        staleTime: 5 * 60 * 1000,
       });
     },
     [queryClient]

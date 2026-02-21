@@ -22,6 +22,8 @@ import {
   Package,
   Users,
   CalendarCheck,
+  Truck,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,15 +31,16 @@ const ADMIN_NAV = [
   { href: "/pos", label: "POS", icon: LayoutDashboard },
   { href: "/kitchen", label: "Kuchnia (KDS)", icon: ChefHat },
   { href: "/orders", label: "Zamówienia", icon: ShoppingCart },
+  { href: "/delivery", label: "Dostawy", icon: Truck },
   { href: "/products", label: "Produkty", icon: Package },
   { href: "/time-tracking", label: "Czas pracy", icon: Clock },
   { href: "/banquets", label: "Bankiety", icon: UtensilsCrossed },
   { href: "/reservations", label: "Rezerwacje", icon: Calendar },
   { href: "/warehouse", label: "Magazyn", icon: Warehouse },
   { href: "/invoices", label: "Faktury", icon: FileText },
-  { href: "/time-tracking", label: "Rejestr czasu", icon: Clock },
   { href: "/day-close", label: "Zamknięcie dnia", icon: CalendarCheck },
   { href: "/reports", label: "Raporty", icon: BarChart3 },
+  { href: "/manager", label: "Menadżer", icon: Wrench },
   { href: "/users", label: "Użytkownicy", icon: Users },
   { href: "/settings", label: "Ustawienia", icon: Settings },
 ];
