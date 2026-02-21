@@ -1,0 +1,1065 @@
+// POS Karczma Łabędź — full schema from PRD
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "mysql"
+  // URL in prisma.config.ts (Prisma 7)
+}
+
+// ============================================================
+// FOUNDATION
+// ============================================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  pin           String    @unique // 4-digit, hashed
+  role          Role      @relation(fields: [roleId], references: [id])
+  roleId        String
+  authMethod    AuthMethod @default(PIN)
+  tokenId       String?   @unique // NFC UID, barcode, card number
+  tokenType     TokenType? // NFC, BARCODE, CARD
+  isActive      Boolean   @default(true)
+  isOwner       Boolean   @default(false)
+  expiresAt     DateTime? // pracownik sezonowy
+  createdAt     DateTime  @default(now())
+
+  orders        Order[]
+  shifts        Shift[]
+  tips          Tip[]
+  auditLogs     AuditLog[]
+  cashOperations CashOperation[]
+  timeEntries   TimeEntry[]
+  soldVouchers  GiftVoucher[]
+  workSchedules   WorkSchedule[]
+  availability    StaffAvailability[]
+  swapRequests    ShiftSwapRequest[] @relation("SwapRequester")
+  swapTargets     ShiftSwapRequest[] @relation("SwapTarget")
+  announcements   Announcement[]
+}
+
+enum AuthMethod {
+  PIN
+  NFC
+  BARCODE
+  CARD
+}
+
+enum TokenType {
+  NFC
+  BARCODE
+  CARD
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique // ADMIN, WAITER
+  permissions Json     // string[] of permission keys
+  users       User[]
+}
+
+// ============================================================
+// ROOMS & TABLES
+// ============================================================
+
+model Room {
+  id            String    @id @default(cuid())
+  name          String    // "Restauracja", "Sala Złota", etc.
+  capacity      Int
+  type          RoomType
+  isSeasonal    Boolean   @default(false)
+  isActive      Boolean   @default(true)
+  canMergeWith  Json      @default("[]") // room IDs that can merge (JSON array)
+  layoutJson    Json?     // {tables: [{id, x, y, shape, seats}]}
+  sortOrder     Int       @default(0)
+
+  tables        Table[]
+  reservations  Reservation[]
+  banquetEvents BanquetEvent[]
+  orders        Order[]
+}
+
+enum RoomType {
+  RESTAURANT
+  BANQUET
+  OUTDOOR
+  PRIVATE
+}
+
+model RoomMerge {
+  id          String   @id @default(cuid())
+  roomIds     Json     // IDs of merged rooms (JSON array)
+  mergedName  String   // "Bankiet Połączony"
+  isActive    Boolean  @default(true)
+  activeFrom  DateTime
+  activeTo    DateTime?
+}
+
+model Table {
+  id             String      @id @default(cuid())
+  room           Room        @relation(fields: [roomId], references: [id])
+  roomId         String
+  number         Int
+  seats          Int
+  positionX      Float       @default(0)
+  positionY      Float       @default(0)
+  shape          TableShape  @default(RECTANGLE)
+  status         TableStatus @default(FREE)
+  assignedUser   String?     // user ID
+  needsAttention Boolean     @default(false) // flaga "wymaga uwagi" dla kelnera
+
+  orders        Order[]
+  reservations  Reservation[]
+
+  @@index([roomId, status])
+}
+
+enum TableShape {
+  RECTANGLE
+  ROUND
+  LONG // bankietowy
+}
+
+enum TableStatus {
+  FREE
+  OCCUPIED
+  BILL_REQUESTED
+  RESERVED
+  BANQUET_MODE
+  INACTIVE
+}
+
+// ============================================================
+// PRODUCTS & MENU
+// ============================================================
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  parentId    String?
+  parent      Category? @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryTree")
+  sortOrder   Int       @default(0)
+  color       String?   // hex color for POS button
+  icon        String?
+  isActive    Boolean   @default(true)
+  isSeasonal  Boolean   @default(false)
+  seasonStart DateTime? // when seasonal category becomes visible
+  seasonEnd   DateTime? // when seasonal category hides
+
+  products  Product[]
+  kdsStations KDSStationCategory[]
+  printerAssignments PrinterCategory[]
+}
+
+model Product {
+  id              String    @id @default(cuid())
+  name            String    // max 40 chars (Posnet limit)
+  nameShort       String?   // abbreviated for receipt
+  category        Category  @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  priceGross      Decimal   @db.Decimal(10, 2)
+  costPrice       Decimal?  @db.Decimal(10, 2) // food cost per portion
+  taxRate         TaxRate   @relation(fields: [taxRateId], references: [id])
+  taxRateId       String
+  isActive        Boolean   @default(true)
+  isAvailable     Boolean   @default(true) // 86 board
+  estimatedPrepMinutes Int? // estimated preparation time in minutes
+  sortOrder       Int       @default(0)
+  color           String?
+  imageUrl        String?
+  recipe          Recipe?
+
+  modifierGroups  ProductModifierGroup[]
+  allergens       ProductAllergen[]
+  orderItems      OrderItem[]
+  suggestionsBase   ProductSuggestion[] @relation("SuggestionBase")
+  suggestionsTarget ProductSuggestion[] @relation("SuggestionTarget")
+}
+
+model TaxRate {
+  id            String   @id @default(cuid())
+  name          String   // "VAT 23%", "VAT 8%"
+  ratePercent   Decimal  @db.Decimal(5, 2)
+  fiscalSymbol  String   // A, B, C, D, E, F, G
+  isDefault     Boolean  @default(false)
+
+  products      Product[]
+  orderItems    OrderItem[]
+}
+
+model ModifierGroup {
+  id          String    @id @default(cuid())
+  name        String    // "Stopień wysmażenia"
+  minSelect   Int       @default(0)
+  maxSelect   Int       @default(1)
+  isRequired  Boolean   @default(false)
+
+  modifiers   Modifier[]
+  products    ProductModifierGroup[]
+}
+
+model Modifier {
+  id          String        @id @default(cuid())
+  name        String        // "medium rare"
+  priceDelta  Decimal       @db.Decimal(10, 2) @default(0)
+  group       ModifierGroup @relation(fields: [groupId], references: [id])
+  groupId     String
+  sortOrder   Int           @default(0)
+}
+
+model ProductModifierGroup {
+  product         Product       @relation(fields: [productId], references: [id])
+  productId       String
+  modifierGroup   ModifierGroup @relation(fields: [modifierGroupId], references: [id])
+  modifierGroupId String
+
+  @@id([productId, modifierGroupId])
+}
+
+model Allergen {
+  id    String @id @default(cuid())
+  code  String @unique // "GLUTEN", "EGGS", etc.
+  name  String         // "Gluten", "Jaja"
+  icon  String?        // emoji or icon name
+
+  products ProductAllergen[]
+}
+
+model ProductAllergen {
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+  allergen   Allergen @relation(fields: [allergenId], references: [id])
+  allergenId String
+
+  @@id([productId, allergenId])
+}
+
+// ============================================================
+// ORDERS
+// ============================================================
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     Int         @default(1)
+  table           Table?      @relation(fields: [tableId], references: [id])
+  tableId         String?
+  room            Room?       @relation(fields: [roomId], references: [id])
+  roomId         String?
+  user            User        @relation(fields: [userId], references: [id])
+  userId          String
+  customer        Customer?   @relation(fields: [customerId], references: [id])
+  customerId      String?
+  status          OrderStatus @default(OPEN)
+  type            OrderType   @default(DINE_IN)
+  guestCount      Int         @default(1)
+  banquetEvent    BanquetEvent? @relation(fields: [banquetEventId], references: [id])
+  banquetEventId  String?
+  discountJson    Json?       // {type, value, reason, authorizedBy}
+  note            String?
+  courseReleasedUpTo Int       @default(1)
+  // Delivery/phone order fields
+  deliveryPhone   String?
+  deliveryAddress String?
+  deliveryStatus  DeliveryStatus?
+  deliveryNote    String?
+  estimatedAt     DateTime?   // estimated pickup/delivery time
+  createdAt       DateTime    @default(now())
+  closedAt        DateTime?
+  // Performance cache fields
+  totalGross        Decimal     @db.Decimal(10, 2) @default(0) // cached sum of items
+  itemCount         Int         @default(0)                     // cached count of items
+  lastInteractionAt DateTime    @default(now())                 // last change timestamp
+
+  items           OrderItem[]
+  payments        Payment[]
+  receipts        Receipt[]
+  invoices        Invoice[]
+  tips            Tip[]
+
+  @@index([tableId, status])
+  @@index([status, createdAt])
+}
+
+enum OrderStatus {
+  OPEN
+  SENT_TO_KITCHEN
+  IN_PROGRESS
+  READY
+  SERVED
+  BILL_REQUESTED
+  CLOSED
+  CANCELLED
+}
+
+enum OrderType {
+  DINE_IN
+  TAKEAWAY
+  BANQUET
+  PHONE
+  DELIVERY
+}
+
+enum DeliveryStatus {
+  PENDING
+  PREPARING
+  READY_FOR_PICKUP
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model OrderItem {
+  id              String          @id @default(cuid())
+  order           Order           @relation(fields: [orderId], references: [id])
+  orderId         String
+  product         Product         @relation(fields: [productId], references: [id])
+  productId       String
+  quantity        Decimal        @db.Decimal(10, 3) // allow fractional (wine by glass)
+  unitPrice       Decimal        @db.Decimal(10, 2) // price at time of order
+  taxRate         TaxRate        @relation(fields: [taxRateId], references: [id])
+  taxRateId       String
+  discountAmount  Decimal        @db.Decimal(10, 2) @default(0)
+  modifiersJson   Json?          // [{modifierId, name, priceDelta}]
+  note            String?        // "bez cebuli"
+  courseNumber    Int            @default(1)
+  status          OrderItemStatus @default(ORDERED)
+  sentToKitchenAt DateTime?
+  startedAt       DateTime?      // when cook clicked "Zaczynam" (IN_PROGRESS)
+  preparedByUserId String?       // which cook prepared this item
+  kdsStationId    String?        // which KDS station handled this item
+  readyAt         DateTime?
+  servedAt        DateTime?
+  cancelledAt     DateTime?
+  cancelReason    String?
+  isBanquetExtra  Boolean        @default(false) // extra beyond banquet menu
+  isModifiedAfterSend Boolean   @default(false) // żółte "ZMIANA" na KDS
+
+  createdAt       DateTime       @default(now())
+
+  @@index([orderId, status])
+}
+
+enum OrderItemStatus {
+  ORDERED
+  SENT
+  IN_PROGRESS
+  READY
+  SERVED
+  CANCELLED
+}
+
+// ============================================================
+// PAYMENTS
+// ============================================================
+
+model Payment {
+  id              String        @id @default(cuid())
+  order           Order         @relation(fields: [orderId], references: [id])
+  orderId         String
+  method          PaymentMethod
+  amount          Decimal       @db.Decimal(10, 2)
+  tipAmount       Decimal       @db.Decimal(10, 2) @default(0)
+  transactionRef  String?       // terminal reference
+  voucher         GiftVoucher?  @relation(fields: [voucherId], references: [id])
+  voucherId       String?
+  createdAt       DateTime      @default(now())
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BLIK
+  TRANSFER
+  VOUCHER
+  ROOM_CHARGE
+}
+
+model Tip {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  amount    Decimal  @db.Decimal(10, 2)
+  method    PaymentMethod
+  createdAt DateTime @default(now())
+}
+
+model Discount {
+  id          String       @id @default(cuid())
+  name        String
+  type        DiscountType
+  value       Decimal      @db.Decimal(10, 2) // percent or amount
+  maxPercent  Decimal?     @db.Decimal(5, 2)  // cap
+  isActive    Boolean      @default(true)
+  validFrom   DateTime?
+  validTo     DateTime?
+  createdAt   DateTime     @default(now())
+}
+
+enum DiscountType {
+  PERCENT
+  AMOUNT
+  PROMO
+}
+
+model Promotion {
+  id          String   @id @default(cuid())
+  name        String   // "Happy Hour Piwa"
+  type        String   // happy_hour, daily_special, combo
+  rulesJson   Json     // {categoryId, productId, discountPercent, discountAmount, timeFrom, timeTo}
+  daysOfWeek  Json     @default("[]") // 0=Sun, 1=Mon, ... 6=Sat (JSON array)
+  isActive    Boolean  @default(true)
+  validFrom   DateTime
+  validTo     DateTime
+}
+
+// ============================================================
+// INVOICES & FISCAL
+// ============================================================
+
+model Invoice {
+  id                String        @id @default(cuid())
+  invoiceNumber     String        @unique // FV/2026/02/0001
+  type              InvoiceType
+  order             Order?        @relation(fields: [orderId], references: [id])
+  orderId           String?
+  banquetEvent      BanquetEvent? @relation(fields: [banquetEventId], references: [id])
+  banquetEventId    String?
+  buyerNip          String?
+  buyerName         String?
+  buyerAddress      String?
+  itemsJson         Json          // [{name, qty, unitPrice, netPrice, vatRate, vatAmount, grossPrice}]
+  netTotal          Decimal       @db.Decimal(10, 2)
+  vatTotal          Decimal       @db.Decimal(10, 2)
+  grossTotal        Decimal       @db.Decimal(10, 2)
+  paymentMethod     String?
+  saleDate          DateTime
+  issueDate         DateTime      @default(now())
+  dueDate           DateTime?
+  ksefRefNumber     String?
+  ksefStatus        KsefStatus    @default(PENDING)
+  ksefErrorMessage  String?       // szczegóły błędu przy REJECTED / OFFLINE
+  relatedInvoiceId  String?       // for corrections/finals → original invoice
+  correctionReason  String?
+  createdAt         DateTime      @default(now())
+}
+
+enum InvoiceType {
+  STANDARD
+  ADVANCE       // zaliczkowa
+  FINAL         // końcowa (po zaliczkach)
+  CORRECTION    // korygująca
+}
+
+enum KsefStatus {
+  PENDING
+  SENT
+  ACCEPTED
+  REJECTED
+  OFFLINE_QUEUED
+}
+
+model Receipt {
+  id              String    @id @default(cuid())
+  order           Order     @relation(fields: [orderId], references: [id])
+  orderId         String
+  fiscalNumber    String    // from Posnet
+  printerId       String
+  buyerNip        String?   // NIP on receipt
+  token           String    @unique @default(cuid()) // e-receipt access token
+  customerPhone   String?   // phone for SMS delivery
+  customerEmail   String?   // email delivery
+  deliveryMethod  String?   // "SMS", "QR", "EMAIL", "PRINT"
+  htmlContent     String?   @db.LongText // rendered e-receipt HTML
+  viewedAt        DateTime? // when customer opened e-receipt
+  expiresAt       DateTime? // link expiry (e.g. 30 days)
+  printedAt       DateTime  @default(now())
+}
+
+// ============================================================
+// WAREHOUSE
+// ============================================================
+
+model Warehouse {
+  id    String        @id @default(cuid())
+  name  String
+  type  WarehouseType
+
+  stockItems StockItem[]
+  movesFrom  StockMove[] @relation("MoveFrom")
+  movesTo    StockMove[] @relation("MoveTo")
+}
+
+enum WarehouseType {
+  MAIN
+  BAR
+  KITCHEN
+  COLD_STORAGE
+}
+
+model Ingredient {
+  id              String      @id @default(cuid())
+  name            String
+  unit            String      // "kg", "l", "szt"
+  category        String?
+  defaultSupplier String?
+
+  stockItems      StockItem[]
+  recipeItems     RecipeItem[]
+}
+
+model StockItem {
+  id                String    @id @default(cuid())
+  warehouse         Warehouse @relation(fields: [warehouseId], references: [id])
+  warehouseId       String
+  ingredient        Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId      String
+  quantity          Decimal   @db.Decimal(10, 3)
+  unit              String
+  minQuantity       Decimal   @db.Decimal(10, 3) @default(0)
+  lastDeliveryPrice Decimal?  @db.Decimal(10, 2)
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([warehouseId, ingredientId])
+}
+
+model StockMove {
+  id              String        @id @default(cuid())
+  type            StockMoveType
+  documentNumber  String?
+  warehouseFrom   Warehouse?    @relation("MoveFrom", fields: [warehouseFromId], references: [id])
+  warehouseFromId String?
+  warehouseTo     Warehouse?    @relation("MoveTo", fields: [warehouseToId], references: [id])
+  warehouseToId   String?
+  itemsJson       Json          // [{ingredientId, quantity, unit, price}]
+  note            String?
+  userId          String
+  createdAt       DateTime      @default(now())
+}
+
+enum StockMoveType {
+  PZ  // Przyjęcie Zewnętrzne
+  WZ  // Wydanie Zewnętrzne
+  RW  // Rozchód Wewnętrzny
+  MM  // Przesunięcie Międzymagazynowe
+  INV // Inwentaryzacja
+}
+
+model Recipe {
+  id        String       @id @default(cuid())
+  product   Product      @relation(fields: [productId], references: [id])
+  productId String       @unique
+  yieldQty  Decimal      @db.Decimal(10, 3) @default(1)
+
+  items     RecipeItem[]
+}
+
+model RecipeItem {
+  id           String     @id @default(cuid())
+  recipe       Recipe     @relation(fields: [recipeId], references: [id])
+  recipeId     String
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId String
+  quantity     Decimal    @db.Decimal(10, 3)
+  unit         String
+}
+
+// ============================================================
+// KDS (Kitchen Display)
+// ============================================================
+
+model KDSStation {
+  id           String @id @default(cuid())
+  name         String // "Kuchnia Ciepła", "Bar"
+  displayOrder Int    @default(0)
+
+  categories KDSStationCategory[]
+}
+
+model KDSStationCategory {
+  station    KDSStation @relation(fields: [stationId], references: [id])
+  stationId  String
+  category   Category   @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([stationId, categoryId])
+}
+
+model KDSLoadSnapshot {
+  id          String   @id @default(cuid())
+  stationId   String?
+  pendingCount Int     @default(0)
+  inProgressCount Int  @default(0)
+  readyCount  Int      @default(0)
+  totalActive Int      @default(0)
+  timestamp   DateTime @default(now())
+
+  @@index([timestamp])
+  @@index([stationId, timestamp])
+}
+
+model KitchenMessage {
+  id        String    @id @default(cuid())
+  orderId   String?
+  tableId   String?
+  message  String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// ============================================================
+// PRINTERS
+// ============================================================
+
+model Printer {
+  id             String      @id @default(cuid())
+  name           String
+  type           PrinterType
+  connectionType String      // USB, COM, TCP
+  address        String?     // IP or port path
+  port           Int?
+  model          String?     // "Posnet Thermal"
+  isActive       Boolean     @default(true)
+
+  categoryAssignments PrinterCategory[]
+}
+
+enum PrinterType {
+  FISCAL
+  KITCHEN
+  BAR
+  SYSTEM
+}
+
+model PrinterCategory {
+  printer    Printer  @relation(fields: [printerId], references: [id])
+  printerId  String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([printerId, categoryId])
+}
+
+// ============================================================
+// RESERVATIONS & BANQUETS
+// ============================================================
+
+model Reservation {
+  id          String            @id @default(cuid())
+  room        Room              @relation(fields: [roomId], references: [id])
+  roomId      String
+  table       Table?            @relation(fields: [tableId], references: [id])
+  tableId     String?
+  date        DateTime          @db.Date
+  timeFrom    DateTime
+  timeTo      DateTime?
+  guestName   String
+  guestPhone  String?
+  guestEmail  String?
+  guestCount  Int
+  type        ReservationType   @default(TABLE)
+  notes       String?
+  status      ReservationStatus @default(PENDING)
+  source      ReservationSource @default(PHONE)
+  createdAt   DateTime          @default(now())
+
+  banquetEvent BanquetEvent?
+}
+
+enum ReservationType {
+  TABLE
+  BANQUET
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  NO_SHOW
+  COMPLETED
+}
+
+enum ReservationSource {
+  PHONE
+  ONLINE
+  WALK_IN
+}
+
+model BanquetEvent {
+  id              String              @id @default(cuid())
+  reservation     Reservation         @relation(fields: [reservationId], references: [id])
+  reservationId   String              @unique
+  rooms           Room[]
+  eventType       BanquetEventType
+  guestCount      Int
+  menu            BanquetMenu?        @relation(fields: [menuId], references: [id])
+  menuId          String?
+  pricePerPerson  Decimal             @db.Decimal(10, 2)
+  extrasJson      Json?               // {openBar: bool, openBarLimit: number, dj: bool, decorations: string}
+  depositRequired Decimal             @db.Decimal(10, 2) @default(0)
+  depositPaid     Decimal             @db.Decimal(10, 2) @default(0)
+  depositMethod   String?
+  contactPerson   String
+  contactPhone    String
+  contactEmail    String?
+  notes           String?
+  status          BanquetStatus       @default(INQUIRY)
+  createdAt       DateTime            @default(now())
+
+  orders          Order[]
+  invoices        Invoice[]
+  menuModifications BanquetMenuModification[]
+}
+
+enum BanquetEventType {
+  WEDDING
+  EIGHTEENTH
+  CORPORATE
+  COMMUNION
+  CHRISTENING
+  FUNERAL
+  OTHER
+}
+
+enum BanquetStatus {
+  INQUIRY
+  CONFIRMED
+  DEPOSIT_PAID
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model BanquetMenu {
+  id              String    @id @default(cuid())
+  name            String    // "Menu Weselne Premium"
+  eventType       String?
+  itemsJson       Json      // [{productId, name, quantity, courseNumber}]
+  pricePerPerson Decimal   @db.Decimal(10, 2)
+  isTemplate      Boolean   @default(true)
+
+  events          BanquetEvent[]
+}
+
+model BanquetMenuModification {
+  id              String       @id @default(cuid())
+  banquetEvent   BanquetEvent @relation(fields: [banquetEventId], references: [id])
+  banquetEventId String
+  changesJson     Json         // {substitutions: [{from, to, count}], additions: [], removals: []}
+  priceAdjustment Decimal     @db.Decimal(10, 2) @default(0)
+  note            String?
+  createdAt       DateTime     @default(now())
+}
+
+// ============================================================
+// SHIFTS & CASH
+// ============================================================
+
+model Shift {
+  id        String      @id @default(cuid())
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  startedAt DateTime   @default(now())
+  endedAt   DateTime?
+  cashStart Decimal     @db.Decimal(10, 2) @default(0)
+  cashEnd   Decimal?    @db.Decimal(10, 2)
+  status    ShiftStatus @default(OPEN)
+}
+
+enum ShiftStatus {
+  OPEN
+  CLOSED
+}
+
+model CashDrawer {
+  id            String   @id @default(cuid())
+  currentAmount Decimal  @db.Decimal(10, 2) @default(0)
+  lastOpenedAt  DateTime?
+  lastCountedAt DateTime?
+}
+
+model CashOperation {
+  id        String             @id @default(cuid())
+  type      CashOperationType
+  amount    Decimal            @db.Decimal(10, 2)
+  reason    String
+  user      User               @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime           @default(now())
+}
+
+enum CashOperationType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+// ============================================================
+// AUDIT & REPORTING
+// ============================================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  action      String   // "ORDER_CANCEL", "DISCOUNT_APPLIED", "CASH_DRAWER_OPEN", etc.
+  entityType  String   // "Order", "OrderItem", "Payment", etc.
+  entityId    String?
+  oldValue    Json?
+  newValue    Json?
+  metadata    Json?    // {reason, authorizedBy, ipAddress}
+  timestamp   DateTime @default(now())
+}
+
+model DailyReport {
+  id                  String   @id @default(cuid())
+  date                DateTime @db.Date @unique
+  totalGross          Decimal  @db.Decimal(10, 2)
+  totalNet            Decimal  @db.Decimal(10, 2)
+  vatBreakdownJson    Json     // {A: {net, vat, gross}, B: {...}}
+  paymentBreakdownJson Json    // {cash: x, card: y, blik: z, transfer: w}
+  receiptCount        Int
+  invoiceCount        Int
+  guestCount          Int
+  avgTicket           Decimal  @db.Decimal(10, 2)
+  cancelCount         Int      @default(0)
+  cancelAmount        Decimal  @db.Decimal(10, 2) @default(0)
+  generatedAt         DateTime @default(now())
+}
+
+model ExportBatch {
+  id        String   @id @default(cuid())
+  type      String   // "daily", "monthly", "vat", "banquets"
+  dateFrom  DateTime
+  dateTo    DateTime
+  filePath  String
+  createdAt DateTime @default(now())
+}
+
+// ============================================================
+// PUSH NOTIFICATIONS
+// ============================================================
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  type      String    // ORDER_READY, KITCHEN_MESSAGE, SHIFT_REMINDER, etc.
+  entityId  String?   // related entity (orderId, etc.)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model PushSubscription {
+  id          String   @id @default(cuid())
+  userId      String
+  endpoint    String   @db.Text
+  p256dh      String   @db.Text
+  auth        String
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, endpoint(length: 255)])
+  @@index([userId])
+}
+
+// ============================================================
+// SYSTEM CONFIG
+// ============================================================
+
+model SystemConfig {
+  id    String @id @default(cuid())
+  key   String @unique
+  value Json
+}
+
+// ============================================================
+// CUSTOMERS (historia gości)
+// ============================================================
+
+model Customer {
+  id              String    @id @default(cuid())
+  phone           String    @unique
+  name            String?
+  email           String?
+  notes           String?
+  hotelGuestId    String?   @unique // synced from hotel system
+  loyaltyPoints   Int       @default(0)
+  totalSpent      Decimal   @db.Decimal(10, 2) @default(0)
+  visitCount      Int       @default(0)
+  lastVisit       DateTime?
+  createdAt       DateTime  @default(now())
+
+  orders              Order[]
+  loyaltyTransactions LoyaltyTransaction[]
+}
+
+// ============================================================
+// LOYALTY PROGRAM (program lojalnościowy)
+// ============================================================
+
+model LoyaltyTransaction {
+  id          String    @id @default(cuid())
+  customer    Customer  @relation(fields: [customerId], references: [id])
+  customerId  String
+  points      Int       // positive = earned, negative = redeemed
+  type        LoyaltyTxType
+  orderId     String?   // related order (if any)
+  description String?
+  createdAt   DateTime  @default(now())
+}
+
+enum LoyaltyTxType {
+  EARNED      // points earned from purchase
+  REDEEMED    // points used for reward
+  ADJUSTMENT  // manual adjustment by admin
+  EXPIRED     // points expired
+}
+
+model LoyaltyReward {
+  id              String  @id @default(cuid())
+  name            String  // "Kawa gratis", "Deser gratis", "10% rabatu"
+  pointsCost      Int     // how many points to redeem
+  rewardType      String  // FREE_PRODUCT, DISCOUNT_PERCENT, DISCOUNT_AMOUNT
+  rewardValue     Decimal @db.Decimal(10, 2) @default(0) // discount value or 0 for free product
+  productId       String? // if FREE_PRODUCT, which product
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now())
+}
+
+// ============================================================
+// PRODUCT SUGGESTIONS (sprzedaż sugerowana)
+// ============================================================
+
+model ProductSuggestion {
+  id            String   @id @default(cuid())
+  product       Product  @relation("SuggestionBase", fields: [productId], references: [id])
+  productId     String
+  suggested     Product  @relation("SuggestionTarget", fields: [suggestedId], references: [id])
+  suggestedId   String
+  type          String   // "ADDON", "UPSELL", "CROSS_SELL"
+  priority      Int      @default(0)
+  isActive      Boolean  @default(true)
+
+  @@unique([productId, suggestedId])
+}
+
+// ============================================================
+// TIME TRACKING (rejestr czasu pracy)
+// ============================================================
+
+model TimeEntry {
+  id        String    @id @default(cuid())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  clockIn   DateTime  @default(now())
+  clockOut  DateTime?
+  breakMin  Int       @default(0) // break minutes
+  note      String?
+  createdAt DateTime  @default(now())
+}
+
+// ============================================================
+// GIFT VOUCHERS (karty podarunkowe)
+// ============================================================
+
+model GiftVoucher {
+  id            String    @id @default(cuid())
+  code          String    @unique
+  initialValue  Decimal   @db.Decimal(10, 2)
+  balance       Decimal   @db.Decimal(10, 2)
+  isActive      Boolean   @default(true)
+  expiresAt     DateTime?
+  soldByUser    User?     @relation(fields: [soldByUserId], references: [id])
+  soldByUserId  String?
+  customerName  String?   // who bought / who it's for
+  note          String?
+  createdAt     DateTime  @default(now())
+
+  payments      Payment[]
+}
+
+// ============================================================
+// WORK SCHEDULE (grafik pracy)
+// ============================================================
+
+model WorkSchedule {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  date      DateTime @db.Date
+  shiftStart String  // "08:00"
+  shiftEnd   String  // "16:00"
+  role       String? // "Kelner", "Kucharz", "Bar"
+  note       String?
+  isConfirmed Boolean @default(false)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model StaffAvailability {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  date      DateTime @db.Date
+  available Boolean  @default(true)
+  timeFrom  String?  // "08:00" — available from
+  timeTo    String?  // "22:00" — available until
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+}
+
+model ShiftSwapRequest {
+  id            String   @id @default(cuid())
+  requester     User     @relation("SwapRequester", fields: [requesterId], references: [id])
+  requesterId   String
+  target        User     @relation("SwapTarget", fields: [targetId], references: [id])
+  targetId      String
+  date          DateTime @db.Date
+  status        SwapStatus @default(PENDING)
+  reason        String?
+  respondedAt   DateTime?
+  createdAt     DateTime @default(now())
+}
+
+enum SwapStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+// ============================================================
+// BULLETIN BOARD (tablica ogłoszeń)
+// ============================================================
+
+model Announcement {
+  id        String    @id @default(cuid())
+  author    User      @relation(fields: [authorId], references: [id])
+  authorId  String
+  title     String
+  content   String    @db.Text
+  priority  AnnouncementPriority @default(NORMAL)
+  pinned    Boolean   @default(false)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
+enum AnnouncementPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}

@@ -1,0 +1,35 @@
+Projekt: System POS gastronomiczny "Karczma Łabędź"
+Stack: Next.js 14 App Router + TypeScript + Tailwind + shadcn/ui + Prisma + MariaDB
+Język UI: Polski (wszystkie etykiety, komunikaty, buttony)
+Język kodu: Angielski (zmienne, funkcje, typy)
+Schema: prisma/schema.prisma — pełny data model
+Plan: c:\Users\hp\.cursor\plans\pos_bistro_simplex_rebuild_cd630ca9.plan.md — szczegółowy plan z opisami
+Checklist: CHECKLIST.md — lista zadań do odznaczania (kolejność = priorytet)
+HotelSystem: C:\HotelSystem — system hotelowy do integracji (ten sam stack)
+
+Zasady:
+- Używaj Server Components gdzie możliwe, Client Components tylko gdy interaktywność
+- Każdy API route waliduje uprawnienia przez middleware.ts (JWT w httpOnly cookie)
+- Każda krytyczna akcja → auditLog()
+- Wszystkie kwoty Decimal(10,2), bez floatów
+- Na paragonie nazwa max 40 znaków (Posnet limit)
+- Stawki VAT: A=23%(alkohole), B=8%(gastronomia), C=5%, D=0%
+- PIN hashowany bcrypt (NIE plaintext!)
+- Polski format dat (dd.MM.yyyy), waluta PLN
+- Responsywny na telefon/tablet/desktop, PWA
+- Walidacja inputów przez Zod na każdym API endpoint
+- KDS kuchnia: ciemne tło, duże czcionki, 3 tryby (kafelkowy/all-day/expo)
+
+## TRYB AUTORUN (nieskończona pętla)
+System zarządzania zadaniami: `python task_manager.py`
+- `next` — pobierz następne zadanie
+- `done <ID> --status=PASS --details="..."` — oznacz jako zrobione
+- `skip <ID> --details="..."` — pomiń
+- `stats` — statystyki postępu
+Szczegóły w AUTORUN.md. Plan szczegółowy w pliku plan.md.
+
+## ZASADA TESTOWANIA
+Po każdej implementacji:
+1. Sprawdź linter na zmienionych plikach
+2. Wypisz listę co zostało zrobione i co przetestować ręcznie
+3. Jeśli są błędy TypeScript lub runtime — napraw je ZANIM zakończysz odpowiedź
