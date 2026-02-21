@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
-import { Decimal } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 type ModifierJson = { modifierId: string; name: string; priceDelta: number };
 
@@ -71,7 +71,7 @@ export async function POST(
       if (items.length < 2) continue;
 
       const [first, ...rest] = items;
-      const totalQuantity = items.reduce((sum, i) => sum.add(i.quantity), new Decimal(0));
+      const totalQuantity = items.reduce((sum, i) => sum.add(i.quantity), new Prisma.Decimal(0));
 
       await prisma.orderItem.update({
         where: { id: first.id },
