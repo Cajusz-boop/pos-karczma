@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import type { TerminalConfig, PaymentIntent, TerminalStatus, TerminalProvider } from "./types";
+import type { 
+  TerminalConfig, 
+  PaymentIntent, 
+  TerminalStatus, 
+  PolcardGoResponse,
+  PolcardGoDeepLinkParams,
+} from "./types";
 
 const DEFAULT_CONFIG: TerminalConfig = {
   provider: "DEMO",
@@ -98,6 +104,10 @@ export async function cancelPayment(intentId: string): Promise<PaymentIntent> {
     return cancelStripePayment(config, intentId);
   }
 
+  if (config.provider === "POLCARD") {
+    return cancelPolcardPayment(intentId);
+  }
+
   return { id: intentId, amount: 0, currency: "PLN", status: "CANCELLED" };
 }
 
@@ -120,12 +130,7 @@ export async function getTerminalStatus(): Promise<TerminalStatus> {
   }
 
   if (config.provider === "POLCARD") {
-    return {
-      connected: !!config.merchantId,
-      provider: "POLCARD",
-      terminalId: config.terminalId,
-      message: config.merchantId ? "PolCard Go skonfigurowany" : "Brak konfiguracji merchantId",
-    };
+    return getPolcardTerminalStatus(config);
   }
 
   return { connected: false, provider: config.provider, message: "Nieznany provider" };
@@ -261,15 +266,38 @@ async function getStripeTerminalStatus(config: TerminalConfig): Promise<Terminal
 
 // ─── PolCard Go ─────────────────────────────────────────────────────
 
+const POLCARD_GO_PACKAGE = "com.fiserv.polcard";
+const POLCARD_GO_DEEP_LINK_SCHEME = "polcardgo";
+
 async function createPolcardPaymentIntent(
   config: TerminalConfig,
   amount: number,
   orderId: string,
-  _description?: string
+  description?: string
 ): Promise<PaymentIntent> {
-  // PolCard Go SoftPOS integration placeholder
-  // Real implementation would use PolCard Go SDK/API
   const intentId = `polcard-${Date.now()}-${orderId.slice(0, 8)}`;
+  
+  try {
+    await prisma.pendingPayment.create({
+      data: {
+        id: intentId,
+        orderId,
+        amount,
+        currency: "PLN",
+        provider: "POLCARD",
+        status: "PENDING",
+        metadata: {
+          description,
+          merchantId: config.polcardConfig?.merchantId ?? config.merchantId,
+          terminalId: config.polcardConfig?.terminalId ?? config.terminalId,
+          createdAt: new Date().toISOString(),
+        },
+      },
+    });
+  } catch (e) {
+    console.error("[PolCard Go] Error saving pending payment:", e);
+  }
+
   return {
     id: intentId,
     amount,
@@ -279,15 +307,210 @@ async function createPolcardPaymentIntent(
 }
 
 async function confirmPolcardPayment(
-  _config: TerminalConfig,
+  config: TerminalConfig,
   intentId: string
 ): Promise<PaymentIntent> {
-  // PolCard Go confirmation placeholder
+  try {
+    const pending = await prisma.pendingPayment.findUnique({
+      where: { id: intentId },
+    });
+
+    if (!pending) {
+      return {
+        id: intentId,
+        amount: 0,
+        currency: "PLN",
+        status: "FAILED",
+        errorMessage: "Płatność nie została znaleziona",
+      };
+    }
+
+    if (pending.status === "COMPLETED") {
+      const response = pending.response as PolcardGoResponse | null;
+      return {
+        id: intentId,
+        amount: pending.amount,
+        currency: "PLN",
+        status: "SUCCEEDED",
+        transactionRef: response?.transactionId ?? `PC-${intentId}`,
+        polcardResponse: response ?? undefined,
+      };
+    }
+
+    if (pending.status === "FAILED" || pending.status === "CANCELLED") {
+      const response = pending.response as PolcardGoResponse | null;
+      return {
+        id: intentId,
+        amount: pending.amount,
+        currency: "PLN",
+        status: pending.status === "FAILED" ? "FAILED" : "CANCELLED",
+        errorMessage: response?.errorMessage ?? "Płatność nie powiodła się",
+      };
+    }
+
+    return {
+      id: intentId,
+      amount: pending.amount,
+      currency: "PLN",
+      status: "PROCESSING",
+    };
+  } catch (e) {
+    console.error("[PolCard Go] Error confirming payment:", e);
+    return {
+      id: intentId,
+      amount: 0,
+      currency: "PLN",
+      status: "FAILED",
+      errorMessage: "Błąd sprawdzania statusu płatności",
+    };
+  }
+}
+
+async function cancelPolcardPayment(
+  intentId: string
+): Promise<PaymentIntent> {
+  try {
+    await prisma.pendingPayment.update({
+      where: { id: intentId },
+      data: { status: "CANCELLED" },
+    });
+  } catch (e) {
+    console.error("[PolCard Go] Error cancelling payment:", e);
+  }
+
+  return { id: intentId, amount: 0, currency: "PLN", status: "CANCELLED" };
+}
+
+async function getPolcardTerminalStatus(config: TerminalConfig): Promise<TerminalStatus> {
+  const merchantId = config.polcardConfig?.merchantId ?? config.merchantId;
+  const terminalId = config.polcardConfig?.terminalId ?? config.terminalId;
+  
+  return {
+    connected: !!merchantId && !!terminalId,
+    provider: "POLCARD",
+    terminalId,
+    message: merchantId && terminalId 
+      ? `PolCard Go gotowy (Terminal: ${terminalId})`
+      : "Brak konfiguracji PolCard Go — uzupełnij merchantId i terminalId",
+  };
+}
+
+/**
+ * Generate a deep link URL to invoke PolCard Go app for payment.
+ * Used on Android devices with PolCard Go installed.
+ */
+export function generatePolcardGoDeepLink(params: PolcardGoDeepLinkParams): string {
+  const { action, amount, currency, orderId, description, callback } = params;
+  
+  const amountInGrosze = Math.round(amount * 100);
+  
+  const queryParams = new URLSearchParams({
+    action,
+    amount: String(amountInGrosze),
+    currency,
+    orderId,
+    callback: encodeURIComponent(callback),
+  });
+  
+  if (description) {
+    queryParams.set("description", description);
+  }
+  
+  return `${POLCARD_GO_DEEP_LINK_SCHEME}://payment?${queryParams.toString()}`;
+}
+
+/**
+ * Generate an Android Intent URL for PolCard Go.
+ * Fallback when deep link scheme doesn't work.
+ */
+export function generatePolcardGoIntentUrl(params: PolcardGoDeepLinkParams): string {
+  const deepLink = generatePolcardGoDeepLink(params);
+  
+  return `intent://payment?${new URLSearchParams({
+    amount: String(Math.round(params.amount * 100)),
+    currency: params.currency,
+    orderId: params.orderId,
+    callback: params.callback,
+  }).toString()}#Intent;scheme=${POLCARD_GO_DEEP_LINK_SCHEME};package=${POLCARD_GO_PACKAGE};end`;
+}
+
+/**
+ * Check if PolCard Go app is likely installed (Android only).
+ * Returns true on Android, false on iOS/desktop.
+ */
+export function isPolcardGoAvailable(): boolean {
+  if (typeof window === "undefined") return false;
+  
+  const ua = navigator.userAgent.toLowerCase();
+  const isAndroid = ua.includes("android");
+  
+  return isAndroid;
+}
+
+/**
+ * Process callback response from PolCard Go.
+ * Called by the callback API endpoint.
+ */
+export async function processPolcardGoCallback(
+  intentId: string,
+  response: PolcardGoResponse
+): Promise<PaymentIntent> {
+  try {
+    const status = response.success ? "COMPLETED" : "FAILED";
+    
+    await prisma.pendingPayment.update({
+      where: { id: intentId },
+      data: {
+        status,
+        response: response as object,
+        completedAt: new Date(),
+      },
+    });
+
+    return {
+      id: intentId,
+      amount: response.amount ?? 0,
+      currency: response.currency ?? "PLN",
+      status: response.success ? "SUCCEEDED" : "FAILED",
+      transactionRef: response.transactionId,
+      errorMessage: response.errorMessage,
+      polcardResponse: response,
+    };
+  } catch (e) {
+    console.error("[PolCard Go] Error processing callback:", e);
+    return {
+      id: intentId,
+      amount: 0,
+      currency: "PLN",
+      status: "FAILED",
+      errorMessage: "Błąd przetwarzania odpowiedzi PolCard Go",
+    };
+  }
+}
+
+/**
+ * Poll for payment status (for use when waiting for PolCard Go callback).
+ */
+export async function pollPolcardPaymentStatus(
+  intentId: string,
+  maxAttempts = 60,
+  intervalMs = 2000
+): Promise<PaymentIntent> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const result = await confirmPolcardPayment({} as TerminalConfig, intentId);
+    
+    if (result.status === "SUCCEEDED" || result.status === "FAILED" || result.status === "CANCELLED") {
+      return result;
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  
   return {
     id: intentId,
     amount: 0,
     currency: "PLN",
-    status: "SUCCEEDED",
-    transactionRef: `PC-${intentId}`,
+    status: "FAILED",
+    errorMessage: "Przekroczono czas oczekiwania na płatność",
   };
 }

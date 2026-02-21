@@ -65,6 +65,23 @@ function flattenAll(cats: CategoryNode[]): CategoryNode[] {
   return out;
 }
 
+function getDescendantIds(tree: CategoryNode[], parentId: string): string[] {
+  const ids: string[] = [parentId];
+  const findAndCollect = (nodes: CategoryNode[]): void => {
+    for (const node of nodes) {
+      if (node.id === parentId || ids.includes(node.parentId ?? "")) {
+        if (!ids.includes(node.id)) ids.push(node.id);
+      }
+      if (node.children?.length) {
+        findAndCollect(node.children);
+      }
+    }
+  };
+  findAndCollect(tree);
+  for (let i = 0; i < 5; i++) findAndCollect(tree);
+  return ids;
+}
+
 function getDirectChildren(tree: CategoryNode[], parentId: string | null): CategoryNode[] {
   if (parentId === null) {
     return (tree ?? []).slice().sort((a, b) => a.sortOrder - b.sortOrder);
@@ -231,7 +248,11 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       .filter(Boolean) as ProductRow[];
   }, [recentProductIds, products]);
 
-  const showProductsHere = currentCategoryId && childCategories.length === 0;
+  const categoryIdsToShow = useMemo(() => {
+    if (!currentCategoryId) return [];
+    return getDescendantIds(categories, currentCategoryId);
+  }, [categories, currentCategoryId]);
+
   const filteredProducts = useMemo(() => {
     const allergenFilter = (p: ProductRow) => {
       if (excludedAllergens.length === 0) return true;
@@ -249,11 +270,11 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         )
         .sort((a, b) => a.sortOrder - b.sortOrder);
     }
-    if (!showProductsHere) return [];
+    if (categoryIdsToShow.length === 0) return [];
     return [...products]
-      .filter((p) => p.categoryId === currentCategoryId && allergenFilter(p))
+      .filter((p) => categoryIdsToShow.includes(p.categoryId) && allergenFilter(p))
       .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [products, currentCategoryId, showProductsHere, searchQuery, excludedAllergens]);
+  }, [products, categoryIdsToShow, searchQuery, excludedAllergens]);
 
   const sendMutation = useMutation({
     mutationFn: async () => {

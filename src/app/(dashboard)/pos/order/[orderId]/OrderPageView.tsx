@@ -612,9 +612,14 @@ export function OrderPageView(props: OrderPageViewProps) {
               </button>
             ))}
           </div>
-          {filteredProducts.length === 0 && !searchQuery && childCategories.length === 0 && categoryStack.length > 0 && (
+          {filteredProducts.length === 0 && !searchQuery && categoryStack.length > 0 && (
             <div className="py-12 text-center text-muted-foreground">
               Brak produktów w tej kategorii
+            </div>
+          )}
+          {filteredProducts.length === 0 && !searchQuery && categoryStack.length === 0 && (
+            <div className="py-12 text-center text-muted-foreground">
+              Wybierz kategorię aby zobaczyć produkty
             </div>
           )}
           {filteredProducts.length === 0 && searchQuery && (

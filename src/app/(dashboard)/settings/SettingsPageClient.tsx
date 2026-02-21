@@ -5,7 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import "@/components/ui/dialog";
-import { Settings, Building2, Printer, Users } from "lucide-react";
+import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone } from "lucide-react";
+import Link from "next/link";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
 
@@ -498,8 +499,18 @@ export default function SettingsPageClient() {
 
       {tab === "rooms" && (
         <section className="rounded-lg border p-4">
-          <h2 className="mb-3 text-lg font-medium">Panel sal</h2>
-          <p className="mb-3 text-sm text-muted-foreground">Aktywacja/dezaktywacja sal (np. Wiata sezonowa).</p>
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-medium">Panel sal</h2>
+              <p className="text-sm text-muted-foreground">Aktywacja/dezaktywacja sal (np. Wiata sezonowa).</p>
+            </div>
+            <Link href="/settings/table-layout">
+              <Button variant="outline" className="gap-2">
+                <LayoutGrid className="h-4 w-4" />
+                Edytuj układ stolików
+              </Button>
+            </Link>
+          </div>
           <div className="space-y-2">
             {rooms.map((room: { id: string; name: string; isActive: boolean }) => (
               <div key={room.id} className="flex items-center justify-between rounded border p-2">
@@ -581,6 +592,104 @@ export default function SettingsPageClient() {
           {openShifts.length === 0 && <p className="mt-2 text-sm text-muted-foreground">Brak otwartych zmian.</p>}
         </section>
       )}
+
+      {/* Quick links to other settings pages */}
+      <section className="rounded-lg border p-4">
+        <h2 className="mb-3 text-lg font-medium">Więcej ustawień</h2>
+        <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+          <Link href="/settings/table-layout" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <LayoutGrid className="h-5 w-5 text-indigo-500" />
+            <div>
+              <p className="font-medium">Układ stolików</p>
+              <p className="text-xs text-muted-foreground">Drag & drop na mapie</p>
+            </div>
+          </Link>
+          <Link href="/settings/rooms" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Building2 className="h-5 w-5 text-emerald-500" />
+            <div>
+              <p className="font-medium">Sale i stoliki</p>
+              <p className="text-xs text-muted-foreground">CRUD sal, stolików</p>
+            </div>
+          </Link>
+          <Link href="/settings/categories" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Tags className="h-5 w-5 text-amber-500" />
+            <div>
+              <p className="font-medium">Kategorie</p>
+              <p className="text-xs text-muted-foreground">Menu, kolejność, kolory</p>
+            </div>
+          </Link>
+          <Link href="/settings/modifiers" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Utensils className="h-5 w-5 text-rose-500" />
+            <div>
+              <p className="font-medium">Modyfikatory</p>
+              <p className="text-xs text-muted-foreground">Dodatki, opcje</p>
+            </div>
+          </Link>
+          <Link href="/settings/tax-rates" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Percent className="h-5 w-5 text-blue-500" />
+            <div>
+              <p className="font-medium">Stawki VAT</p>
+              <p className="text-xs text-muted-foreground">A, B, C, D</p>
+            </div>
+          </Link>
+          <Link href="/settings/menu-import" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <FileSpreadsheet className="h-5 w-5 text-green-500" />
+            <div>
+              <p className="font-medium">Import menu</p>
+              <p className="text-xs text-muted-foreground">CSV, Excel</p>
+            </div>
+          </Link>
+          <Link href="/settings/vouchers" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Gift className="h-5 w-5 text-purple-500" />
+            <div>
+              <p className="font-medium">Vouchery</p>
+              <p className="text-xs text-muted-foreground">Karty podarunkowe</p>
+            </div>
+          </Link>
+          <Link href="/settings/loyalty" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Heart className="h-5 w-5 text-pink-500" />
+            <div>
+              <p className="font-medium">Program lojalnościowy</p>
+              <p className="text-xs text-muted-foreground">Punkty, nagrody</p>
+            </div>
+          </Link>
+          <Link href="/settings/kds" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Monitor className="h-5 w-5 text-orange-500" />
+            <div>
+              <p className="font-medium">KDS</p>
+              <p className="text-xs text-muted-foreground">Stacje kuchenne</p>
+            </div>
+          </Link>
+          <Link href="/settings/schedule" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <CalendarDays className="h-5 w-5 text-cyan-500" />
+            <div>
+              <p className="font-medium">Grafik pracy</p>
+              <p className="text-xs text-muted-foreground">Zmiany, dostępność</p>
+            </div>
+          </Link>
+          <Link href="/settings/training" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <GraduationCap className="h-5 w-5 text-yellow-500" />
+            <div>
+              <p className="font-medium">Tryb szkoleniowy</p>
+              <p className="text-xs text-muted-foreground">Demo, ćwiczenia</p>
+            </div>
+          </Link>
+          <Link href="/settings/terminal" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Smartphone className="h-5 w-5 text-blue-500" />
+            <div>
+              <p className="font-medium">Terminal płatniczy</p>
+              <p className="text-xs text-muted-foreground">PolCard Go, SoftPOS</p>
+            </div>
+          </Link>
+          <Link href="/settings/printers" className="flex items-center gap-3 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+            <Printer className="h-5 w-5 text-slate-500" />
+            <div>
+              <p className="font-medium">Drukarki</p>
+              <p className="text-xs text-muted-foreground">Kuchenne, bonówka</p>
+            </div>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

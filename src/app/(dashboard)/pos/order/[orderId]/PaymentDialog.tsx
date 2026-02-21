@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -27,7 +27,10 @@ import {
   Loader2,
   Gift,
   Users,
+  Wifi,
+  WifiOff,
 } from "lucide-react";
+import { usePolcardGo } from "@/lib/hooks/usePolcardGo";
 
 type OrderItemBill = {
   id: string;
@@ -146,9 +149,34 @@ export function PaymentDialog({
   const [foreignRate, setForeignRate] = useState(4.30);
   const [foreignSymbol, setForeignSymbol] = useState("€");
   const [currencyRates, setCurrencyRates] = useState<{ code: string; rate: number; symbol: string; name: string }[]>([]);
+  // PolCard Go (SoftPOS) state
+  const [polcardIntentId, setPolcardIntentId] = useState<string | null>(null);
+  const [polcardMode, setPolcardMode] = useState<"softpos" | "external" | "manual">("manual");
 
   const bill = useMemo(() => (order ? computeBill(order) : null), [order]);
   const totalToPay = bill?.grossTotal ?? 0;
+
+  const handlePolcardSuccess = useCallback((result: { id: string; transactionRef?: string }) => {
+    setCardOrBlikConfirmed(true);
+    setPolcardIntentId(result.id);
+  }, []);
+
+  const handlePolcardError = useCallback((errorMsg: string) => {
+    setError(errorMsg);
+    setPolcardMode("manual");
+  }, []);
+
+  const {
+    initiatePayment: initiatePolcardPayment,
+    cancelPayment: cancelPolcardPayment,
+    isProcessing: polcardProcessing,
+    isPolcardAvailable,
+    status: polcardStatus,
+    error: polcardError,
+  } = usePolcardGo({
+    onSuccess: handlePolcardSuccess,
+    onError: handlePolcardError,
+  });
 
   const rawCashInput = parseFloat(cashReceived) || 0;
   const paidByCash = step === "cash" ? rawCashInput : 0;
@@ -184,6 +212,11 @@ export function PaymentDialog({
     setVoucherChecking(false);
     setVoucherValid(false);
     setForeignCurrency(false);
+    setPolcardIntentId(null);
+    setPolcardMode("manual");
+    if (polcardProcessing) {
+      cancelPolcardPayment();
+    }
   };
 
   const applyDiscount = async () => {
@@ -879,51 +912,148 @@ export function PaymentDialog({
         {/* Step: Card / BLIK */}
         {(step === "card" || step === "blik") && (
           <div className="space-y-4">
-            <Button variant="ghost" size="sm" className="gap-1" onClick={() => setStep("method")}>
+            <Button variant="ghost" size="sm" className="gap-1" onClick={() => { setStep("method"); if (polcardProcessing) cancelPolcardPayment(); }}>
               <ArrowLeft className="h-4 w-4" />
               Zmień formę
             </Button>
+
+            {/* PolCard Go SoftPOS mode selector (Android only) */}
+            {step === "card" && isPolcardAvailable && !cardOrBlikConfirmed && (
+              <div className="flex gap-2 p-2 bg-muted rounded-xl">
+                <Button
+                  variant={polcardMode === "softpos" ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 gap-1"
+                  onClick={() => setPolcardMode("softpos")}
+                >
+                  <Smartphone className="h-4 w-4" />
+                  PolCard Go
+                </Button>
+                <Button
+                  variant={polcardMode === "external" ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 gap-1"
+                  onClick={() => setPolcardMode("external")}
+                >
+                  <CreditCard className="h-4 w-4" />
+                  Terminal zewn.
+                </Button>
+                <Button
+                  variant={polcardMode === "manual" ? "default" : "ghost"}
+                  size="sm"
+                  className="flex-1 gap-1"
+                  onClick={() => setPolcardMode("manual")}
+                >
+                  <Check className="h-4 w-4" />
+                  Ręczna
+                </Button>
+              </div>
+            )}
 
             <div className="rounded-2xl border-2 border-dashed p-8 text-center">
               {step === "card" ? (
                 <>
                   <CreditCard className="mx-auto mb-3 h-16 w-16 text-blue-500" />
-                  <div className="mx-auto mb-3 h-20 w-20 rounded-full border-4 border-blue-200 flex items-center justify-center animate-pulse">
-                    <Smartphone className="h-10 w-10 text-blue-400" />
+                  <div className={cn(
+                    "mx-auto mb-3 h-20 w-20 rounded-full border-4 flex items-center justify-center",
+                    polcardProcessing ? "border-blue-400 animate-pulse" : "border-blue-200",
+                    polcardStatus === "success" && "border-emerald-400 bg-emerald-50"
+                  )}>
+                    {polcardProcessing ? (
+                      <Loader2 className="h-10 w-10 text-blue-500 animate-spin" />
+                    ) : polcardStatus === "success" ? (
+                      <Check className="h-10 w-10 text-emerald-500" />
+                    ) : (
+                      <Smartphone className="h-10 w-10 text-blue-400" />
+                    )}
                   </div>
                 </>
               ) : (
                 <Smartphone className="mx-auto mb-3 h-16 w-16 text-pink-500" />
               )}
+
               <p className="text-lg font-semibold">
-                {step === "card" ? "Przyłóż kartę do telefonu" : "Oczekiwanie na BLIK…"}
+                {step === "blik" && "Oczekiwanie na BLIK…"}
+                {step === "card" && polcardMode === "softpos" && polcardProcessing && "Otwieranie PolCard Go…"}
+                {step === "card" && polcardMode === "softpos" && polcardStatus === "polling" && "Oczekiwanie na płatność…"}
+                {step === "card" && polcardMode === "softpos" && polcardStatus === "success" && "Płatność przyjęta!"}
+                {step === "card" && polcardMode === "softpos" && !polcardProcessing && polcardStatus === "idle" && "Uruchom PolCard Go"}
+                {step === "card" && polcardMode === "external" && "Płatność na terminalu zewnętrznym"}
+                {step === "card" && polcardMode === "manual" && "Przyłóż kartę do telefonu"}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Kwota: {totalToPay.toFixed(2)} zł
               </p>
-              {step === "card" && (
+              {step === "card" && polcardMode === "manual" && (
                 <p className="mt-2 text-xs text-muted-foreground">
                   Karta płatnicza, telefon z NFC lub zegarek
                 </p>
               )}
+              {step === "card" && polcardMode === "softpos" && !polcardProcessing && (
+                <p className="mt-2 text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  {isPolcardAvailable ? (
+                    <><Wifi className="h-3 w-3 text-emerald-500" /> Android z NFC wykryty</>
+                  ) : (
+                    <><WifiOff className="h-3 w-3 text-red-500" /> Wymaga Androida z NFC</>
+                  )}
+                </p>
+              )}
+              {polcardError && (
+                <p className="mt-2 text-xs text-destructive">{polcardError}</p>
+              )}
             </div>
 
-            <Button
-              className={cn(
-                "w-full h-14 text-lg font-bold gap-2",
-                cardOrBlikConfirmed && "bg-emerald-600 hover:bg-emerald-700"
-              )}
-              variant={cardOrBlikConfirmed ? "default" : "outline"}
-              onClick={() => setCardOrBlikConfirmed(true)}
-            >
-              <Check className="h-5 w-5" />
-              {cardOrBlikConfirmed
-                ? "Płatność zaakceptowana"
-                : step === "card"
-                  ? "Potwierdź akceptację karty"
-                  : "Potwierdź akceptację BLIK"
-              }
-            </Button>
+            {/* PolCard Go - Start SoftPOS payment */}
+            {step === "card" && polcardMode === "softpos" && !cardOrBlikConfirmed && (
+              <Button
+                className="w-full h-14 text-lg font-bold gap-2 bg-blue-600 hover:bg-blue-700"
+                onClick={async () => {
+                  if (!order) return;
+                  const intentId = `polcard-${Date.now()}-${order.id.slice(0, 8)}`;
+                  setPolcardIntentId(intentId);
+                  
+                  await fetch("/api/payment/terminal", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ action: "create", amount: totalToPay, orderId: order.id }),
+                  }).catch(() => {});
+
+                  await initiatePolcardPayment({
+                    intentId,
+                    amount: totalToPay,
+                    orderId: order.id,
+                    description: `Zamówienie #${order.orderNumber}`,
+                  });
+                }}
+                disabled={polcardProcessing || !isPolcardAvailable}
+              >
+                {polcardProcessing ? (
+                  <><Loader2 className="h-5 w-5 animate-spin" /> Przetwarzanie…</>
+                ) : (
+                  <><Smartphone className="h-5 w-5" /> Uruchom PolCard Go</>
+                )}
+              </Button>
+            )}
+
+            {/* External terminal / Manual confirmation */}
+            {(step === "blik" || (step === "card" && polcardMode !== "softpos") || cardOrBlikConfirmed) && (
+              <Button
+                className={cn(
+                  "w-full h-14 text-lg font-bold gap-2",
+                  cardOrBlikConfirmed && "bg-emerald-600 hover:bg-emerald-700"
+                )}
+                variant={cardOrBlikConfirmed ? "default" : "outline"}
+                onClick={() => setCardOrBlikConfirmed(true)}
+              >
+                <Check className="h-5 w-5" />
+                {cardOrBlikConfirmed
+                  ? "Płatność zaakceptowana"
+                  : step === "card"
+                    ? "Potwierdź akceptację karty"
+                    : "Potwierdź akceptację BLIK"
+                }
+              </Button>
+            )}
 
             <div className="flex items-center gap-2">
               <label className="text-sm text-muted-foreground">Napiwek:</label>

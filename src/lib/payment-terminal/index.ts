@@ -4,4 +4,9 @@ export {
   confirmPayment,
   cancelPayment,
   getTerminalStatus,
+  generatePolcardGoDeepLink,
+  generatePolcardGoIntentUrl,
+  isPolcardGoAvailable,
+  processPolcardGoCallback,
+  pollPolcardPaymentStatus,
 } from "./client";

@@ -100,6 +100,14 @@ if (-not $FullZip) {
     if (Test-Path $standalonePath) {
         Get-ChildItem -Path $standalonePath -Recurse -File -Exclude $excludePatterns | Where-Object { $_.Name -match '^[\x20-\x7E]+$' } | ForEach-Object { [void]$allFiles.Add($_.FullName) }
     }
+    $staticPath = Join-Path $ProjectRoot ".next\static"
+    if (Test-Path $staticPath) {
+        Get-ChildItem -Path $staticPath -Recurse -File -Exclude $excludePatterns | Where-Object { $_.Name -match '^[\x20-\x7E]+$' } | ForEach-Object { [void]$allFiles.Add($_.FullName) }
+    }
+    $publicPath = Join-Path $ProjectRoot "public"
+    if (Test-Path $publicPath) {
+        Get-ChildItem -Path $publicPath -Recurse -File -Exclude $excludePatterns | Where-Object { $_.Name -match '^[\x20-\x7E]+$' } | ForEach-Object { [void]$allFiles.Add($_.FullName) }
+    }
     $prismaPath = Join-Path $ProjectRoot "prisma"
     if (Test-Path $prismaPath) {
         Get-ChildItem -Path $prismaPath -Recurse -File -Exclude $excludePatterns | Where-Object { $_.Name -match '^[\x20-\x7E]+$' } | ForEach-Object { [void]$allFiles.Add($_.FullName) }
@@ -212,7 +220,7 @@ if (-not $FullZip) {
                 exit 1
             }
             Write-Host "Rozpakowywanie delta na serwerze..." -ForegroundColor Yellow
-            ssh -i $keyPath $SSH_TARGET ("cd " + $REMOTE_PATH + " && rm -rf .next/standalone/.next/static && tar -xzf _deploy_delta.tar.gz && rm -f _deploy_delta.tar.gz")
+            ssh -i $keyPath $SSH_TARGET ("cd " + $REMOTE_PATH + " && rm -rf .next/standalone/.next/static .next/standalone/public && tar -xzf _deploy_delta.tar.gz && rm -f _deploy_delta.tar.gz && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/")
             Write-Host "Delta OK" -ForegroundColor Green
         }
     } else {
@@ -246,7 +254,7 @@ if (-not $FullZip) {
     if (Test-Path $tarFile) { Remove-Item $tarFile -Force }
 
     Write-Host "Pakowanie..." -ForegroundColor Yellow
-    tar -czf $tarFile -C $ProjectRoot --exclude=".git" ".next/standalone" "prisma"
+    tar -czf $tarFile -C $ProjectRoot --exclude=".git" ".next/standalone" ".next/static" "public" "prisma"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[BLAD] tar nie powiodl sie!" -ForegroundColor Red
         exit 1
@@ -262,7 +270,7 @@ if (-not $FullZip) {
         exit 1
     }
 
-    ssh -i $keyPath $SSH_TARGET ("cd " + $REMOTE_PATH + " && rm -rf .next && tar -xzf _deploy_hetzner.tar.gz && rm -f _deploy_hetzner.tar.gz")
+    ssh -i $keyPath $SSH_TARGET ("cd " + $REMOTE_PATH + " && rm -rf .next && tar -xzf _deploy_hetzner.tar.gz && rm -f _deploy_hetzner.tar.gz && mkdir -p .next/standalone/.next && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/")
     
     if (Test-Path $tarFile) { Remove-Item $tarFile -Force }
     Write-Host "Transfer zakonczony." -ForegroundColor Green

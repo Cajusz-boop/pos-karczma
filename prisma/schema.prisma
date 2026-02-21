@@ -1063,3 +1063,23 @@ enum AnnouncementPriority {
   HIGH
   URGENT
 }
+
+// ============================================================
+// PENDING PAYMENTS (płatności oczekujące - SoftPOS)
+// ============================================================
+
+model PendingPayment {
+  id          String   @id
+  orderId     String
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String   @default("PLN")
+  provider    String   // "POLCARD", "STRIPE"
+  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED, CANCELLED
+  metadata    Json?
+  response    Json?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  @@index([orderId])
+  @@index([status])
+}

@@ -1,5 +1,5 @@
-const CACHE_NAME = "pos-karczma-v1";
-const STATIC_ASSETS = ["/", "/pos", "/login"];
+const CACHE_NAME = "pos-karczma-v2";
+const STATIC_ASSETS = ["/icon-192.png", "/icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -93,7 +93,7 @@ self.addEventListener("fetch", (event) => {
 
   if (request.method !== "GET") return;
 
-  // API requests: network-first with offline queue
+  // API requests: network-first with offline fallback
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
       fetch(request)
@@ -107,17 +107,49 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Static assets: cache-first
+  // Navigation requests (HTML pages): ALWAYS network-first
+  // This prevents stale HTML from referencing outdated JS chunks
+  if (request.mode === "navigate" || request.destination === "document") {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // Immutable hashed assets (_next/static): cache-first (safe to cache forever)
+  if (url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(
+      caches.match(request).then((cached) => {
+        if (cached) return cached;
+        return fetch(request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Other static assets (icons, images): stale-while-revalidate
   event.respondWith(
     caches.match(request).then((cached) => {
-      if (cached) return cached;
-      return fetch(request).then((response) => {
+      const fetchPromise = fetch(request).then((response) => {
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return response;
       });
+      return cached || fetchPromise;
     })
   );
 });
