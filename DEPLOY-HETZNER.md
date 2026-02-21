@@ -179,3 +179,6 @@ mysql -u pos -p pos_karczma -e "SHOW TABLES;"
 pm2 restart all
 systemctl reload nginx
 ```
+
+---
+*Ostatni test webhook: 2026-02-21*
