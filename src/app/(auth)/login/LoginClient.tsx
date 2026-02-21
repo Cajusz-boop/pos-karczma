@@ -301,9 +301,9 @@ export function LoginClient() {
         <div className="flex flex-col items-center gap-6 py-8">
           {/* Pulsing capsule animation */}
           <div className="relative flex items-center justify-center">
-            {/* Outer pulse rings */}
-            <div className="absolute h-40 w-40 animate-ping rounded-full bg-primary/5" style={{ animationDuration: "3s" }} />
-            <div className="absolute h-32 w-32 animate-ping rounded-full bg-primary/10" style={{ animationDuration: "2s" }} />
+            {/* Outer pulse rings - pointer-events-none to not block tab clicks */}
+            <div className="pointer-events-none absolute h-40 w-40 animate-ping rounded-full bg-primary/5" style={{ animationDuration: "3s" }} />
+            <div className="pointer-events-none absolute h-32 w-32 animate-ping rounded-full bg-primary/10" style={{ animationDuration: "2s" }} />
 
             {/* Capsule icon */}
             <div
