@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         startedAt: true,
-        openingCash: true,
+        cashStart: true,
         userId: true,
         user: { select: { name: true } },
       },
@@ -74,8 +74,8 @@ export async function GET(request: NextRequest) {
       _sum: { amount: true },
     });
 
-    const openingBalance = currentShift?.openingCash
-      ? Number(currentShift.openingCash)
+    const openingBalance = currentShift?.cashStart
+      ? Number(currentShift.cashStart)
       : 0;
 
     const cashReceived = Number(cashPayments._sum.amount ?? 0);
