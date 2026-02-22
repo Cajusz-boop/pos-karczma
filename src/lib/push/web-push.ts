@@ -54,7 +54,8 @@ export async function sendPushToUser(
     } catch (e) {
       failed++;
       // Remove invalid subscriptions (410 Gone)
-      if (e instanceof webPush.WebPushError && (e.statusCode === 410 || e.statusCode === 404)) {
+      const err = e as { statusCode?: number };
+      if (err.statusCode === 410 || err.statusCode === 404) {
         await prisma.pushSubscription.delete({ where: { id: sub.id } }).catch(() => {});
       }
     }
