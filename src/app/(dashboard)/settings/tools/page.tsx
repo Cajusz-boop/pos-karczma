@@ -273,7 +273,7 @@ function ReportCard({ report, onDelete }: { report: ScannerReport; onDelete: () 
                 {/* Network printers */}
                 {(report.printers?.network || report.hardware?.tcp_printers)?.map((p, i) => (
                   <p key={`net-${i}`} className="text-muted-foreground">
-                    <span className="rounded bg-green-100 px-1 text-xs text-green-700 dark:bg-green-900 dark:text-green-300">Sieć</span> {'full_address' in p ? p.full_address : p.address} ({p.type})
+                    <span className="rounded bg-green-100 px-1 text-xs text-green-700 dark:bg-green-900 dark:text-green-300">Sieć</span> {'full_address' in p ? String(p.full_address) : String(p.address)} ({String(p.type)})
                   </p>
                 ))}
                 {!report.printers?.com_ports?.length && !report.printers?.windows?.length && !report.printers?.network?.length && 
