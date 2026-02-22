@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 
 /** GET /api/printers — lista drukarek (filtr: type, isActive) */
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type");
     const isActive = searchParams.get("isActive");
 
-    const where: { type?: string; isActive?: boolean } = {};
+    const where: Prisma.PrinterWhereInput = {};
     if (type) where.type = type as "FISCAL" | "KITCHEN" | "BAR" | "SYSTEM";
     if (isActive === "true" || isActive === "false") where.isActive = isActive === "true";
 
