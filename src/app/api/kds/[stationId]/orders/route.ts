@@ -72,7 +72,7 @@ export async function GET(
           isModifiedAfterSend: boolean;
           cancelReason: string | null;
           elapsedMinutes: number;
-          estimatedMinutes: number;
+          estimatedMinutes: number | null;
           urgency: "normal" | "warning" | "critical";
         }>;
       }
