@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = request.headers.get("x-user-id");
-    await auditLog(userId, "PRODUCTS_IMPORTED", "Product", null, undefined, {
+    await auditLog(userId, "PRODUCTS_IMPORTED", "Product", undefined, undefined, {
       mode,
       created: results.created,
       updated: results.updated,
