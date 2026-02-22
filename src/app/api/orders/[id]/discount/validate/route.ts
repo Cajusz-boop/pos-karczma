@@ -33,7 +33,7 @@ export async function POST(
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: {
-        role: { select: { permissionsJson: true } },
+        role: { select: { permissions: true } },
       },
     });
 
@@ -41,7 +41,7 @@ export async function POST(
       return NextResponse.json({ error: "Użytkownik nie istnieje" }, { status: 404 });
     }
 
-    const rolePerms = (user.role.permissionsJson as PermissionsJson) ?? {};
+    const rolePerms = (user.role.permissions as PermissionsJson) ?? {};
     const userPerms = (user.permissionsJson as PermissionsJson) ?? {};
 
     const canDiscount = userPerms.operations?.discount ?? rolePerms.operations?.discount ?? true;
