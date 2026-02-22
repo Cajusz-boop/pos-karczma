@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
     });
 
     const payouts = cashOperations
-      .filter((op) => op.type === "PAYOUT" || op.type === "WITHDRAWAL")
+      .filter((op) => op.type === "WITHDRAWAL")
       .reduce((sum, op) => sum + Number(op.amount), 0);
 
     const deposits = cashOperations
