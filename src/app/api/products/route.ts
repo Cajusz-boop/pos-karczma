@@ -4,6 +4,8 @@ import { parseBody, createProductSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 import { cached, cacheDeletePattern } from "@/lib/redis";
 
+export const dynamic = "force-dynamic";
+
 const CACHE_TTL = 120;
 
 async function fetchCategoriesFromDb() {

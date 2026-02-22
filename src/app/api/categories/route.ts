@@ -35,7 +35,7 @@ const reorderSchema = z.object({
   })),
 });
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 async function fetchCategoriesWithCount() {
   return prisma.category.findMany({
