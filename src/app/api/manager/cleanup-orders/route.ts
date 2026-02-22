@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     if (status) {
       where.status = status;
     } else {
-      where.status = { in: ["PAID", "CLOSED", "CANCELLED"] };
+      where.status = { in: ["CLOSED", "CANCELLED"] };
     }
 
     const count = await prisma.order.count({ where });
@@ -92,7 +92,7 @@ export async function DELETE(request: NextRequest) {
     if (status) {
       where.status = status;
     } else {
-      where.status = { in: ["PAID", "CLOSED", "CANCELLED"] };
+      where.status = { in: ["CLOSED", "CANCELLED"] };
     }
 
     if (keepFiscalized) {
