@@ -185,7 +185,7 @@ export async function printKitchenTicket(
 
   const results: PrintResult[] = [];
 
-  for (const [printerId, items] of printerItems) {
+  for (const [printerId, items] of Array.from(printerItems)) {
     const printer = printerCategories.find((pc) => pc.printerId === printerId)?.printer;
     if (!printer) continue;
 
