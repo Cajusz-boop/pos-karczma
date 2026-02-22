@@ -1,0 +1,186 @@
+{
+  "meta": {
+    "version": "3.0.0",
+    "timestamp": "2026-02-22T06:47:13.825533",
+    "hostname": "USERWOR-QBUD2EE",
+    "scanner_admin": false
+  },
+  "platform": {
+    "name": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "edition": "Microsoft Windows 11 Pro for Workstations",
+    "build": "26200"
+  },
+  "hardware": {
+    "cpu": {
+      "name": "Intel(R) Xeon(R) E-2244G CPU @ 3.80GHz",
+      "cores": 8,
+      "arch": "AMD64"
+    },
+    "memory": {
+      "total_gb": 31.850746154785156,
+      "available_gb": 20.48916244506836,
+      "used_percent": 35
+    },
+    "disk": {
+      "total_gb": 943.7187461853027,
+      "free_gb": 826.0799522399902,
+      "used_percent": 12
+    },
+    "displays": [
+      {
+        "name": "NVIDIA Quadro P1000",
+        "resolution": "2560x1080"
+      }
+    ]
+  },
+  "software": {
+    "nodejs": {
+      "installed": true,
+      "version": "24.13.1",
+      "path": ""
+    },
+    "npm": {
+      "installed": true,
+      "version": "11.8.0"
+    },
+    "git": {
+      "installed": true,
+      "version": "2.53.0.windows.1"
+    },
+    "python": {
+      "version": "3.14.3",
+      "path": "C:\\Users\\hp\\AppData\\Local\\Programs\\Python\\Python314\\python.exe"
+    }
+  },
+  "databases": {
+    "mysql": {
+      "running": true,
+      "version": "",
+      "service": false,
+      "port": 3306
+    },
+    "redis": {
+      "running": false,
+      "version": ""
+    }
+  },
+  "network": {
+    "hostname": "USERWOR-QBUD2EE",
+    "local_ip": "192.168.55.106",
+    "interfaces": [],
+    "gateway": "192.168.55.1",
+    "dns": [
+      "192.168.55.1"
+    ],
+    "firewall": {
+      "enabled": true,
+      "profiles": {
+        "Domain": true,
+        "Private": true,
+        "Public": true
+      }
+    }
+  },
+  "ports": {
+    "3000": {
+      "description": "Next.js dev",
+      "in_use": false,
+      "should_be_free": true,
+      "status": "ok"
+    },
+    "3001": {
+      "description": "Next.js prod",
+      "in_use": false,
+      "should_be_free": true,
+      "status": "ok"
+    },
+    "3306": {
+      "description": "MySQL",
+      "in_use": true,
+      "should_be_free": false,
+      "status": "ok"
+    },
+    "6379": {
+      "description": "Redis",
+      "in_use": false,
+      "should_be_free": false,
+      "status": "info"
+    },
+    "9000": {
+      "description": "Webhook",
+      "in_use": false,
+      "should_be_free": true,
+      "status": "ok"
+    },
+    "9100": {
+      "description": "Drukarka RAW",
+      "in_use": false,
+      "should_be_free": false,
+      "status": "info"
+    }
+  },
+  "printers": {
+    "com_ports": [],
+    "windows": [
+      {
+        "name": "AnyDesk Printer",
+        "port": "AD_Port",
+        "driver": "AnyDesk v4 Printer Driver"
+      },
+      {
+        "name": "Microsoft Print to PDF",
+        "port": "PORTPROMPT:",
+        "driver": "Microsoft Print To PDF"
+      }
+    ],
+    "network": []
+  },
+  "bistro": [],
+  "checks": {
+    "admin": {
+      "status": "warn",
+      "is_admin": false
+    },
+    "memory": {
+      "status": "ok",
+      "total_gb": 31.850746154785156
+    },
+    "disk": {
+      "status": "ok",
+      "free_gb": 826.0799522399902
+    },
+    "nodejs": {
+      "status": "ok",
+      "version": "24.13.1"
+    },
+    "npm": {
+      "status": "ok"
+    },
+    "git": {
+      "status": "ok"
+    },
+    "mysql": {
+      "status": "ok",
+      "running": true
+    },
+    "redis": {
+      "status": "warn",
+      "running": false
+    },
+    "firewall": {
+      "status": "warn",
+      "enabled": true
+    },
+    "ports": {
+      "status": "ok",
+      "issues": []
+    }
+  },
+  "recommendations": [
+    "Zainstaluj Redis dla lepszej wydajnosci - https://redis.io",
+    "Firewall wlaczony - dodaj wyjatki dla portow 3000, 3001, 3306",
+    "Uruchom skaner jako Administrator dla pelnych wynikow"
+  ]
+}

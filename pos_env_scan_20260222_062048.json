@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "version": "2.0.0",
+    "timestamp": "2026-02-22T06:20:36.751160",
+    "hostname": "USERWOR-QBUD2EE"
+  },
+  "platform": {
+    "system": "Windows",
+    "release": "11",
+    "version": "10.0.26200",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 158 Stepping 10, GenuineIntel"
+  },
+  "checks": {
+    "memory": {
+      "status": "ok",
+      "detail": "RAM: 31.9 GB (dostępne: 8.0 GB)",
+      "info": {
+        "total_gb": 31.850746154785156,
+        "available_gb": 7.9994659423828125
+      }
+    },
+    "disk": {
+      "status": "ok",
+      "detail": "826.4 GB wolnego",
+      "info": {
+        "free_gb": 826.4042816162109,
+        "total_gb": 943.7187461853027
+      }
+    },
+    "nodejs": {
+      "status": "ok",
+      "version": "24.13.1",
+      "detail": "OK"
+    },
+    "npm": {
+      "status": "ok",
+      "detail": "11.8.0"
+    },
+    "mysql": {
+      "status": "warn",
+      "detail": "MySQL działa, brak CLI",
+      "info": {
+        "running": true,
+        "cli": false,
+        "version": ""
+      }
+    },
+    "redis": {
+      "status": "warn",
+      "detail": "Redis niedostępny (opcjonalny)",
+      "info": {
+        "running": false,
+        "cli": false
+      }
+    },
+    "ports": {
+      "3000": {
+        "in_use": true,
+        "description": "Next.js dev"
+      },
+      "3001": {
+        "in_use": true,
+        "description": "Next.js prod"
+      },
+      "3306": {
+        "in_use": true,
+        "description": "MySQL"
+      },
+      "6379": {
+        "in_use": false,
+        "description": "Redis"
+      },
+      "9000": {
+        "in_use": false,
+        "description": "Webhook"
+      },
+      "9100": {
+        "in_use": false,
+        "description": "Drukarka RAW"
+      }
+    }
+  },
+  "bistro": [],
+  "recommendations": [
+    "ZALECANE: Zainstaluj Redis dla lepszej wydajności"
+  ],
+  "network": [
+    {
+      "name": "Hostname",
+      "value": "USERWOR-QBUD2EE"
+    },
+    {
+      "name": "IP lokalne",
+      "value": "192.168.55.106"
+    }
+  ],
+  "hardware": {
+    "com_ports": [],
+    "tcp_printers": []
+  }
+}

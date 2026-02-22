@@ -1,0 +1,111 @@
+================================================================================
+  POS KARCZMA - SKANER SRODOWISKOWY
+  Instrukcja instalacji na docelowym komputerze
+================================================================================
+
+KROK 1: Skopiuj pliki
+---------------------
+Skopiuj caly folder "tools" na docelowy komputer, np.:
+  - Na pendrive
+  - Przez siec lokalna
+  - Przez email (spakuj do ZIP)
+
+Potrzebujesz tylko tych plikow:
+  - pos_env_scanner.py  (skaner)
+  - uruchom_skaner.bat  (skrot do uruchomienia)
+  - INSTALACJA.txt      (ta instrukcja)
+
+
+KROK 2: Zainstaluj Python (jesli brak)
+--------------------------------------
+Python jest WYMAGANY do uruchomienia skanera!
+
+Jesli na docelowym komputerze nie ma Pythona:
+
+1. Wejdz na: https://www.python.org/downloads/
+2. Kliknij ZOLTY przycisk "Download Python 3.x.x"
+3. Uruchom pobrany plik (np. python-3.12.0-amd64.exe)
+4. 
+   ╔══════════════════════════════════════════════════════════════╗
+   ║  BARDZO WAZNE! Na dole okna instalatora zaznacz:            ║
+   ║                                                              ║
+   ║  [x] Add Python to PATH                                      ║
+   ║                                                              ║
+   ║  Bez tego skaner NIE ZADZIAL!                               ║
+   ╚══════════════════════════════════════════════════════════════╝
+
+5. Kliknij "Install Now"
+6. Poczekaj na zakonczenie instalacji
+7. Zamknij instalator
+
+Jak sprawdzic czy Python jest zainstalowany:
+- Otworz CMD lub PowerShell
+- Wpisz: python --version
+- Powinno wyswietlic np. "Python 3.12.0"
+
+
+KROK 3: Uruchom skaner
+----------------------
+Metoda A (najlatwiejsza):
+  - Kliknij dwukrotnie na "uruchom_skaner.bat"
+
+Metoda B (z konsoli):
+  1. Otworz PowerShell lub CMD
+  2. Przejdz do folderu ze skanerem:
+       cd C:\sciezka\do\tools
+  3. Uruchom:
+       python pos_env_scanner.py
+
+
+KROK 4: Sprawdz wyniki
+----------------------
+Po uruchomieniu skaner:
+  - Wyswietli wyniki w oknie konsoli
+  - Utworzy plik JSON z raportem (pos_env_scan_*.json)
+  - Jesli znajdzie Bistro Simplex, utworzy eksport konfiguracji
+
+
+CO SKANER SPRAWDZA
+==================
+- System operacyjny i zasoby (RAM, dysk)
+- Node.js i npm (wymagane do POS Karczma)
+- MySQL/MariaDB (baza danych)
+- Redis (opcjonalny cache)
+- Porty sieciowe (3000, 3001, 3306, 6379)
+- Porty COM (czytniki kart)
+- Drukarki sieciowe (TCP port 9100)
+- Instalacje Bistro Simplex (automatyczne wykrywanie)
+
+
+WYNIKI SKANERA
+==============
+[OK]   - Wymaganie spelnione
+[!]    - Ostrzezenie (system moze dzialac)
+[X]    - Problem do naprawienia
+[i]    - Informacja
+[*]    - Znaleziono (np. Bistro)
+
+
+CZESTE PROBLEMY
+===============
+
+Problem: "python nie jest rozpoznawane jako polecenie"
+Rozwiazanie: Zainstaluj Pythona i zaznacz "Add to PATH"
+
+Problem: Skaner nie znajduje Bistro
+Rozwiazanie: Bistro moze byc w niestandardowej lokalizacji.
+             Sprawdz recznie w C:\, D:\, E:\ foldery:
+             - Small Business
+             - Bistro
+             - Symplex
+
+Problem: Bledy polskich znakow
+Rozwiazanie: To normalne na starszych Windows. 
+             Raport JSON bedzie poprawny.
+
+
+KONTAKT
+=======
+W razie problemow skontaktuj sie z zespolem POS Karczma.
+
+================================================================================
