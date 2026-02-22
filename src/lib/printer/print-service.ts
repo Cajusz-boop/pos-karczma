@@ -116,7 +116,7 @@ async function sendToRemoteServer(serverUrl: string, printerId: string, data: Bu
       "Content-Type": "application/octet-stream",
       "X-Printer-Id": printerId,
     },
-    body: data,
+    body: new Uint8Array(data),
   });
 
   if (!response.ok) {
