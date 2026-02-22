@@ -22,7 +22,7 @@ export async function POST(
       where: { id },
       include: {
         modifierGroups: {
-          include: { modifiers: true },
+          include: { modifierGroup: { include: { modifiers: true } } },
         },
         allergens: true,
         setComponents: true,
