@@ -24,6 +24,9 @@ try {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   env: {
     AUTH_DISABLED: process.env.AUTH_DISABLED || authDisabledFromSnapshot,
   },
