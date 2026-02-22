@@ -59,7 +59,7 @@ type OrderWithRelations = Awaited<ReturnType<typeof prisma.order.findMany>>[numb
   user: { name: string };
   items: {
     product: { name: string; nameShort: string | null };
-    taxRate: { symbol: string; rate: number };
+    taxRate: { fiscalSymbol: string; ratePercent: unknown };
     quantity: unknown;
     unitPrice: unknown;
     discountAmount: unknown;
