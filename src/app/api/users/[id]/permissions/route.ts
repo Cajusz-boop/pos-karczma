@@ -250,11 +250,11 @@ export async function POST(
       where: { id: targetId },
       data: {
         autoLogoutSec: sourceUser.autoLogoutSec,
-        allowedCategoryIds: sourceUser.allowedCategoryIds,
-        allowedTableIds: sourceUser.allowedTableIds,
-        allowedPriceLevelIds: sourceUser.allowedPriceLevelIds,
-        uiButtonGroups: sourceUser.uiButtonGroups,
-        permissionsJson: sourceUser.permissionsJson,
+        allowedCategoryIds: sourceUser.allowedCategoryIds ?? undefined,
+        allowedTableIds: sourceUser.allowedTableIds ?? undefined,
+        allowedPriceLevelIds: sourceUser.allowedPriceLevelIds ?? undefined,
+        uiButtonGroups: sourceUser.uiButtonGroups ?? undefined,
+        permissionsJson: sourceUser.permissionsJson ?? undefined,
       },
       select: { id: true, name: true },
     });
