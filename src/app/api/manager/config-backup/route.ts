@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     const backups = await prisma.systemConfig.findMany({
       where: { key: { startsWith: "backup_" } },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { key: "desc" },
     });
 
     return NextResponse.json({
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
         return {
           id: b.key.replace("backup_", ""),
           name: value.name ?? "Bez nazwy",
-          createdAt: value.createdAt ?? b.updatedAt,
+          createdAt: value.createdAt ?? null,
           tableCount: value.tables ?? 0,
         };
       }),
