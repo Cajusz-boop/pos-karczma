@@ -30,13 +30,43 @@ export async function POST(
       return NextResponse.json({ error: "Produkt źródłowy nie istnieje" }, { status: 404 });
     }
 
-    const { id: _id, name: _name, createdAt: _cAt, updatedAt: _uAt, ...productData } = source;
-
     const newProduct = await prisma.product.create({
       data: {
-        ...productData,
         name: newName ?? `${source.name} (kopia)`,
         categoryId: targetCategoryId ?? source.categoryId,
+        priceGross: source.priceGross,
+        costPrice: source.costPrice,
+        taxRateId: source.taxRateId,
+        isActive: source.isActive,
+        isAvailable: source.isAvailable,
+        estimatedPrepMinutes: source.estimatedPrepMinutes,
+        sortOrder: source.sortOrder,
+        color: source.color,
+        imageUrl: source.imageUrl,
+        isWeightBased: source.isWeightBased,
+        requiresWeightConfirm: source.requiresWeightConfirm,
+        unit: source.unit,
+        tareWeight: source.tareWeight,
+        productType: source.productType,
+        isSet: source.isSet,
+        setPriceMode: source.setPriceMode,
+        maxComponents: source.maxComponents,
+        nameShort: source.nameShort,
+        freeComponents: source.freeComponents,
+        superGroupId: source.superGroupId,
+        isAddonOnly: source.isAddonOnly,
+        isHidden: source.isHidden,
+        noPrintKitchen: source.noPrintKitchen,
+        printWithMinus: source.printWithMinus,
+        canRepeat: source.canRepeat,
+        alwaysOnePortion: source.alwaysOnePortion,
+        noQuantityChange: source.noQuantityChange,
+        askForComponents: source.askForComponents,
+        afterSelectGoTo: source.afterSelectGoTo,
+        afterSelectAction: source.afterSelectAction,
+        maxPerOrder: source.maxPerOrder,
+        noGeneralDesc: source.noGeneralDesc,
+        isDefaultTemplate: source.isDefaultTemplate,
       },
     });
 
@@ -62,13 +92,16 @@ export async function POST(
       for (const comp of source.setComponents) {
         await prisma.setComponent.create({
           data: {
-            parentProductId: newProduct.id,
-            componentProductId: comp.componentProductId,
+            setId: newProduct.id,
+            componentId: comp.componentId,
             quantity: comp.quantity,
             isDefault: comp.isDefault,
             isRequired: comp.isRequired,
             priceDelta: comp.priceDelta,
             sortOrder: comp.sortOrder,
+            isHidden: comp.isHidden,
+            noPrintKitchen: comp.noPrintKitchen,
+            printWithMinus: comp.printWithMinus,
           },
         });
       }
