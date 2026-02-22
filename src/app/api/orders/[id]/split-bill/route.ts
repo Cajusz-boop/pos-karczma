@@ -120,7 +120,7 @@ export async function POST(
                 unitPrice: Number(item.unitPrice),
                 taxRateId: item.taxRateId,
                 discountAmount: Math.round((Number(item.discountAmount ?? 0) / numberOfPeople) * 100) / 100,
-                modifiersJson: item.modifiersJson,
+                modifiersJson: item.modifiersJson ?? undefined,
                 note: item.note,
                 courseNumber: item.courseNumber,
                 status: "SERVED",
