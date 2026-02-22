@@ -104,7 +104,7 @@ export async function POST(
             type: order.type,
             guestCount: 1,
             note: `Podział rachunku #${order.orderNumber} — osoba ${i}/${numberOfPeople}`,
-            discountJson: order.discountJson,
+            discountJson: order.discountJson ?? undefined,
           },
         });
 
