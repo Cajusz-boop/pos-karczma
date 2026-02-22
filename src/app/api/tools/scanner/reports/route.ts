@@ -17,11 +17,12 @@ export async function GET() {
 
     const parsedReports = reports.map((r) => {
       const data = r.value as Record<string, unknown>;
+      const meta = data.meta as Record<string, unknown> | undefined;
       return {
         id: r.id,
         key: r.key,
-        hostname: data.meta?.hostname || "Nieznany",
-        timestamp: data.meta?.timestamp || r.key.replace("scanner_report_", ""),
+        hostname: meta?.hostname || "Nieznany",
+        timestamp: meta?.timestamp || r.key.replace("scanner_report_", ""),
         platform: data.platform || {},
         checks: data.checks || {},
         bistro: data.bistro || [],
