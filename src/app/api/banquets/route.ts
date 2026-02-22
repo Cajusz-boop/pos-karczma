@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { parseBody, createBanquetSchema } from "@/lib/validation";
 
 /** GET /api/banquets — lista imprez bankietowych */
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
         menuId: menuId?.trim() || null,
         pricePerPerson: Number(pricePerPerson) || 0,
         depositRequired: Number(depositRequired) || 0,
-        extrasJson: extrasJson ?? null,
+        extrasJson: extrasJson ?? Prisma.JsonNull,
         contactPerson: contactPerson.trim(),
         contactPhone: contactPhone.trim(),
         contactEmail: contactEmail?.trim() ?? null,
