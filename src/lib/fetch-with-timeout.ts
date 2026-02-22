@@ -21,7 +21,7 @@ export interface FetchResult<T = unknown> {
   ok: boolean;
 }
 
-const DEFAULT_TIMEOUT = 15000;
+const DEFAULT_TIMEOUT = 10000;
 const DEFAULT_RETRY_DELAY = 1000;
 const DEFAULT_RETRY_ON = [408, 429, 500, 502, 503, 504];
 

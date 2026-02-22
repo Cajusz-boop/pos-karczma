@@ -14,17 +14,22 @@ function createRedisClient(): Redis | null {
 
   try {
     const client = new Redis(redisUrl, {
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: 1,
       retryStrategy(times) {
-        if (times > 3) return null;
-        return Math.min(times * 100, 3000);
+        if (times > 2) return null;
+        return Math.min(times * 200, 1000);
       },
       enableReadyCheck: true,
       lazyConnect: true,
+      connectTimeout: 2000,
+      commandTimeout: 1000,
+      enableOfflineQueue: false,
     });
 
     client.on("error", (err) => {
-      console.error("[Redis] Connection error:", err.message);
+      if (!err.message.includes("ECONNREFUSED")) {
+        console.error("[Redis] Connection error:", err.message);
+      }
     });
 
     client.on("connect", () => {

@@ -4,7 +4,7 @@ import { useOfflineStore, type PendingAction, type OfflineActionType } from "@/s
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY_BASE_MS = 2000;
-const FETCH_TIMEOUT_MS = 15000;
+const FETCH_TIMEOUT_MS = 10000;
 const CONNECTIVITY_CHECK_INTERVAL = 30000;
 
 type EndpointConfig = {
@@ -186,7 +186,7 @@ export async function syncPendingActions(): Promise<{
  */
 export async function checkConnectivity(): Promise<boolean> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  const timeoutId = setTimeout(() => controller.abort(), 2000);
   
   try {
     const response = await fetch("/api/ping", {
