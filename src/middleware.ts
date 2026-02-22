@@ -8,6 +8,7 @@ const PUBLIC_API_ROUTES = [
   "/api/auth/users",
   "/api/users",
   "/api/health",
+  "/api/ping",
 ];
 
 const PUBLIC_API_PREFIXES = [
@@ -20,6 +21,15 @@ function isPublicApiRoute(pathname: string): boolean {
   return PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
+function getClientIp(request: NextRequest): string {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    request.headers.get("cf-connecting-ip") ??
+    "unknown"
+  );
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -27,17 +37,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Rate limiting
-  const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-    ?? request.headers.get("x-real-ip")
-    ?? "unknown";
+  const clientIp = getClientIp(request);
   const rateLimitKey = `${clientIp}:${pathname.split("/").slice(0, 4).join("/")}`;
   const rlConfig = getConfigForRoute(pathname);
   const rl = checkRateLimit(rateLimitKey, rlConfig);
 
   if (!rl.allowed) {
     return NextResponse.json(
-      { error: "Zbyt wiele żądań. Spróbuj ponownie za chwilę." },
+      { 
+        error: "Zbyt wiele żądań. Spróbuj ponownie za chwilę.",
+        code: "RATE_LIMIT_EXCEEDED",
+        retryAfter: Math.ceil((rl.resetAt - Date.now()) / 1000),
+      },
       {
         status: 429,
         headers: {
@@ -59,7 +70,7 @@ export async function middleware(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME)?.value;
   if (!token) {
     return NextResponse.json(
-      { error: "Brak autoryzacji" },
+      { error: "Brak autoryzacji", code: "UNAUTHORIZED" },
       { status: 401 }
     );
   }
@@ -67,7 +78,7 @@ export async function middleware(request: NextRequest) {
   const session = await verifySession(token);
   if (!session) {
     const res = NextResponse.json(
-      { error: "Sesja wygasła — zaloguj się ponownie" },
+      { error: "Sesja wygasła — zaloguj się ponownie", code: "SESSION_EXPIRED" },
       { status: 401 }
     );
     res.cookies.delete(COOKIE_NAME);

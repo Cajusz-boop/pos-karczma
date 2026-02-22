@@ -7,7 +7,13 @@ export interface SessionPayload extends JWTPayload {
   isOwner: boolean;
 }
 
-const JWT_SECRET_RAW = process.env.JWT_SECRET ?? "dev-secret-change-in-production";
+const JWT_SECRET_RAW = process.env.JWT_SECRET;
+if (!JWT_SECRET_RAW) {
+  throw new Error(
+    "JWT_SECRET environment variable is required. " +
+    "Set it in .env.local with at least 32 characters."
+  );
+}
 const secret = new TextEncoder().encode(JWT_SECRET_RAW);
 
 const SESSION_DURATION = "8h";

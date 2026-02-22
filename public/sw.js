@@ -1,4 +1,4 @@
-const CACHE_NAME = "pos-karczma-v3";
+const CACHE_NAME = "pos-karczma-v4";
 const STATIC_ASSETS = [
   "/icon-192.png",
   "/icon-512.png",
@@ -9,13 +9,18 @@ const API_PRECACHE = [
   "/api/categories",
 ];
 
+const BACKGROUND_SYNC_TAG = "pos-offline-sync";
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
       await cache.addAll(STATIC_ASSETS);
       for (const url of API_PRECACHE) {
         try {
-          const response = await fetch(url);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          const response = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
           if (response.ok) {
             await cache.put(url, response);
           }
@@ -39,6 +44,36 @@ self.addEventListener("activate", (event) => {
     )
   );
   self.clients.claim();
+});
+
+// ─── Background Sync ─────────────────────────────────────────────────
+
+self.addEventListener("sync", (event) => {
+  if (event.tag === BACKGROUND_SYNC_TAG) {
+    event.waitUntil(doBackgroundSync());
+  }
+});
+
+async function doBackgroundSync() {
+  const clients = await self.clients.matchAll({ type: "window" });
+  
+  for (const client of clients) {
+    client.postMessage({ type: "SYNC_REQUESTED" });
+  }
+}
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "REGISTER_SYNC") {
+    if ("sync" in self.registration) {
+      self.registration.sync.register(BACKGROUND_SYNC_TAG).catch(() => {
+        // Background sync not supported
+      });
+    }
+  }
+  
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 // ─── Push Notifications ─────────────────────────────────────────────

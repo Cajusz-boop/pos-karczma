@@ -58,6 +58,16 @@ interface UseKdsStreamResult {
   lastUpdate: Date | null;
 }
 
+const MIN_RECONNECT_DELAY = 1000;
+const MAX_RECONNECT_DELAY = 60000;
+const MAX_SSE_FAILURES_BEFORE_FALLBACK = 3;
+
+function calculateBackoff(attempt: number): number {
+  const delay = MIN_RECONNECT_DELAY * Math.pow(2, attempt);
+  const jitter = Math.random() * 1000;
+  return Math.min(delay + jitter, MAX_RECONNECT_DELAY);
+}
+
 export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
   const { stationId, enabled = true, fallbackPollingMs = 3000 } = options;
 
@@ -71,6 +81,8 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fallbackIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const failedAttemptsRef = useRef(0);
+  const isUsingFallbackRef = useRef(false);
 
   const cleanup = useCallback(() => {
     if (eventSourceRef.current) {
@@ -89,8 +101,14 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
 
   const fetchFallback = useCallback(async () => {
     if (!stationId) return;
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     try {
-      const res = await fetch(`/api/kds/${stationId}/orders`);
+      const res = await fetch(`/api/kds/${stationId}/orders`, { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
       if (!res.ok) throw new Error("Błąd pobierania");
       const data = await res.json();
       setActive(data.active ?? []);
@@ -99,18 +117,31 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
       setError(null);
       setIsLoading(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Błąd połączenia");
+      clearTimeout(timeoutId);
+      if (e instanceof Error && e.name === "AbortError") {
+        setError("Przekroczono limit czasu połączenia");
+      } else {
+        setError(e instanceof Error ? e.message : "Błąd połączenia");
+      }
+      setIsLoading(false);
     }
   }, [stationId]);
+
+  const startFallbackPolling = useCallback(() => {
+    if (isUsingFallbackRef.current) return;
+    isUsingFallbackRef.current = true;
+    fallbackIntervalRef.current = setInterval(fetchFallback, fallbackPollingMs);
+    fetchFallback();
+  }, [fetchFallback, fallbackPollingMs]);
 
   const connect = useCallback(() => {
     if (!enabled || !stationId || typeof window === "undefined") return;
 
     cleanup();
+    isUsingFallbackRef.current = false;
 
     if (!("EventSource" in window)) {
-      fallbackIntervalRef.current = setInterval(fetchFallback, fallbackPollingMs);
-      fetchFallback();
+      startFallbackPolling();
       return;
     }
 
@@ -120,6 +151,7 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
     eventSource.onopen = () => {
       setIsConnected(true);
       setError(null);
+      failedAttemptsRef.current = 0;
     };
 
     eventSource.addEventListener("orders", (event) => {
@@ -129,6 +161,7 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
         setServed(data.served);
         setLastUpdate(data.timestamp ? new Date(data.timestamp) : new Date());
         setIsLoading(false);
+        failedAttemptsRef.current = 0;
       } catch (e) {
         console.error("[SSE KDS] Parse error:", e);
       }
@@ -142,10 +175,17 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
         setIsConnected(false);
         eventSource.close();
         eventSourceRef.current = null;
+        failedAttemptsRef.current += 1;
 
+        if (failedAttemptsRef.current >= MAX_SSE_FAILURES_BEFORE_FALLBACK) {
+          startFallbackPolling();
+          return;
+        }
+
+        const backoffDelay = calculateBackoff(failedAttemptsRef.current);
         reconnectTimeoutRef.current = setTimeout(() => {
           connect();
-        }, 3000);
+        }, backoffDelay);
       }
     });
 
@@ -153,12 +193,19 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
       setIsConnected(false);
       eventSource.close();
       eventSourceRef.current = null;
+      failedAttemptsRef.current += 1;
 
+      if (failedAttemptsRef.current >= MAX_SSE_FAILURES_BEFORE_FALLBACK) {
+        startFallbackPolling();
+        return;
+      }
+
+      const backoffDelay = calculateBackoff(failedAttemptsRef.current);
       reconnectTimeoutRef.current = setTimeout(() => {
         connect();
-      }, 3000);
+      }, backoffDelay);
     };
-  }, [enabled, stationId, cleanup, fetchFallback, fallbackPollingMs]);
+  }, [enabled, stationId, cleanup, fetchFallback, fallbackPollingMs, startFallbackPolling]);
 
   useEffect(() => {
     connect();
@@ -171,6 +218,7 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
       setActive([]);
       setServed([]);
       setIsConnected(false);
+      isUsingFallbackRef.current = false;
     }
   }, [enabled, stationId, cleanup]);
 

@@ -1,6 +1,9 @@
 /**
- * Simple in-memory rate limiter using sliding window.
- * For production with multiple instances, use Redis.
+ * In-memory rate limiter for Edge Runtime (middleware).
+ * Uses sliding window algorithm.
+ * 
+ * NOTE: Redis-based rate limiting should be done in API routes, not middleware,
+ * because middleware runs in Edge Runtime which doesn't support ioredis.
  */
 
 interface RateLimitEntry {
@@ -8,18 +11,17 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
-const store = new Map<string, RateLimitEntry>();
-
+const memoryStore = new Map<string, RateLimitEntry>();
 const CLEANUP_INTERVAL = 60000;
 let lastCleanup = Date.now();
 
-function cleanup() {
+function cleanupMemory() {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
-  for (const [key, entry] of store) {
+  for (const [key, entry] of memoryStore) {
     if (entry.resetAt < now) {
-      store.delete(key);
+      memoryStore.delete(key);
     }
   }
 }
@@ -48,20 +50,25 @@ const AUTH_CONFIG: RateLimitConfig = {
   windowMs: 60000,
 };
 
+const HEAVY_CONFIG: RateLimitConfig = {
+  limit: 30,
+  windowMs: 60000,
+};
+
 /**
- * Check rate limit for a given key (typically IP address).
+ * In-memory rate limit check.
  */
-export function checkRateLimit(
+function checkRateLimitMemory(
   key: string,
-  config: RateLimitConfig = DEFAULT_CONFIG
+  config: RateLimitConfig
 ): RateLimitResult {
-  cleanup();
+  cleanupMemory();
 
   const now = Date.now();
-  const entry = store.get(key);
+  const entry = memoryStore.get(key);
 
   if (!entry || entry.resetAt < now) {
-    store.set(key, { count: 1, resetAt: now + config.windowMs });
+    memoryStore.set(key, { count: 1, resetAt: now + config.windowMs });
     return {
       allowed: true,
       remaining: config.limit - 1,
@@ -90,9 +97,29 @@ export function checkRateLimit(
 }
 
 /**
+ * Check rate limit (synchronous, in-memory).
+ * Safe to use in Edge Runtime (middleware).
+ */
+export function checkRateLimit(
+  key: string,
+  config: RateLimitConfig = DEFAULT_CONFIG
+): RateLimitResult {
+  return checkRateLimitMemory(key, config);
+}
+
+/**
  * Get rate limit config based on route.
  */
 export function getConfigForRoute(pathname: string): RateLimitConfig {
   if (pathname.startsWith("/api/auth/")) return AUTH_CONFIG;
+  if (pathname.startsWith("/api/reports/")) return HEAVY_CONFIG;
+  if (pathname.startsWith("/api/export/")) return HEAVY_CONFIG;
   return DEFAULT_CONFIG;
+}
+
+/**
+ * Reset rate limit for a key (useful for testing).
+ */
+export function resetRateLimit(key: string): void {
+  memoryStore.delete(key);
 }

@@ -88,6 +88,16 @@ interface UseFloorStreamResult {
   lastUpdate: Date | null;
 }
 
+const MIN_RECONNECT_DELAY = 1000;
+const MAX_RECONNECT_DELAY = 60000;
+const MAX_SSE_FAILURES_BEFORE_FALLBACK = 3;
+
+function calculateBackoff(attempt: number): number {
+  const delay = MIN_RECONNECT_DELAY * Math.pow(2, attempt);
+  const jitter = Math.random() * 1000;
+  return Math.min(delay + jitter, MAX_RECONNECT_DELAY);
+}
+
 export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStreamResult {
   const { enabled = true, fallbackPollingMs = 5000 } = options;
   
@@ -102,6 +112,7 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
   const fallbackIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initialLoadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const failedAttemptsRef = useRef(0);
+  const isUsingFallbackRef = useRef(false);
   
   const cleanup = useCallback(() => {
     if (eventSourceRef.current) {
@@ -123,8 +134,13 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
   }, []);
 
   const fetchFallback = useCallback(async () => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
     try {
-      const res = await fetch("/api/pos/floor");
+      const res = await fetch("/api/pos/floor", { signal: controller.signal });
+      clearTimeout(timeoutId);
+      
       if (!res.ok) throw new Error("Błąd pobierania");
       const data = await res.json();
       setRooms(data.rooms ?? []);
@@ -132,19 +148,31 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
       setError(null);
       setIsLoading(false);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Błąd połączenia");
-      setIsLoading(false); // Zawsze kończ stan ładowania, żeby UI nie wisiało w nieskończoność
+      clearTimeout(timeoutId);
+      if (e instanceof Error && e.name === "AbortError") {
+        setError("Przekroczono limit czasu połączenia");
+      } else {
+        setError(e instanceof Error ? e.message : "Błąd połączenia");
+      }
+      setIsLoading(false);
     }
   }, []);
+
+  const startFallbackPolling = useCallback(() => {
+    if (isUsingFallbackRef.current) return;
+    isUsingFallbackRef.current = true;
+    fallbackIntervalRef.current = setInterval(fetchFallback, fallbackPollingMs);
+    fetchFallback();
+  }, [fetchFallback, fallbackPollingMs]);
 
   const connect = useCallback(() => {
     if (!enabled || typeof window === "undefined") return;
     
     cleanup();
+    isUsingFallbackRef.current = false;
     
     if (!("EventSource" in window)) {
-      fallbackIntervalRef.current = setInterval(fetchFallback, fallbackPollingMs);
-      fetchFallback();
+      startFallbackPolling();
       return;
     }
     
@@ -154,7 +182,8 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
     eventSource.onopen = () => {
       setIsConnected(true);
       setError(null);
-      // Gdy SSE łączy się, ale pierwsza wiadomość się opóźnia – po 8 s wywołaj fetch jako backup
+      failedAttemptsRef.current = 0;
+      
       initialLoadTimeoutRef.current = setTimeout(() => {
         initialLoadTimeoutRef.current = null;
         if (eventSourceRef.current && eventSource.readyState === EventSource.OPEN) {
@@ -179,7 +208,7 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
           failedAttemptsRef.current = 0;
         } else if (data.type === "error") {
           setError(data.message ?? "Błąd serwera");
-          setIsLoading(false); // Nie blokuj UI przy błędzie – fallback w PosPageClient może zadziałać
+          setIsLoading(false);
         }
       } catch (e) {
         console.error("[SSE] Parse error:", e);
@@ -192,18 +221,17 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
       eventSourceRef.current = null;
       failedAttemptsRef.current += 1;
 
-      // Po 2 nieudanych próbach SSE przechodzimy na fallback fetch (np. gdy stream nie działa w dev)
-      if (failedAttemptsRef.current >= 2) {
-        fallbackIntervalRef.current = setInterval(fetchFallback, fallbackPollingMs);
-        fetchFallback();
+      if (failedAttemptsRef.current >= MAX_SSE_FAILURES_BEFORE_FALLBACK) {
+        startFallbackPolling();
         return;
       }
 
+      const backoffDelay = calculateBackoff(failedAttemptsRef.current);
       reconnectTimeoutRef.current = setTimeout(() => {
         connect();
-      }, 3000);
+      }, backoffDelay);
     };
-  }, [enabled, cleanup, fetchFallback, fallbackPollingMs]);
+  }, [enabled, cleanup, fetchFallback, startFallbackPolling]);
 
   useEffect(() => {
     connect();
@@ -215,6 +243,7 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
       cleanup();
       setRooms([]);
       setIsConnected(false);
+      isUsingFallbackRef.current = false;
     }
   }, [enabled, cleanup]);
 

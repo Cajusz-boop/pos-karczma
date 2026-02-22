@@ -4,6 +4,7 @@ import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegister";
 import { ConnectionMonitor } from "@/components/ConnectionMonitor";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -65,6 +66,7 @@ export default function RootLayout({
       >
         <ConnectionMonitor />
         <QueryProvider>{children}</QueryProvider>
+        <OfflineIndicator />
         <ServiceWorkerRegister />
       </body>
     </html>
