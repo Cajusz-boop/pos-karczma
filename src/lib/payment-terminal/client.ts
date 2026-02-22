@@ -329,7 +329,7 @@ async function confirmPolcardPayment(
       const response = pending.response as PolcardGoResponse | null;
       return {
         id: intentId,
-        amount: pending.amount,
+        amount: Number(pending.amount),
         currency: "PLN",
         status: "SUCCEEDED",
         transactionRef: response?.transactionId ?? `PC-${intentId}`,
@@ -341,7 +341,7 @@ async function confirmPolcardPayment(
       const response = pending.response as PolcardGoResponse | null;
       return {
         id: intentId,
-        amount: pending.amount,
+        amount: Number(pending.amount),
         currency: "PLN",
         status: pending.status === "FAILED" ? "FAILED" : "CANCELLED",
         errorMessage: response?.errorMessage ?? "Płatność nie powiodła się",
@@ -350,7 +350,7 @@ async function confirmPolcardPayment(
 
     return {
       id: intentId,
-      amount: pending.amount,
+      amount: Number(pending.amount),
       currency: "PLN",
       status: "PROCESSING",
     };
