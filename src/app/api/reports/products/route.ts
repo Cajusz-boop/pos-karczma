@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
 
 /** GET /api/reports/products?dateFrom=&dateTo=&categoryId=&roomId=&userId= — raport produktowy TOP/BOTTOM */
@@ -19,18 +19,14 @@ export async function GET(request: NextRequest) {
     const from = startOfDay(new Date(dateFrom));
     const to = endOfDay(new Date(dateTo));
 
-    const orderWhere: { status: string; closedAt: { gte: Date; lte: Date }; roomId?: string; userId?: string } = {
+    const orderWhere: Prisma.OrderWhereInput = {
       status: "CLOSED",
       closedAt: { gte: from, lte: to },
     };
     if (roomId) orderWhere.roomId = roomId;
     if (userId) orderWhere.userId = userId;
 
-    const itemWhere: {
-      status: { not: "CANCELLED" };
-      order: typeof orderWhere;
-      product?: { categoryId: string };
-    } = {
+    const itemWhere: Prisma.OrderItemWhereInput = {
       status: { not: "CANCELLED" },
       order: orderWhere,
     };
