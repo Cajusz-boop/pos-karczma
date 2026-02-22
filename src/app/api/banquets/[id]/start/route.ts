@@ -40,7 +40,7 @@ export async function POST(
     const items: MenuItemJson[] = event.menu?.itemsJson ? (event.menu.itemsJson as MenuItemJson[]) : [];
     if (items.length === 0) return NextResponse.json({ error: "Menu imprezy nie ma pozycji" }, { status: 400 });
 
-    const productIds = [...new Set(items.map((i) => i.productId))];
+    const productIds = Array.from(new Set(items.map((i) => i.productId)));
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
       include: { taxRate: true },
