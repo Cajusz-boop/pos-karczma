@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { nextStockMoveNumber } from "@/lib/stock-move-number";
 
 type MoveItem = { ingredientId: string; quantity: number; unit: string; price?: number };
@@ -11,13 +11,16 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type");
     const limit = Math.min(parseInt(searchParams.get("limit") ?? "100", 10), 200);
 
+    const where: Prisma.StockMoveWhereInput = {};
+    if (warehouseId) {
+      where.OR = [{ warehouseFromId: warehouseId }, { warehouseToId: warehouseId }];
+    }
+    if (type) {
+      where.type = type as Prisma.EnumStockMoveTypeFilter["equals"];
+    }
+
     const moves = await prisma.stockMove.findMany({
-      where: {
-        ...(warehouseId
-          ? { OR: [{ warehouseFromId: warehouseId }, { warehouseToId: warehouseId }] }
-          : {}),
-        ...(type ? { type } : {}),
-      },
+      where,
       orderBy: { createdAt: "desc" },
       take: limit,
       include: {
