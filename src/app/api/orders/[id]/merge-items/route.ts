@@ -66,7 +66,7 @@ export async function POST(
     let mergedCount = 0;
     const deletedIds: string[] = [];
 
-    for (const items of groups.values()) {
+    for (const items of Array.from(groups.values())) {
       if (items.length < 2) continue;
 
       const [first, ...rest] = items;
