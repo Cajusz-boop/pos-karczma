@@ -19,7 +19,7 @@ function cleanupMemory() {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
-  for (const [key, entry] of memoryStore) {
+  for (const [key, entry] of Array.from(memoryStore)) {
     if (entry.resetAt < now) {
       memoryStore.delete(key);
     }
