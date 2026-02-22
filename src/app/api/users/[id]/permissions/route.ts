@@ -95,7 +95,7 @@ export async function GET(
         allowedTableIds: true,
         allowedPriceLevelIds: true,
         uiButtonGroups: true,
-        permissions: true,
+        permissionsJson: true,
         role: {
           select: {
             id: true,
@@ -111,7 +111,7 @@ export async function GET(
     }
 
     const rolePermissions = (user.role.permissions as Record<string, unknown>) ?? {};
-    const userPermissions = (user.permissions as Record<string, unknown>) ?? {};
+    const userPermissions = (user.permissionsJson as Record<string, unknown>) ?? {};
     const mergedPermissions = { ...rolePermissions, ...userPermissions };
 
     return NextResponse.json({
@@ -123,7 +123,7 @@ export async function GET(
         allowedTableIds: user.allowedTableIds ?? [],
         allowedPriceLevelIds: user.allowedPriceLevelIds ?? [],
         uiButtonGroups: user.uiButtonGroups,
-        permissions: user.permissions,
+        permissions: user.permissionsJson,
       },
       role: {
         id: user.role.id,
@@ -183,7 +183,7 @@ export async function PUT(
       updateData.uiButtonGroups = parsed.data.uiButtonGroups;
     }
     if (parsed.data.permissions !== undefined) {
-      updateData.permissions = parsed.data.permissions;
+      updateData.permissionsJson = parsed.data.permissions;
     }
 
     const updated = await prisma.user.update({
@@ -197,12 +197,12 @@ export async function PUT(
         allowedTableIds: true,
         allowedPriceLevelIds: true,
         uiButtonGroups: true,
-        permissions: true,
+        permissionsJson: true,
       },
     });
 
     const requestUserId = request.headers.get("x-user-id");
-    await auditLog(requestUserId, "USER_PERMISSIONS_UPDATED", "User", id, user.permissions as Record<string, unknown>, updateData);
+    await auditLog(requestUserId, "USER_PERMISSIONS_UPDATED", "User", id, user.permissionsJson as Record<string, unknown>, updateData);
 
     return NextResponse.json({
       user: updated,
@@ -238,7 +238,7 @@ export async function POST(
         allowedTableIds: true,
         allowedPriceLevelIds: true,
         uiButtonGroups: true,
-        permissions: true,
+        permissionsJson: true,
       },
     });
 
@@ -254,7 +254,7 @@ export async function POST(
         allowedTableIds: sourceUser.allowedTableIds,
         allowedPriceLevelIds: sourceUser.allowedPriceLevelIds,
         uiButtonGroups: sourceUser.uiButtonGroups,
-        permissions: sourceUser.permissions,
+        permissionsJson: sourceUser.permissionsJson,
       },
       select: { id: true, name: true },
     });
