@@ -94,14 +94,17 @@ export async function getOccupiedRooms(): Promise<{
 
     const data = await response.json();
     return {
-      rooms: (data.rooms ?? data ?? []).map((r: Record<string, unknown>) => ({
-        roomNumber: String(r.roomNumber ?? r.number ?? ""),
-        guestName: String(r.guestName ?? r.guest?.name ?? ""),
-        guestId: String(r.guestId ?? r.guest?.id ?? ""),
-        checkIn: String(r.checkIn ?? ""),
-        checkOut: String(r.checkOut ?? ""),
-        reservationId: String(r.reservationId ?? r.id ?? ""),
-      })),
+      rooms: (data.rooms ?? data ?? []).map((r: Record<string, unknown>) => {
+        const guest = r.guest as Record<string, unknown> | undefined;
+        return {
+          roomNumber: String(r.roomNumber ?? r.number ?? ""),
+          guestName: String(r.guestName ?? guest?.name ?? ""),
+          guestId: String(r.guestId ?? guest?.id ?? ""),
+          checkIn: String(r.checkIn ?? ""),
+          checkOut: String(r.checkOut ?? ""),
+          reservationId: String(r.reservationId ?? r.id ?? ""),
+        };
+      }),
     };
   } catch (e) {
     return {
