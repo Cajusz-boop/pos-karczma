@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
           where: { status: { not: "CANCELLED" } },
           include: {
             product: { select: { name: true, nameShort: true } },
-            taxRate: { select: { symbol: true, rate: true } },
+            taxRate: { select: { fiscalSymbol: true, ratePercent: true } },
           },
         },
         payments: { select: { method: true, amount: true } },
@@ -87,7 +87,7 @@ function generateGenericCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo
       const price = Number(item.unitPrice);
       const discount = Number(item.discountAmount ?? 0);
       const gross = qty * price - discount;
-      const rate = Number(item.taxRate.rate);
+      const rate = Number(item.taxRate.ratePercentPercent);
       const net = gross / (1 + rate / 100);
       const vat = gross - net;
 
@@ -99,7 +99,7 @@ function generateGenericCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo
         `"${item.product.name}"`,
         qty.toFixed(3),
         price.toFixed(2),
-        `${item.taxRate.symbol} (${rate}%)`,
+        `${item.taxRate.fiscalSymbol} (${rate}%)`,
         net.toFixed(2),
         vat.toFixed(2),
         gross.toFixed(2),
@@ -140,7 +140,7 @@ function generateOptimaCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo:
       const price = Number(item.unitPrice);
       const discount = Number(item.discountAmount ?? 0);
       const gross = qty * price - discount;
-      const rate = Number(item.taxRate.rate);
+      const rate = Number(item.taxRate.ratePercent);
       const net = gross / (1 + rate / 100);
       const vat = gross - net;
 
@@ -193,7 +193,7 @@ function generateSymfoniaXML(orders: OrderWithRelations[], dateFrom: Date, dateT
       const price = Number(item.unitPrice);
       const discount = Number(item.discountAmount ?? 0);
       const gross = qty * price - discount;
-      const rate = Number(item.taxRate.rate);
+      const rate = Number(item.taxRate.ratePercent);
       const net = gross / (1 + rate / 100);
       const vat = gross - net;
 
@@ -239,7 +239,7 @@ function generateWFirmaCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo:
       const price = Number(item.unitPrice);
       const discount = Number(item.discountAmount ?? 0);
       const gross = qty * price - discount;
-      const rate = Number(item.taxRate.rate);
+      const rate = Number(item.taxRate.ratePercent);
       const net = gross / (1 + rate / 100);
       const vat = gross - net;
 
