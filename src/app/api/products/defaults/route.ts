@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
       const config = await prisma.systemConfig.findUnique({
         where: { key: "productDefaults" },
       });
-      defaults = (config?.value as object) ?? DEFAULT_PRODUCT_SETTINGS;
+      defaults = (config?.value as Record<string, unknown>) ?? DEFAULT_PRODUCT_SETTINGS;
     }
 
     let updatedCount = 0;
