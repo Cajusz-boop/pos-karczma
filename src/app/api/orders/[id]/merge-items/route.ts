@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
-import { Prisma } from "@prisma/client";
 
 type ModifierJson = { modifierId: string; name: string; priceDelta: number };
 

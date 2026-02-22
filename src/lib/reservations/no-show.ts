@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@/lib/prisma";
 
 const NO_SHOW_MINUTES = 30;
 

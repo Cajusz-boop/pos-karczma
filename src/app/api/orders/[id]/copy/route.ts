@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
-import { Prisma } from "@prisma/client";
 
 /**
  * POST /api/orders/[id]/copy - copy order (resend to kitchen)
