@@ -158,7 +158,7 @@ export async function PUT(
 
     const user = await prisma.user.findUnique({
       where: { id },
-      select: { id: true, permissions: true },
+      select: { id: true, permissionsJson: true },
     });
 
     if (!user) {
