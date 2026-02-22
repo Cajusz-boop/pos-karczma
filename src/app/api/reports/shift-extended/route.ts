@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const orders = await prisma.order.findMany({
       where: {
         createdAt: { gte: fromDate, lte: toDate },
-        status: { in: ["PAID", "CLOSED"] },
+        status: { in: ["CLOSED"] },
         ...(userId && { userId }),
       },
       include: {
