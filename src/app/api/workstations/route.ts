@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
+
+function toJsonInput<T>(value: T | null | undefined): T | typeof Prisma.JsonNull | undefined {
+  if (value === null) return Prisma.JsonNull;
+  return value;
+}
 
 const createWorkstationSchema = z.object({
   name: z.string().min(1).max(50),
@@ -76,7 +81,11 @@ export async function POST(request: NextRequest) {
     }
 
     const workstation = await prisma.workstationConfig.create({
-      data: parsed.data,
+      data: {
+        ...parsed.data,
+        allowedCategoryIds: toJsonInput(parsed.data.allowedCategoryIds),
+        allowedRoomIds: toJsonInput(parsed.data.allowedRoomIds),
+      },
     });
 
     const userId = request.headers.get("x-user-id");
@@ -122,7 +131,15 @@ export async function PATCH(request: NextRequest) {
 
     const workstation = await prisma.workstationConfig.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...updateData,
+        allowedCategoryIds: updateData.allowedCategoryIds !== undefined
+          ? toJsonInput(updateData.allowedCategoryIds)
+          : undefined,
+        allowedRoomIds: updateData.allowedRoomIds !== undefined
+          ? toJsonInput(updateData.allowedRoomIds)
+          : undefined,
+      },
     });
 
     const userId = request.headers.get("x-user-id");
