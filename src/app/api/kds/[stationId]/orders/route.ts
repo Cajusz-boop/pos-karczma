@@ -154,11 +154,11 @@ export async function GET(
       include: {
         product: { select: { name: true } },
         order: {
-          include: {
-            table: { select: { number: true } },
-            user: { select: { name: true } },
+          select: {
             orderNumber: true,
             type: true,
+            table: { select: { number: true } },
+            user: { select: { name: true } },
           },
         },
       },
