@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { WifiOff, Wifi, ArrowRight } from "lucide-react";
 
 const MAIN_SERVER = process.env.NEXT_PUBLIC_MAIN_SERVER_URL ?? "https://pos.karczma-labedz.pl";
-const LOCAL_SERVER = process.env.NEXT_PUBLIC_LOCAL_SERVER_URL ?? "http://localhost:3001";
+const LOCAL_SERVER = process.env.NEXT_PUBLIC_LOCAL_SERVER_URL ?? "http://10.119.169.20:3001";
 const CHECK_INTERVAL = Number(process.env.NEXT_PUBLIC_CONNECTION_CHECK_INTERVAL) || 30000;
 const REDIRECT_DELAY = Number(process.env.NEXT_PUBLIC_REDIRECT_DELAY) || 5000;
 
