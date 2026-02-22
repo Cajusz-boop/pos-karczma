@@ -71,6 +71,9 @@ export async function GET(
           status: string;
           isModifiedAfterSend: boolean;
           cancelReason: string | null;
+          elapsedMinutes: number;
+          estimatedMinutes: number;
+          urgency: "normal" | "warning" | "critical";
         }>;
       }
     >();
