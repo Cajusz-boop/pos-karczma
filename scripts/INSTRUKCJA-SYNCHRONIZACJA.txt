@@ -1,0 +1,61 @@
+================================================================================
+         POS-KARCZMA: INSTRUKCJA SYNCHRONIZACJI BAZ DANYCH
+================================================================================
+
+ARCHITEKTURA:
+  Hetzner (glowny)    <---->    Lokalny (backup)
+  pos.karczma-labedz.pl         10.119.169.20:3001
+
+--------------------------------------------------------------------------------
+SCENARIUSZ: Normalny dzien pracy
+--------------------------------------------------------------------------------
+  - Pracujesz na: https://pos.karczma-labedz.pl
+  - Lokalny serwer jest tylko backupem
+
+--------------------------------------------------------------------------------
+SCENARIUSZ: Awaria internetu
+--------------------------------------------------------------------------------
+  1. Przegladarka nie dziala na pos.karczma-labedz.pl
+  
+  2. Otworz: http://10.119.169.20:3001
+     (lub http://localhost:3001 jesli jestes na serwerze)
+  
+  3. Pracuj normalnie - wszystko zapisuje sie lokalnie
+  
+  4. Gdy INTERNET WROCI:
+     a) Na serwerze lokalnym uruchom:
+        E:\pos-karczma\scripts\sync-db-TO-hetzner.bat
+        
+     b) Poczekaj az skonczy
+     
+     c) Wroc do pracy na: https://pos.karczma-labedz.pl
+
+--------------------------------------------------------------------------------
+DOSTEPNE SKRYPTY (uruchamiaj na serwerze lokalnym przez AnyDesk)
+--------------------------------------------------------------------------------
+
+  sync-db-from-hetzner.bat
+    - Kierunek: Hetzner --> Lokalny
+    - Kiedy: Przed praca offline (pobierz swiezne dane)
+    - NADPISUJE dane lokalne
+  
+  sync-db-TO-hetzner.bat
+    - Kierunek: Lokalny --> Hetzner
+    - Kiedy: Po pracy offline (wyslij zmiany)
+    - NADPISUJE dane na Hetzner
+
+  aktualizuj-serwer-lokalny.bat
+    - Aktualizuje KOD aplikacji z GitHub
+    - Nie dotyka bazy danych
+
+--------------------------------------------------------------------------------
+DANE DOSTEPU
+--------------------------------------------------------------------------------
+  AnyDesk do serwera lokalnego: 540261132 / Wojtek1415
+  
+  MySQL lokalny:  root:root123 / baza: pos_karczma
+  MySQL Hetzner:  pos:PosPMS2024#Secure / baza: pos_karczma
+  
+  SSH Hetzner:    root@65.108.245.25 (klucz w C:\Users\Admin\.ssh\id_ed25519)
+
+================================================================================
