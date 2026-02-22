@@ -1,3 +1,4 @@
+// @ts-expect-error - no type definitions
 import webPush from "web-push";
 import { prisma } from "@/lib/prisma";
 
