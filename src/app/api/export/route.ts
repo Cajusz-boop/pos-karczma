@@ -87,7 +87,7 @@ function generateGenericCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo
       const price = Number(item.unitPrice);
       const discount = Number(item.discountAmount ?? 0);
       const gross = qty * price - discount;
-      const rate = Number(item.taxRate.ratePercentPercent);
+      const rate = Number(item.taxRate.ratePercent);
       const net = gross / (1 + rate / 100);
       const vat = gross - net;
 
