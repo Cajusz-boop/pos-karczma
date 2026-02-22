@@ -590,7 +590,7 @@ function MenusSection({
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Anuluj</Button>
-            <Button disabled={!name.trim() || saving} onClick={() => createMutation.mutate()}>{saving ? "Zapisywanie…" : "Zapisz menu"}</Button>
+            <Button disabled={!name.trim() || createMutation.isPending} onClick={() => createMutation.mutate()}>{createMutation.isPending ? "Zapisywanie…" : "Zapisz menu"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
