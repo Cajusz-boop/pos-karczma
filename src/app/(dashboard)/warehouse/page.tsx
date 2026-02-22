@@ -334,7 +334,7 @@ function WarehousesSection({
               Anuluj
             </Button>
             <Button
-              disabled={!name.trim() || saving}
+              disabled={!name.trim() || createMutation.isPending || updateMutation.isPending}
               onClick={() => (editingId ? updateMutation.mutate() : createMutation.mutate())}
             >
               {editingId ? "Zapisz" : "Dodaj"}
