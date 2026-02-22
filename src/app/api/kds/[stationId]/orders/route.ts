@@ -73,7 +73,7 @@ export async function GET(
           cancelReason: string | null;
           elapsedMinutes: number;
           estimatedMinutes: number | null;
-          urgency: "normal" | "warning" | "critical";
+          urgency: number | null;
         }>;
       }
     >();
