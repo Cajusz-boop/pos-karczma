@@ -1025,7 +1025,7 @@ export async function GET(request: Request) {
     
     const zipBuffer = await createZipBuffer(serverUrl);
 
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/zip",
