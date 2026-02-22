@@ -112,7 +112,7 @@ export function createApiError(
  * Check if an error response is retryable.
  */
 export function isRetryableError(code: ErrorCode): boolean {
-  return [
+  return ([
     ErrorCodes.RATE_LIMIT_EXCEEDED,
     ErrorCodes.SERVICE_UNAVAILABLE,
     ErrorCodes.NETWORK_ERROR,
@@ -121,14 +121,14 @@ export function isRetryableError(code: ErrorCode): boolean {
     ErrorCodes.INTERNAL_ERROR,
     ErrorCodes.DATABASE_ERROR,
     ErrorCodes.EXTERNAL_SERVICE_ERROR,
-  ].includes(code);
+  ] as readonly ErrorCode[]).includes(code);
 }
 
 /**
  * Check if an error is a permanent failure (should not retry).
  */
 export function isPermanentError(code: ErrorCode): boolean {
-  return [
+  return ([
     ErrorCodes.UNAUTHORIZED,
     ErrorCodes.INVALID_CREDENTIALS,
     ErrorCodes.INSUFFICIENT_PERMISSIONS,
@@ -138,7 +138,7 @@ export function isPermanentError(code: ErrorCode): boolean {
     ErrorCodes.RESOURCE_DELETED,
     ErrorCodes.ORDER_ALREADY_CLOSED,
     ErrorCodes.INVALID_OPERATION,
-  ].includes(code);
+  ] as readonly ErrorCode[]).includes(code);
 }
 
 /**
