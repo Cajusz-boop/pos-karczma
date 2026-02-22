@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
           }
         }
       }
-      for (const [printerId, items] of itemsByPrinterId) {
+      for (const [printerId, items] of Array.from(itemsByPrinterId)) {
         const p = printers.find((x) => x.id === printerId);
         const text = formatKitchenTicket(orderInfo, items, { reprint: reprint ?? false });
         tickets.push({ printerId, printerName: p?.name ?? "Drukarka", text });
