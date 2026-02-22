@@ -1,5 +1,5 @@
 import "dotenv/config";
-import mariadb from "mariadb";
+import * as mariadb from "mariadb";
 
 const rawUrl = process.env.DATABASE_URL;
 if (!rawUrl) throw new Error("DATABASE_URL is not set");
