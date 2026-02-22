@@ -35,12 +35,6 @@ export async function POST(
     if (order.status === "CLOSED") {
       return NextResponse.json({ error: "Zamówienie już zamknięte" }, { status: 400 });
     }
-    if (order.payments.length === 0) {
-      return NextResponse.json(
-        { error: "Dodaj płatności przed zamknięciem rachunku" },
-        { status: 400 }
-      );
-    }
 
     const orderTotal = order.items.reduce(
       (sum, i) =>
@@ -61,7 +55,8 @@ export async function POST(
       order.payments.reduce((sum, p) => sum + Number(p.amount), 0) * 100
     ) / 100;
 
-    if (paidTotal < finalTotal) {
+    // Allow closing zero-balance orders without payments
+    if (finalTotal > 0 && paidTotal < finalTotal) {
       return NextResponse.json(
         {
           error: `Suma płatności (${paidTotal.toFixed(2)} zł) nie pokrywa kwoty zamówienia (${finalTotal.toFixed(2)} zł)`,

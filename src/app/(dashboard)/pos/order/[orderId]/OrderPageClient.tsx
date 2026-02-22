@@ -303,6 +303,13 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   );
   const breadcrumb = currentCategoryId ? getBreadcrumb(categories, currentCategoryId) : [];
 
+  // Effective category stack - if empty, use first root category for display
+  const effectiveCategoryStack = useMemo(() => {
+    if (categoryStack.length > 0) return categoryStack;
+    if (rootCategories.length > 0) return [rootCategories[0].id];
+    return [];
+  }, [categoryStack, rootCategories]);
+
   const recentProducts = useMemo(() => {
     return recentProductIds
       .map((id) => products.find((p) => p.id === id))
@@ -310,9 +317,11 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   }, [recentProductIds, products]);
 
   const categoryIdsToShow = useMemo(() => {
-    if (!currentCategoryId) return [];
-    return getDescendantIds(categories, currentCategoryId);
-  }, [categories, currentCategoryId]);
+    // If no category selected, use first root category by default
+    const effectiveCategoryId = currentCategoryId ?? rootCategories[0]?.id ?? null;
+    if (!effectiveCategoryId) return [];
+    return getDescendantIds(categories, effectiveCategoryId);
+  }, [categories, currentCategoryId, rootCategories]);
 
   const filteredProducts = useMemo(() => {
     const allergenFilter = (p: ProductRow) => {
@@ -537,6 +546,33 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     queryClient.invalidateQueries({ queryKey: ["rooms"] });
   };
 
+  const handleCloseBill = async () => {
+    const activeItems = items.filter((i) => i.status !== "CANCELLED");
+    const total = activeItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+    
+    if (total === 0) {
+      // Zero balance - close immediately without payment dialog
+      setOpLoading(true);
+      try {
+        const res = await fetch(`/api/orders/${orderId}/close`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ receipt: false }),
+        });
+        if (!res.ok) throw new Error((await res.json()).error || "Błąd zamykania");
+        invalidateOrder();
+        router.push("/pos");
+      } catch (e) {
+        setOpError(e instanceof Error ? e.message : "Błąd zamykania");
+      } finally {
+        setOpLoading(false);
+      }
+    } else {
+      // Has balance - show payment dialog
+      setPaymentDialogOpen(true);
+    }
+  };
+
   const handleCancelOrder = async () => {
     setOpError(null);
     setOpLoading(true);
@@ -691,7 +727,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         orderNumber={orderNumber}
         tableNumber={tableNumber}
         items={items}
-        categoryStack={categoryStack}
+        categoryStack={effectiveCategoryStack}
         childCategories={childCategories}
         rootCategories={rootCategories}
         breadcrumb={breadcrumb}
@@ -732,7 +768,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         onNoteSave={saveNote}
         onNoteInputChange={setNoteInput}
         onRemoveItem={removeItem}
-        onCloseBill={() => setPaymentDialogOpen(true)}
+        onCloseBill={handleCloseBill}
         onCancelOrder={() => setCancelOrderConfirm(true)}
         onStornoItem={(itemId) => { setStornoItemId(itemId); setStornoReason(""); setOpError(null); }}
         onMoveOrder={() => { setMoveDialogOpen(true); setSelectedTableId(null); setOpError(null); }}

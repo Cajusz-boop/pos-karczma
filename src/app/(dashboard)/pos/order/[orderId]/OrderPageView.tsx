@@ -460,7 +460,6 @@ export function OrderPageView(props: OrderPageViewProps) {
               variant="outline"
               className="w-full gap-2"
               onClick={onCloseBill}
-              disabled={activeItems.length === 0}
             >
               <CreditCard className="h-4 w-4" />
               Zamknij rachunek
