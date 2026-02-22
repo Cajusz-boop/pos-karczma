@@ -42,7 +42,7 @@ export async function GET(
       orderBy: [{ sentToKitchenAt: "asc" }, { createdAt: "asc" }],
     });
 
-    const orderIds = [...new Set(items.map((i) => i.orderId))];
+    const orderIds = Array.from(new Set(items.map((i) => i.orderId)));
     const orders = await prisma.order.findMany({
       where: { id: { in: orderIds } },
       include: { table: true, user: { select: { name: true } }, banquetEvent: true },

@@ -49,8 +49,8 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" },
     });
 
-    const driverIds = [...new Set(orders.map((o) => o.assignedDriverId).filter(Boolean))] as string[];
-    const zoneIds = [...new Set(orders.map((o) => o.deliveryZoneId).filter(Boolean))] as string[];
+    const driverIds = Array.from(new Set(orders.map((o) => o.assignedDriverId).filter(Boolean))) as string[];
+    const zoneIds = Array.from(new Set(orders.map((o) => o.deliveryZoneId).filter(Boolean))) as string[];
 
     const [drivers, zones] = await Promise.all([
       prisma.deliveryDriver.findMany({
