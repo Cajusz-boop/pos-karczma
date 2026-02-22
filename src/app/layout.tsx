@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegister";
+import { ConnectionMonitor } from "@/components/ConnectionMonitor";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,7 +32,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#09090b",
+  themeColor: "#895a3a",
 };
 
 export default function RootLayout({
@@ -62,6 +63,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ConnectionMonitor />
         <QueryProvider>{children}</QueryProvider>
         <ServiceWorkerRegister />
       </body>
