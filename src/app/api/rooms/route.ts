@@ -109,7 +109,7 @@ export async function GET(request: NextRequest) {
 const createRoomSchema = z.object({
   name: z.string().min(1).max(50),
   capacity: z.number().int().min(1),
-  type: z.enum(["RESTAURANT", "TERRACE", "BANQUET", "BAR", "VIP"]),
+  type: z.enum(["RESTAURANT", "BANQUET", "OUTDOOR", "PRIVATE"]),
   isSeasonal: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
 });
