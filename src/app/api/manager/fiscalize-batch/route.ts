@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
 
     const orders = await prisma.order.findMany({
       where: {
-        status: { in: ["PAID", "CLOSED"] },
+        status: { in: ["CLOSED"] },
         fiscalizedAt: null,
         ...(type && { type: type as "DINE_IN" | "TAKEAWAY" | "PHONE" }),
       },
