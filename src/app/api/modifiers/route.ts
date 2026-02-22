@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     if (body.groupId && !body.modifiers) {
       const parsed = modifierSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+        return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
       }
       const modifier = await prisma.modifier.create({
         data: {
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Creating a new group
     const parsed = createGroupSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+      return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
     }
 
     const group = await prisma.modifierGroup.create({
@@ -124,7 +124,7 @@ export async function PATCH(request: NextRequest) {
     if (body.modifierId) {
       const parsed = updateModifierSchema.safeParse({ id: body.modifierId, ...body });
       if (!parsed.success) {
-        return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+        return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
       }
       const { id, ...data } = parsed.data;
       const modifier = await prisma.modifier.update({
@@ -142,7 +142,7 @@ export async function PATCH(request: NextRequest) {
     // Update group
     const parsed = updateGroupSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+      return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
     }
     const { id, ...data } = parsed.data;
     const group = await prisma.modifierGroup.update({

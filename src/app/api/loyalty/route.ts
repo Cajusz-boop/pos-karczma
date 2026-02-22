@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     if (action === "earn") {
       const parsed = earnSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+        return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
       }
       const { customerId, orderId, amount } = parsed.data;
 
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
     if (action === "redeem") {
       const parsed = redeemSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+        return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
       }
       const { customerId, rewardId, orderId } = parsed.data;
 
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
     if (action === "adjust") {
       const parsed = adjustSchema.safeParse(body);
       if (!parsed.success) {
-        return NextResponse.json({ error: parsed.error.errors[0]?.message }, { status: 400 });
+        return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 });
       }
       const { customerId, points, description } = parsed.data;
 
