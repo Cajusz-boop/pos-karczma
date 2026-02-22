@@ -18,7 +18,6 @@ const DEFAULT_PRODUCT_SETTINGS = {
   noQuantityChange: false,
   askForComponents: false,
   noGeneralDesc: false,
-  vatRate: 23,
 };
 
 const defaultsSchema = z.object({
@@ -36,7 +35,6 @@ const defaultsSchema = z.object({
   noQuantityChange: z.boolean().optional(),
   askForComponents: z.boolean().optional(),
   noGeneralDesc: z.boolean().optional(),
-  vatRate: z.number().min(0).max(100).optional(),
 });
 
 /**
@@ -57,7 +55,6 @@ export async function GET() {
       select: {
         id: true,
         name: true,
-        code: true,
       },
     });
 
@@ -158,7 +155,6 @@ export async function POST(request: NextRequest) {
         noQuantityChange: template.noQuantityChange,
         askForComponents: template.askForComponents,
         noGeneralDesc: template.noGeneralDesc,
-        vatRate: template.vatRate,
       };
     } else {
       const config = await prisma.systemConfig.findUnique({
