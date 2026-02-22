@@ -5,7 +5,7 @@ import { z } from "zod";
 const createSchema = z.object({
   title: z.string().min(1, "Wymagany tytuł").max(100),
   content: z.string().min(1, "Wymagana treść"),
-  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
+  priority: z.enum(["LOW", "NORMAL", "HIGH"]).optional(),
   pinned: z.boolean().optional(),
   expiresAt: z.string().datetime().optional(),
 });
