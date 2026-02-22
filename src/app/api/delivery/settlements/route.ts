@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
       where: {
         action: "DELIVERY_COMPLETED",
         timestamp: { gte: dateStart, lte: dateEnd },
-        metadata: { path: ["driverId"], equals: driverId },
+        metadata: { path: "$.driverId", equals: driverId },
       },
       select: { entityId: true },
     });
