@@ -9,7 +9,7 @@ const permissionsSchema = z.object({
   allowedPriceLevelIds: z.array(z.string()).nullable().optional(),
   autoLogoutSec: z.number().int().min(0).max(600).nullable().optional(),
   uiButtonGroups: z.any().nullable().optional(),
-  permissionsJson: z.object({
+  permissions: z.object({
     access: z.object({
       pos: z.boolean().optional(),
       kds: z.boolean().optional(),
@@ -95,12 +95,12 @@ export async function GET(
         allowedTableIds: true,
         allowedPriceLevelIds: true,
         uiButtonGroups: true,
-        permissionsJson: true,
+        permissions: true,
         role: {
           select: {
             id: true,
             name: true,
-            permissionsJson: true,
+            permissions: true,
           },
         },
       },
@@ -110,8 +110,8 @@ export async function GET(
       return NextResponse.json({ error: "Użytkownik nie istnieje" }, { status: 404 });
     }
 
-    const rolePermissions = (user.role.permissionsJson as Record<string, unknown>) ?? {};
-    const userPermissions = (user.permissionsJson as Record<string, unknown>) ?? {};
+    const rolePermissions = (user.role.permissions as Record<string, unknown>) ?? {};
+    const userPermissions = (user.permissions as Record<string, unknown>) ?? {};
     const mergedPermissions = { ...rolePermissions, ...userPermissions };
 
     return NextResponse.json({
@@ -123,7 +123,7 @@ export async function GET(
         allowedTableIds: user.allowedTableIds ?? [],
         allowedPriceLevelIds: user.allowedPriceLevelIds ?? [],
         uiButtonGroups: user.uiButtonGroups,
-        permissionsJson: user.permissionsJson,
+        permissions: user.permissions,
       },
       role: {
         id: user.role.id,
@@ -158,7 +158,7 @@ export async function PUT(
 
     const user = await prisma.user.findUnique({
       where: { id },
-      select: { id: true, permissionsJson: true },
+      select: { id: true, permissions: true },
     });
 
     if (!user) {
@@ -182,8 +182,8 @@ export async function PUT(
     if (parsed.data.uiButtonGroups !== undefined) {
       updateData.uiButtonGroups = parsed.data.uiButtonGroups;
     }
-    if (parsed.data.permissionsJson !== undefined) {
-      updateData.permissionsJson = parsed.data.permissionsJson;
+    if (parsed.data.permissions !== undefined) {
+      updateData.permissions = parsed.data.permissions;
     }
 
     const updated = await prisma.user.update({
@@ -197,12 +197,12 @@ export async function PUT(
         allowedTableIds: true,
         allowedPriceLevelIds: true,
         uiButtonGroups: true,
-        permissionsJson: true,
+        permissions: true,
       },
     });
 
     const requestUserId = request.headers.get("x-user-id");
-    await auditLog(requestUserId, "USER_PERMISSIONS_UPDATED", "User", id, user.permissionsJson as Record<string, unknown>, updateData);
+    await auditLog(requestUserId, "USER_PERMISSIONS_UPDATED", "User", id, user.permissions as Record<string, unknown>, updateData);
 
     return NextResponse.json({
       user: updated,
@@ -238,7 +238,7 @@ export async function POST(
         allowedTableIds: true,
         allowedPriceLevelIds: true,
         uiButtonGroups: true,
-        permissionsJson: true,
+        permissions: true,
       },
     });
 
@@ -254,7 +254,7 @@ export async function POST(
         allowedTableIds: sourceUser.allowedTableIds,
         allowedPriceLevelIds: sourceUser.allowedPriceLevelIds,
         uiButtonGroups: sourceUser.uiButtonGroups,
-        permissionsJson: sourceUser.permissionsJson,
+        permissions: sourceUser.permissions,
       },
       select: { id: true, name: true },
     });
