@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
 
@@ -157,7 +157,7 @@ export async function POST(
 
     await prisma.printer.update({
       where: { id },
-      data: { templatesJson: null },
+      data: { templatesJson: Prisma.JsonNull },
     });
 
     const userId = request.headers.get("x-user-id");
