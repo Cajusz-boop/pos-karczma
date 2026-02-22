@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Prisma } from "@/lib/prisma";
 import { processNoShows } from "@/lib/reservations/no-show";
 import { parseBody, createReservationSchema } from "@/lib/validation";
 
@@ -14,15 +14,15 @@ export async function GET(request: NextRequest) {
     const roomId = searchParams.get("roomId");
     const status = searchParams.get("status");
 
-    const where: { date?: { gte?: Date; lte?: Date }; roomId?: string; status?: string } = {};
-    if (dateFrom) where.date = { ...where.date, gte: new Date(dateFrom) };
+    const where: Prisma.ReservationWhereInput = {};
+    if (dateFrom) where.date = { ...((where.date as Prisma.DateTimeFilter) ?? {}), gte: new Date(dateFrom) };
     if (dateTo) {
       const to = new Date(dateTo);
       to.setHours(23, 59, 59, 999);
-      where.date = { ...where.date, lte: to };
+      where.date = { ...((where.date as Prisma.DateTimeFilter) ?? {}), lte: to };
     }
     if (roomId) where.roomId = roomId;
-    if (status) where.status = status as "PENDING" | "CONFIRMED" | "CANCELLED" | "NO_SHOW" | "COMPLETED";
+    if (status) where.status = status as Prisma.EnumReservationStatusFilter["equals"];
 
     const reservations = await prisma.reservation.findMany({
       where: { ...where, type: "TABLE" },
