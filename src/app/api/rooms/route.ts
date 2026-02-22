@@ -118,7 +118,7 @@ const createTableSchema = z.object({
   roomId: z.string().min(1),
   number: z.number().int().min(1),
   seats: z.number().int().min(1),
-  shape: z.enum(["RECTANGLE", "ROUND", "SQUARE", "BAR"]).optional(),
+  shape: z.enum(["RECTANGLE", "ROUND", "LONG"]).optional(),
   positionX: z.number().optional(),
   positionY: z.number().optional(),
 });
