@@ -1,12 +1,12 @@
 {
   "name": "POS Karczma Łabędź",
-  "short_name": "POS Karczma",
+  "short_name": "Łabędź POS",
   "description": "System POS gastronomiczny - Karczma Łabędź",
   "start_url": "/pos",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#09090b",
-  "theme_color": "#09090b",
+  "background_color": "#0a0f10",
+  "theme_color": "#895a3a",
   "icons": [
     {
       "src": "/icon-192.png",

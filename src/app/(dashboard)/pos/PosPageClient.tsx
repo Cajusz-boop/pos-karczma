@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useFloorStream } from "@/lib/hooks/useFloorStream";
@@ -123,10 +124,10 @@ interface AlertsResponse {
 }
 
 const STATUS_CONFIG: Record<TableStatus, { bg: string; label: string }> = {
-  FREE: { bg: "bg-emerald-500 hover:bg-emerald-600 border-emerald-600 text-white shadow-emerald-500/25", label: "Wolny" },
-  OCCUPIED: { bg: "bg-amber-500 hover:bg-amber-600 border-amber-600 text-white shadow-amber-500/25", label: "Zajęty" },
-  BILL_REQUESTED: { bg: "bg-rose-500 hover:bg-rose-600 border-rose-600 text-white shadow-rose-500/25 animate-pulse", label: "Rachunek" },
-  RESERVED: { bg: "bg-violet-500 hover:bg-violet-600 border-violet-600 text-white shadow-violet-500/25", label: "Rezerwacja" },
+  FREE: { bg: "bg-brand-brown hover:brightness-110 border-[#704a2f] text-white shadow-[#895a3a]/30", label: "Wolny" },
+  OCCUPIED: { bg: "bg-brand-gold hover:brightness-110 border-[#c9a03d] text-brand-dark shadow-[#d8af44]/30", label: "Zajęty" },
+  BILL_REQUESTED: { bg: "bg-rose-500 hover:bg-rose-600 border-rose-600 text-white shadow-rose-500/40 animate-pulse ring-2 ring-rose-400/50", label: "Rachunek" },
+  RESERVED: { bg: "bg-brand-dark/80 hover:bg-brand-dark border-[#2a3538] text-white/80 shadow-[#0a0f10]/25", label: "Rezerwacja" },
   BANQUET_MODE: { bg: "bg-blue-500 hover:bg-blue-600 border-blue-600 text-white shadow-blue-500/25", label: "Bankiet" },
   INACTIVE: { bg: "bg-gray-200 border-gray-300 text-gray-400 cursor-not-allowed", label: "Nieaktywny" },
 };
@@ -316,13 +317,13 @@ const TableCard = memo(function TableCard({
             {table.kitchenStatus && table.activeOrder!.itemCount > 0 && (
               <div className="mt-1 flex h-1 w-14 gap-0.5 overflow-hidden rounded-full sm:w-16">
                 {table.kitchenStatus.served > 0 && (
-                  <div className="bg-emerald-400" style={{ flex: table.kitchenStatus.served }} />
+                  <div className="bg-brand-blue" style={{ flex: table.kitchenStatus.served }} />
                 )}
                 {table.kitchenStatus.ready > 0 && (
-                  <div className="bg-rose-400 animate-pulse" style={{ flex: table.kitchenStatus.ready }} />
+                  <div className="bg-brand-gold animate-pulse" style={{ flex: table.kitchenStatus.ready }} />
                 )}
                 {table.kitchenStatus.inProgress > 0 && (
-                  <div className="bg-amber-400" style={{ flex: table.kitchenStatus.inProgress }} />
+                  <div className="bg-brand-brown" style={{ flex: table.kitchenStatus.inProgress }} />
                 )}
                 {table.kitchenStatus.ordered > 0 && (
                   <div className="bg-white/30" style={{ flex: table.kitchenStatus.ordered }} />
@@ -423,8 +424,8 @@ export function PosPageClient() {
 
   // Real-time floor data via SSE (Server-Sent Events)
   const { rooms: sseRooms, isLoading: sseLoading, isConnected } = useFloorStream({ enabled: true });
-  
-  // Fallback to polling if SSE not available (kept for compatibility)
+
+  // Fetch floor od razu – nie czekaj na SSE (SSE może się opóźnić lub nie połączyć)
   const { data: floorData } = useQuery<FloorResponse>({
     queryKey: ["floor"],
     queryFn: async () => {
@@ -435,10 +436,10 @@ export function PosPageClient() {
     refetchInterval: isConnected ? false : 5_000,
     staleTime: 3_000,
     refetchOnWindowFocus: false,
-    enabled: !isConnected,
+    enabled: true,
   });
-  
-  const isLoading = sseLoading && !floorData;
+
+  const isLoading = sseLoading && floorData === undefined;
 
   // Fetch alerts
   const { data: alertsData } = useQuery<AlertsResponse>({
@@ -529,13 +530,8 @@ export function PosPageClient() {
     setDismissedAlerts(prev => new Set([...Array.from(prev), alertId]));
   }, []);
 
-  const handleStartOrder = async () => {
+  const handleStartOrderWithCount = async (count: number) => {
     if (!guestDialog || !currentUser) return;
-    const num = parseInt(guestCount, 10);
-    if (Number.isNaN(num) || num < 1) {
-      setCreateError("Podaj liczbę gości (min 1)");
-      return;
-    }
     setCreating(true);
     setCreateError("");
     try {
@@ -546,7 +542,7 @@ export function PosPageClient() {
           tableId: guestDialog.tableId,
           roomId: guestDialog.roomId,
           userId: currentUser.id,
-          guestCount: num,
+          guestCount: count,
         }),
       });
       const data = await res.json();
@@ -560,9 +556,18 @@ export function PosPageClient() {
       router.push(`/pos/order/${data.order.id}`);
     } catch {
       setCreateError("Błąd połączenia");
-    } finally {
       setCreating(false);
     }
+  };
+
+  const handleStartOrder = async () => {
+    if (!guestDialog || !currentUser) return;
+    const num = parseInt(guestCount, 10);
+    if (Number.isNaN(num) || num < 1) {
+      setCreateError("Podaj liczbę gości (min 1)");
+      return;
+    }
+    await handleStartOrderWithCount(num);
   };
 
   const handleTakeaway = async () => {
@@ -644,6 +649,9 @@ export function PosPageClient() {
     <div className="flex h-[calc(100vh-4rem)] flex-col">
       {/* === TOP BAR === */}
       <div className="flex flex-wrap items-center gap-2 border-b bg-card px-3 py-2 sm:px-4">
+        <div className="relative mr-1 hidden h-8 w-10 flex-shrink-0 sm:block">
+          <Image src="/logo.png" alt="Łabędź" fill className="object-contain object-left" unoptimized />
+        </div>
         <div className="flex flex-1 flex-wrap gap-1.5">
           {rooms.map((room) => {
             const isActive = selectedRoomId === room.id;
@@ -667,7 +675,7 @@ export function PosPageClient() {
                       ? "bg-rose-500 text-white animate-pulse"
                       : isActive 
                         ? "bg-primary-foreground/20 text-primary-foreground" 
-                        : "bg-amber-500 text-white"
+                        : "bg-brand-brown text-white"
                   )}>
                     {room.stats.occupied + room.stats.billRequested}
                   </span>
@@ -706,7 +714,21 @@ export function PosPageClient() {
 
       {/* === TABLE GRID === */}
       <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
-        {selectedRoom && (
+        {rooms.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <p className="text-lg font-medium text-muted-foreground">Brak sal i stolików</p>
+            <p className="max-w-sm text-sm text-muted-foreground">
+              Skonfiguruj sale i stoliki w ustawieniach, żeby móc przyjmować zamówienia.
+              Jeśli sale istniały wcześniej, mogły zostać wyłączone — sprawdź w Ustawieniach → Sale.
+            </p>
+            {currentUser?.isOwner && (
+              <Button onClick={() => router.push("/settings/rooms")} variant="default">
+                <Settings className="mr-2 h-4 w-4" />
+                Przejdź do ustawień
+              </Button>
+            )}
+          </div>
+        ) : selectedRoom ? (
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
             {selectedRoom.tables.map((table) => (
               <TableCard
@@ -728,7 +750,7 @@ export function PosPageClient() {
               />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
       {/* === BOTTOM ACTION BAR === */}
@@ -819,7 +841,11 @@ export function PosPageClient() {
                   key={n}
                   variant={guestCount === String(n) ? "default" : "outline"}
                   className="h-12 text-lg font-bold"
-                  onClick={() => setGuestCount(String(n))}
+                  disabled={creating}
+                  onClick={() => {
+                    setGuestCount(String(n));
+                    handleStartOrderWithCount(n);
+                  }}
                 >
                   {n}
                 </Button>
@@ -835,21 +861,21 @@ export function PosPageClient() {
                 onChange={(e) => setGuestCount(e.target.value)}
                 className="w-20 text-center"
               />
+              <Button
+                size="sm"
+                onClick={handleStartOrder}
+                disabled={creating || !guestCount}
+              >
+                OK
+              </Button>
             </div>
             {createError && (
               <p className="text-sm text-destructive">{createError}</p>
             )}
           </div>
-          <DialogFooter>
+          <DialogFooter className="sm:justify-center">
             <Button variant="outline" onClick={() => setGuestDialog(null)}>
               Anuluj
-            </Button>
-            <Button
-              onClick={handleStartOrder}
-              disabled={creating}
-              className="min-w-[120px]"
-            >
-              {creating ? "Tworzenie…" : `Rozpocznij (${guestCount} os.)`}
             </Button>
           </DialogFooter>
         </DialogContent>

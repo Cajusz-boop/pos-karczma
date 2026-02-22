@@ -5,6 +5,7 @@ export type CategoryNode = {
   sortOrder: number;
   color: string | null;
   icon: string | null;
+  imageUrl: string | null;
   children?: CategoryNode[];
 };
 

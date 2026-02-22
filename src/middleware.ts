@@ -12,6 +12,7 @@ const PUBLIC_API_ROUTES = [
 
 const PUBLIC_API_PREFIXES = [
   "/api/e-receipt/",
+  "/api/tools/",
 ];
 
 function isPublicApiRoute(pathname: string): boolean {

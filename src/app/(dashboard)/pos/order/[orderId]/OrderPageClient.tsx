@@ -132,6 +132,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const [lastAddedProductId, setLastAddedProductId] = useState<string | null>(null);
   const [recentProductIds, setRecentProductIds] = useState<string[]>([]);
   const [excludedAllergens, setExcludedAllergens] = useState<string[]>([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [modifierProduct, setModifierProduct] = useState<{
     product: ProductRow;
     selected: Record<string, string[]>;
@@ -215,6 +216,50 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     refetchOnWindowFocus: false,
   });
 
+  // Favorites
+  const { data: userPrefs } = useQuery<{ preferences: { favoriteProducts: string[] } }>({
+    queryKey: ["pos-preferences", currentUser?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/users/${currentUser?.id}/pos-preferences`);
+      if (!res.ok) return { preferences: { favoriteProducts: [] } };
+      return res.json();
+    },
+    enabled: !!currentUser?.id,
+    staleTime: 60 * 1000,
+  });
+  const favoriteProductIds = userPrefs?.preferences?.favoriteProducts ?? [];
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      const res = await fetch(`/api/users/${currentUser?.id}/pos-preferences/favorites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId }),
+      });
+      if (!res.ok) throw new Error("Błąd ulubionych");
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(
+        ["pos-preferences", currentUser?.id],
+        (old: { preferences: { favoriteProducts: string[] } } | undefined) => ({
+          preferences: {
+            ...old?.preferences,
+            favoriteProducts: data.favoriteProducts,
+          },
+        })
+      );
+    },
+  });
+
+  const handleToggleFavorite = (productId: string) => {
+    toggleFavoriteMutation.mutate(productId);
+  };
+
+  const handleToggleFavoritesView = () => {
+    setShowFavoritesOnly(prev => !prev);
+  };
+
   useEffect(() => {
     if (orderData?.status === "READY" && prevOrderStatusRef.current !== "READY") {
       setShowReadyBanner(true);
@@ -252,6 +297,10 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     () => getDirectChildren(categories, currentCategoryId),
     [categories, currentCategoryId]
   );
+  const rootCategories = useMemo(
+    () => getDirectChildren(categories, null),
+    [categories]
+  );
   const breadcrumb = currentCategoryId ? getBreadcrumb(categories, currentCategoryId) : [];
 
   const recentProducts = useMemo(() => {
@@ -270,6 +319,15 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       if (excludedAllergens.length === 0) return true;
       return !p.allergens.some((a) => excludedAllergens.includes(a.code));
     };
+    const alphabeticalSort = (a: ProductRow, b: ProductRow) => 
+      a.name.localeCompare(b.name, 'pl');
+
+    // Show favorites only mode
+    if (showFavoritesOnly) {
+      return [...products]
+        .filter((p) => favoriteProductIds.includes(p.id) && p.isAvailable && allergenFilter(p))
+        .sort(alphabeticalSort);
+    }
 
     if (deferredSearchQuery.trim()) {
       const q = deferredSearchQuery.trim().toLowerCase();
@@ -280,13 +338,13 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
             (p.nameShort && p.nameShort.toLowerCase().includes(q))) &&
             allergenFilter(p)
         )
-        .sort((a, b) => a.sortOrder - b.sortOrder);
+        .sort(alphabeticalSort);
     }
     if (categoryIdsToShow.length === 0) return [];
     return [...products]
       .filter((p) => categoryIdsToShow.includes(p.categoryId) && allergenFilter(p))
-      .sort((a, b) => a.sortOrder - b.sortOrder);
-  }, [products, categoryIdsToShow, deferredSearchQuery, excludedAllergens]);
+      .sort(alphabeticalSort);
+  }, [products, categoryIdsToShow, deferredSearchQuery, excludedAllergens, showFavoritesOnly, favoriteProductIds]);
 
   const sendMutation = useMutation({
     mutationFn: async () => {
@@ -322,8 +380,12 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   });
 
   const handleCategoryClick = (cat: CategoryNode) => {
-    if (cat.children && cat.children.length > 0) {
-      setCategoryStack((s) => [...s, cat.id]);
+    // Clear favorites view when clicking a category
+    setShowFavoritesOnly(false);
+    // If clicking a root category, reset stack to just that category
+    const isRootCategory = rootCategories.some(rc => rc.id === cat.id);
+    if (isRootCategory) {
+      setCategoryStack([cat.id]);
     } else {
       setCategoryStack((s) => [...s, cat.id]);
     }
@@ -631,6 +693,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         items={items}
         categoryStack={categoryStack}
         childCategories={childCategories}
+        rootCategories={rootCategories}
         breadcrumb={breadcrumb}
         searchQuery={searchQuery}
         filteredProducts={filteredProducts}
@@ -649,6 +712,11 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         onAllergenClear={() => setExcludedAllergens([])}
         popularProducts={popularProducts}
         recentProducts={recentProducts}
+        favoriteProductIds={favoriteProductIds}
+        onToggleFavorite={handleToggleFavorite}
+        showFavoritesOnly={showFavoritesOnly}
+        onToggleFavoritesView={handleToggleFavoritesView}
+        allProducts={products}
         onProductClick={tryAddProduct}
         onSend={() => sendMutation.mutate()}
         sendError={sendMutation.isError ? String(sendMutation.error?.message) : null}

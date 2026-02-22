@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -124,6 +125,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-screen flex-col">
         <header className="flex h-10 items-center justify-between border-b bg-card px-3">
           <div className="flex items-center gap-2">
+            <div className="relative h-7 w-10 flex-shrink-0">
+              <Image src="/logo.png" alt="Łabędź" fill className="object-contain object-left" unoptimized />
+            </div>
             <span className="text-sm font-semibold text-foreground">Karczma Łabędź</span>
             <span className="text-xs text-muted-foreground">|</span>
             <Link href="/reports" className="text-xs text-muted-foreground hover:text-foreground">
@@ -163,8 +167,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="flex h-12 items-center justify-between border-b px-4">
-          <span className="text-sm font-bold">Karczma Łabędź</span>
+        <div className="flex h-12 items-center justify-between gap-2 border-b px-4">
+          <div className="relative h-8 w-11 flex-shrink-0">
+            <Image src="/logo.png" alt="Łabędź" fill className="object-contain object-left" unoptimized />
+          </div>
+          <span className="text-sm font-bold truncate">Karczma Łabędź</span>
           <button
             type="button"
             className="md:hidden"

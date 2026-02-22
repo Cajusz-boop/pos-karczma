@@ -42,6 +42,7 @@ interface RoomData {
   capacity: number;
   type: string;
   isSeasonal: boolean;
+  isActive?: boolean;
   sortOrder: number;
   tables: TableData[];
 }
@@ -88,8 +89,8 @@ export default function RoomsPage() {
     try {
       const res = await fetch("/api/rooms?all=true");
       const data = await res.json();
-      setRooms(data ?? []);
-    } catch { /* ignore */ } finally { setLoading(false); }
+      setRooms(Array.isArray(data) ? data : []);
+    } catch { setRooms([]); } finally { setLoading(false); }
   }, []);
 
   useEffect(() => { fetchRooms(); }, [fetchRooms]);
@@ -174,7 +175,7 @@ export default function RoomsPage() {
           <LayoutGrid className="h-7 w-7 text-indigo-500" />
           <div>
             <h1 className="text-2xl font-bold">Sale i stoliki</h1>
-            <p className="text-sm text-muted-foreground">{rooms.length} sal, {rooms.reduce((s, r) => s + r.tables.length, 0)} stolików</p>
+            <p className="text-sm text-muted-foreground">{rooms.length} sal, {rooms.reduce((s, r) => s + (r.tables?.length ?? 0), 0)} stolików</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -197,11 +198,20 @@ export default function RoomsPage() {
                 <span className="font-medium">{room.name}</span>
                 <span className="rounded bg-muted px-1.5 py-0.5 text-xs">{ROOM_TYPES.find((t) => t.value === room.type)?.label}</span>
                 {room.isSeasonal && <Snowflake className="h-4 w-4 text-cyan-500" />}
+                {room.isActive === false && (
+                  <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">Wyłączona</span>
+                )}
                 <span className="text-xs text-muted-foreground">{room.tables.length} stolików • {room.capacity} miejsc</span>
               </div>
               <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toggleRoom(room.id, true)}>
-                  <Eye className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn("h-8 w-8", !room.isActive && "text-amber-600")}
+                  onClick={() => toggleRoom(room.id, room.isActive ?? true)}
+                  title={room.isActive ? "Wyłącz salę (ukryj na mapie POS)" : "Włącz salę"}
+                >
+                  {room.isActive ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                 </Button>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditRoom(room)}>
                   <Pencil className="h-4 w-4" />

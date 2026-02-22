@@ -16,6 +16,7 @@ async function fetchCategoriesFromDb() {
       sortOrder: true,
       color: true,
       icon: true,
+      imageUrl: true,
       children: {
         where: { isActive: true },
         orderBy: { sortOrder: "asc" },
@@ -26,6 +27,7 @@ async function fetchCategoriesFromDb() {
           sortOrder: true,
           color: true,
           icon: true,
+          imageUrl: true,
           children: {
             where: { isActive: true },
             orderBy: { sortOrder: "asc" },
@@ -36,6 +38,7 @@ async function fetchCategoriesFromDb() {
               sortOrder: true,
               color: true,
               icon: true,
+              imageUrl: true,
             },
           },
         },
@@ -142,6 +145,7 @@ export async function GET(request: NextRequest) {
       sortOrder: c.sortOrder,
       color: c.color,
       icon: c.icon,
+      imageUrl: c.imageUrl,
       children: (c.children ?? []).map((ch) => ({
         id: ch.id,
         name: ch.name,
@@ -149,6 +153,7 @@ export async function GET(request: NextRequest) {
         sortOrder: ch.sortOrder,
         color: ch.color,
         icon: ch.icon,
+        imageUrl: ch.imageUrl,
         children: (ch.children ?? []).map((ch2) => ({
           id: ch2.id,
           name: ch2.name,
@@ -156,6 +161,7 @@ export async function GET(request: NextRequest) {
           sortOrder: ch2.sortOrder,
           color: ch2.color,
           icon: ch2.icon,
+          imageUrl: ch2.imageUrl,
         })),
       })),
     }));

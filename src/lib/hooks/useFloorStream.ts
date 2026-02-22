@@ -100,6 +100,8 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fallbackIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initialLoadTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const failedAttemptsRef = useRef(0);
   
   const cleanup = useCallback(() => {
     if (eventSourceRef.current) {
@@ -114,6 +116,10 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
       clearInterval(fallbackIntervalRef.current);
       fallbackIntervalRef.current = null;
     }
+    if (initialLoadTimeoutRef.current) {
+      clearTimeout(initialLoadTimeoutRef.current);
+      initialLoadTimeoutRef.current = null;
+    }
   }, []);
 
   const fetchFallback = useCallback(async () => {
@@ -127,6 +133,7 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
       setIsLoading(false);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Błąd połączenia");
+      setIsLoading(false); // Zawsze kończ stan ładowania, żeby UI nie wisiało w nieskończoność
     }
   }, []);
 
@@ -147,6 +154,13 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
     eventSource.onopen = () => {
       setIsConnected(true);
       setError(null);
+      // Gdy SSE łączy się, ale pierwsza wiadomość się opóźnia – po 8 s wywołaj fetch jako backup
+      initialLoadTimeoutRef.current = setTimeout(() => {
+        initialLoadTimeoutRef.current = null;
+        if (eventSourceRef.current && eventSource.readyState === EventSource.OPEN) {
+          fetchFallback();
+        }
+      }, 4000);
     };
     
     eventSource.onmessage = (event) => {
@@ -154,11 +168,18 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
         const data: FloorEvent = JSON.parse(event.data);
         
         if (data.type === "floor" && data.rooms) {
+          if (initialLoadTimeoutRef.current) {
+            clearTimeout(initialLoadTimeoutRef.current);
+            initialLoadTimeoutRef.current = null;
+          }
           setRooms(data.rooms);
           setLastUpdate(data.timestamp ? new Date(data.timestamp) : new Date());
           setIsLoading(false);
+          setError(null);
+          failedAttemptsRef.current = 0;
         } else if (data.type === "error") {
           setError(data.message ?? "Błąd serwera");
+          setIsLoading(false); // Nie blokuj UI przy błędzie – fallback w PosPageClient może zadziałać
         }
       } catch (e) {
         console.error("[SSE] Parse error:", e);
@@ -169,7 +190,15 @@ export function useFloorStream(options: UseFloorStreamOptions = {}): UseFloorStr
       setIsConnected(false);
       eventSource.close();
       eventSourceRef.current = null;
-      
+      failedAttemptsRef.current += 1;
+
+      // Po 2 nieudanych próbach SSE przechodzimy na fallback fetch (np. gdy stream nie działa w dev)
+      if (failedAttemptsRef.current >= 2) {
+        fallbackIntervalRef.current = setInterval(fetchFallback, fallbackPollingMs);
+        fetchFallback();
+        return;
+      }
+
       reconnectTimeoutRef.current = setTimeout(() => {
         connect();
       }, 3000);

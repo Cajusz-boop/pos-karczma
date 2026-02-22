@@ -53,6 +53,7 @@ export async function GET(request: NextRequest) {
       capacity: room.capacity,
       type: room.type,
       isSeasonal: room.isSeasonal,
+      isActive: room.isActive,
       sortOrder: room.sortOrder,
       tables: room.tables.map((t) => {
         const activeOrder = t.orders[0];

@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import "@/components/ui/dialog";
-import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone, Truck, Package, Tv, CreditCard, BarChart3, Archive, Wrench } from "lucide-react";
+import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone, Truck, Package, Tv, CreditCard, BarChart3, Archive, Wrench, HardDrive } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
@@ -735,6 +735,13 @@ export default function SettingsPageClient() {
             <div>
               <p className="font-medium">Archiwum KDS</p>
               <p className="text-xs text-muted-foreground">Historia, statystyki czasu</p>
+            </div>
+          </Link>
+          <Link href="/settings/tools" className="flex items-center gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 hover:bg-blue-100 transition-colors dark:border-blue-800 dark:bg-blue-950 dark:hover:bg-blue-900">
+            <HardDrive className="h-5 w-5 text-blue-500" />
+            <div>
+              <p className="font-medium">Narzędzia instalacyjne</p>
+              <p className="text-xs text-muted-foreground">Skaner środowiskowy, migracja</p>
             </div>
           </Link>
         </div>

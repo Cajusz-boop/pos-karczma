@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -42,6 +42,7 @@ export interface OrderPageViewProps {
   items: OrderItemLine[];
   categoryStack: string[];
   childCategories: CategoryNode[];
+  rootCategories: CategoryNode[];
   breadcrumb: CategoryNode[];
   searchQuery: string;
   filteredProducts: ProductRow[];
@@ -59,6 +60,11 @@ export interface OrderPageViewProps {
   onAllergenClear?: () => void;
   popularProducts?: Array<{ id: string; name: string; priceGross: number; taxRateId: string; color: string | null; categoryName: string; orderCount: number }>;
   recentProducts?: ProductRow[];
+  favoriteProductIds?: string[];
+  onToggleFavorite?: (productId: string) => void;
+  showFavoritesOnly?: boolean;
+  onToggleFavoritesView?: () => void;
+  allProducts?: ProductRow[];
   onProductClick: (p: ProductRow) => void;
   onProductLongPress?: (p: ProductRow, quantity: number) => void;
   onSend: () => void;
@@ -103,6 +109,7 @@ export function OrderPageView(props: OrderPageViewProps) {
     items,
     categoryStack,
     childCategories,
+    rootCategories,
     breadcrumb,
     searchQuery,
     filteredProducts,
@@ -117,6 +124,11 @@ export function OrderPageView(props: OrderPageViewProps) {
     onAllergenClear,
     popularProducts = [],
     recentProducts = [],
+    favoriteProductIds = [],
+    onToggleFavorite,
+    showFavoritesOnly = false,
+    onToggleFavoritesView,
+    allProducts = [],
     onProductClick,
     onProductLongPress,
     onSend,
@@ -144,7 +156,58 @@ export function OrderPageView(props: OrderPageViewProps) {
   const [mobileReceiptOpen, setMobileReceiptOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [qtyPopup, setQtyPopup] = useState<{ product: ProductRow; x: number; y: number } | null>(null);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Search suggestions - show top 8 matching products
+  const searchSuggestions = useMemo(() => {
+    if (!searchQuery.trim() || searchQuery.length < 2) return [];
+    const q = searchQuery.toLowerCase();
+    return allProducts
+      .filter(p => p.isAvailable && (
+        p.name.toLowerCase().includes(q) ||
+        (p.nameShort && p.nameShort.toLowerCase().includes(q))
+      ))
+      .slice(0, 8);
+  }, [searchQuery, allProducts]);
+
+  // Favorite products
+  const favoriteProducts = useMemo(() => {
+    return allProducts.filter(p => favoriteProductIds.includes(p.id) && p.isAvailable);
+  }, [allProducts, favoriteProductIds]);
+
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return text;
+    const idx = text.toLowerCase().indexOf(query.toLowerCase());
+    if (idx === -1) return text;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <span className="bg-yellow-200 dark:bg-yellow-800 font-semibold">{text.slice(idx, idx + query.length)}</span>
+        {text.slice(idx + query.length)}
+      </>
+    );
+  };
+
+  // Default emojis for categories
+  const getCategoryEmoji = (name: string, icon: string | null) => {
+    if (icon) return icon;
+    const n = name.toLowerCase();
+    if (n.includes("przystaw")) return "🥗";
+    if (n.includes("zup")) return "🍲";
+    if (n.includes("dani") || n.includes("główn")) return "🍽️";
+    if (n.includes("mięs")) return "🥩";
+    if (n.includes("ryb")) return "🐟";
+    if (n.includes("wege")) return "🥬";
+    if (n.includes("deser")) return "🍰";
+    if (n.includes("gorąc") || n.includes("kaw") || n.includes("herb")) return "☕";
+    if (n.includes("zimn") || n.includes("sok")) return "🧃";
+    if (n.includes("piw")) return "🍺";
+    if (n.includes("win")) return "🍷";
+    if (n.includes("alkoh") || n.includes("mocn") || n.includes("wódk")) return "🥃";
+    return null;
+  };
 
   const handleProductPointerDown = useCallback((e: React.PointerEvent, product: ProductRow) => {
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
@@ -443,21 +506,72 @@ export function OrderPageView(props: OrderPageViewProps) {
             </nav>
           )}
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
             <Input
-              placeholder="Szukaj produktu…"
+              ref={searchInputRef}
+              placeholder="🔍 Szukaj produktu…"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 200)}
               className="h-9 pl-8 text-sm"
             />
             {searchQuery && (
               <button
                 type="button"
-                onClick={() => onSearchChange("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onClick={() => { onSearchChange(""); searchInputRef.current?.focus(); }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground z-10"
               >
                 <X className="h-4 w-4" />
               </button>
+            )}
+            
+            {/* Search suggestions dropdown */}
+            {searchFocused && searchSuggestions.length > 0 && (
+              <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-80 overflow-y-auto rounded-lg border bg-card shadow-xl">
+                {searchSuggestions.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors border-b last:border-b-0"
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                      onProductClick(p);
+                      onSearchChange("");
+                    }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">
+                        {highlightMatch(p.name, searchQuery)}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {p.category?.name}
+                      </div>
+                    </div>
+                    <div className="font-bold text-primary tabular-nums">
+                      {p.priceGross.toFixed(2)} zł
+                    </div>
+                    {onToggleFavorite && (
+                      <button
+                        type="button"
+                        className="p-1 hover:bg-muted rounded"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onToggleFavorite(p.id);
+                        }}
+                      >
+                        <Star className={cn(
+                          "h-4 w-4",
+                          favoriteProductIds.includes(p.id) 
+                            ? "fill-yellow-400 text-yellow-400" 
+                            : "text-muted-foreground"
+                        )} />
+                      </button>
+                    )}
+                  </button>
+                ))}
+              </div>
             )}
           </div>
           {onAllergenToggle && onAllergenClear && (
@@ -532,14 +646,31 @@ export function OrderPageView(props: OrderPageViewProps) {
         )}
 
         {/* Categories - tabs style (horizontal scrollable) */}
-        {!searchQuery && childCategories.length > 0 && (
+        {/* Always show root categories for easy navigation */}
+        {!searchQuery && rootCategories.length > 0 && (
           <div className="border-b">
             <div className="flex overflow-x-auto px-2 py-1.5 gap-1 scrollbar-hide">
-              {childCategories.map((cat, i) => {
+              {/* Favorites tab */}
+              {onToggleFavoritesView && favoriteProductIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={onToggleFavoritesView}
+                  className={cn(
+                    "shrink-0 rounded-lg px-3 py-2 text-sm font-semibold transition-all active:scale-95",
+                    showFavoritesOnly
+                      ? "bg-yellow-500 text-white shadow-md ring-2 ring-yellow-300"
+                      : "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 shadow-sm hover:shadow-md hover:bg-yellow-200",
+                  )}
+                >
+                  <Star className={cn("inline h-4 w-4 mr-1", showFavoritesOnly && "fill-white")} />
+                  Ulubione ({favoriteProductIds.length})
+                </button>
+              )}
+              {rootCategories.map((cat, i) => {
                 const gradient = cat.color
                   ? undefined
                   : CATEGORY_COLORS[i % CATEGORY_COLORS.length];
-                const isActive = categoryStack.length > 0 && categoryStack[categoryStack.length - 1] === cat.id;
+                const isActive = !showFavoritesOnly && categoryStack.includes(cat.id);
                 return (
                   <button
                     key={cat.id}
@@ -548,13 +679,41 @@ export function OrderPageView(props: OrderPageViewProps) {
                     className={cn(
                       "shrink-0 rounded-lg px-3 py-2 text-sm font-semibold transition-all active:scale-95",
                       isActive
-                        ? "text-white shadow-md"
+                        ? "text-white shadow-md ring-2 ring-white/50"
                         : "text-white/90 shadow-sm hover:shadow-md",
                       gradient && `bg-gradient-to-br ${gradient}`,
                     )}
                     style={cat.color ? { backgroundColor: cat.color } : undefined}
                   >
-                    {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                    {getCategoryEmoji(cat.name, cat.icon) && (
+                      <span className="mr-1">{getCategoryEmoji(cat.name, cat.icon)}</span>
+                    )}
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Show subcategories if current category has children */}
+        {!searchQuery && childCategories.length > 0 && categoryStack.length > 0 && (
+          <div className="border-b bg-muted/30">
+            <div className="flex overflow-x-auto px-2 py-1 gap-1 scrollbar-hide">
+              {childCategories.map((cat) => {
+                const isActive = categoryStack[categoryStack.length - 1] === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => onCategoryClick(cat)}
+                    className={cn(
+                      "shrink-0 rounded px-2.5 py-1 text-xs font-medium transition-all active:scale-95",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-background text-foreground hover:bg-muted",
+                    )}
+                  >
                     {cat.name}
                   </button>
                 );
@@ -585,9 +744,28 @@ export function OrderPageView(props: OrderPageViewProps) {
                 )}
                 style={p.color ? { borderLeftColor: p.color } : undefined}
               >
-                <span className="text-sm font-semibold leading-tight sm:text-base">
-                  {p.name}
-                </span>
+                <div className="flex items-start justify-between gap-1">
+                  <span className="text-sm font-semibold leading-tight sm:text-base">
+                    {p.name}
+                  </span>
+                  {onToggleFavorite && (
+                    <button
+                      type="button"
+                      className="shrink-0 p-0.5 -mr-1 -mt-1 hover:bg-muted/50 rounded"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleFavorite(p.id);
+                      }}
+                    >
+                      <Star className={cn(
+                        "h-4 w-4 transition-colors",
+                        favoriteProductIds.includes(p.id) 
+                          ? "fill-yellow-400 text-yellow-400" 
+                          : "text-muted-foreground/50 hover:text-yellow-400"
+                      )} />
+                    </button>
+                  )}
+                </div>
                 <span className="mt-1 text-base font-bold tabular-nums text-primary sm:text-lg">
                   {p.priceGross.toFixed(2)} zł
                 </span>
@@ -612,12 +790,19 @@ export function OrderPageView(props: OrderPageViewProps) {
               </button>
             ))}
           </div>
-          {filteredProducts.length === 0 && !searchQuery && categoryStack.length > 0 && (
+          {filteredProducts.length === 0 && !searchQuery && showFavoritesOnly && (
+            <div className="py-12 text-center text-muted-foreground">
+              <Star className="mx-auto h-12 w-12 text-yellow-300 mb-2" />
+              <p>Brak ulubionych produktów</p>
+              <p className="text-xs mt-1">Kliknij gwiazdkę ⭐ przy produkcie, aby dodać go do ulubionych</p>
+            </div>
+          )}
+          {filteredProducts.length === 0 && !searchQuery && !showFavoritesOnly && categoryStack.length > 0 && (
             <div className="py-12 text-center text-muted-foreground">
               Brak produktów w tej kategorii
             </div>
           )}
-          {filteredProducts.length === 0 && !searchQuery && categoryStack.length === 0 && (
+          {filteredProducts.length === 0 && !searchQuery && !showFavoritesOnly && categoryStack.length === 0 && (
             <div className="py-12 text-center text-muted-foreground">
               Wybierz kategorię aby zobaczyć produkty
             </div>
