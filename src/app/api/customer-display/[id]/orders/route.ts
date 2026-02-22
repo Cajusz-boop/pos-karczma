@@ -33,7 +33,7 @@ export async function GET(
     const orders = await prisma.order.findMany({
       where: {
         type: { in: ["TAKEAWAY", "PHONE"] },
-        status: { in: ["OPEN", "PREPARING"] },
+        status: { in: ["OPEN", "IN_PROGRESS", "SENT_TO_KITCHEN"] },
         createdAt: { gte: cutoffTime },
       },
       include: {
