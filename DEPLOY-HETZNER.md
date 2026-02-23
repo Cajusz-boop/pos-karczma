@@ -81,6 +81,19 @@ server {
     listen 80;
     server_name pos.karczma-labedz.pl;
 
+    # Next.js static — serwuj z dysku (standalone)
+    location /_next/static/ {
+        alias /var/www/pos/standalone/.next/static/;
+        expires 365d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Public (manifest, favicon, icons, sw.js)
+    location ~ ^/(manifest\.json|favicon\.ico|icon-192\.png|icon-512\.png|sw\.js) {
+        root /var/www/pos/standalone/public;
+        expires 7d;
+    }
+
     location / {
         proxy_pass http://127.0.0.1:3001;
         proxy_http_version 1.1;
@@ -144,6 +157,18 @@ Flaga `-FullZip` przy pierwszym deployu (potem nie trzeba).
 | hotel-pms | 3000 |
 | pos-karczma | 3001 |
 
+## Auto-start po restarcie serwera (PM2 startup)
+
+**Ważne:** Bez tego aplikacja nie uruchomi się po rebootcie VPS.
+
+```bash
+# Jednorazowo - wygeneruj i uruchom komendę startup
+pm2 startup
+
+# Zapisz aktualną konfigurację (uruchom po każdym pm2 start/restart)
+pm2 save
+```
+
 ## Logi i diagnostyka
 
 ```bash
@@ -163,11 +188,35 @@ tail -f /var/log/nginx/error.log
 ## Troubleshooting
 
 ### 502 Bad Gateway
-Aplikacja nie działa. Sprawdź:
-```bash
-pm2 status
-pm2 logs pos-karczma --lines 50
+Aplikacja nie odpowiada. Szybka naprawa z Windows:
+
+```powershell
+# Wklej klucz i host z .env.deploy.hetzner
+scp -i $key scripts/fix-502-hetzner.sh root@65.108.245.25:/tmp/
+ssh -i $key root@65.108.245.25 "bash /tmp/fix-502-hetzner.sh"
 ```
+
+Lub po SSH na serwer:
+
+```bash
+# 1. Sprawdź status
+pm2 status
+
+# 2. Restart
+pm2 restart pos-karczma
+pm2 save
+
+# 3. Sprawdź czy odpowiada (powinno zwrócić JSON)
+curl http://127.0.0.1:3001/api/health
+
+# 4. Jeśli nadal 502 - sprawdź logi
+pm2 logs pos-karczma --lines 100
+
+# 5. Sprawdź .env (DATABASE_URL, PORT)
+cat /var/www/pos/.env | grep -v PASSWORD
+```
+
+Typowe przyczyny: błąd bazy danych, brak .env, port 3001 zajęty.
 
 ### Błąd bazy danych
 ```bash
@@ -177,8 +226,9 @@ mysql -u pos -p pos_karczma -e "SHOW TABLES;"
 ### Restart wszystkiego
 ```bash
 pm2 restart all
+pm2 save
 systemctl reload nginx
 ```
 
 ---
-*Ostatni test webhook: 2026-02-21*
+*Ostatni test webhook: 2026-02-23*

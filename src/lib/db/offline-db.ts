@@ -325,6 +325,27 @@ export class PosOfflineDB extends Dexie {
       paymentLocks: "orderLocalId",
       cachedSessions: "userId, userName",
     });
+
+    // FIX: Baza mogła zostać utworzona z uszkodzonym schematem (np. v20 z 0 tabel).
+    // Wersja 21 wymusi migrację i utworzenie wszystkich object stores.
+    this.version(21).stores({
+      products: "id, categoryId, isActive, isAvailable, sortOrder, [categoryId+isActive+sortOrder], [isActive+isAvailable]",
+      categories: "id, parentId, isActive, sortOrder, [parentId+sortOrder], [isActive+sortOrder]",
+      rooms: "id, isActive, sortOrder",
+      posTables: "id, roomId, status, number, [roomId+status], [roomId+number]",
+      modifierGroups: "id",
+      taxRates: "id, isDefault",
+      allergens: "id, code",
+
+      orders: "_localId, _serverId, _syncStatus, tableId, status, userId, createdAt, [status+createdAt], [tableId+status], [_syncStatus+_updatedAt]",
+      orderItems: "_localId, _serverId, _syncStatus, orderId, orderServerId, productId, status, [orderId+status], [orderId+courseNumber]",
+      payments: "_localId, _serverId, _syncStatus, orderId, orderServerId, createdAt",
+
+      syncQueue: "++id, operationId, table, localId, priority, timestamp, [priority+timestamp]",
+      syncCheckpoints: "id",
+      paymentLocks: "orderLocalId",
+      cachedSessions: "userId, userName",
+    });
   }
 
   static generateLocalId(): string {

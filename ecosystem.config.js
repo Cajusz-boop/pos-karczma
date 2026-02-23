@@ -2,12 +2,14 @@ module.exports = {
   apps: [
     {
       name: 'pos-karczma',
-      script: 'node_modules/.bin/next',
-      args: 'start -p 3001',
+      script: 'node',
+      node_args: '-r dotenv/config',  // ładuje .env z cwd (DATABASE_URL, JWT_SECRET) — działa na Node 16+
+      args: 'standalone/server.js',
       cwd: '/var/www/pos',
       env: {
         NODE_ENV: 'production',
-        PORT: 3001
+        PORT: 3001,
+        HOSTNAME: '0.0.0.0'
       },
       instances: 1,
       exec_mode: 'fork',

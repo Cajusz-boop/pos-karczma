@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { initialSync, backgroundRefresh } from "@/lib/db/initial-sync";
 import { clearExpiredSessions } from "@/lib/auth/cached-auth";
 import { queueOperation } from "@/lib/sync/sync-engine";
@@ -9,9 +9,14 @@ import { db } from "@/lib/db/offline-db";
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minut
 const PURGE_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24h
 
+export const DexieSyncContext = createContext<{ isReady: boolean }>({ isReady: false });
+
+export function useDexieSyncReady(): boolean {
+  return useContext(DexieSyncContext).isReady;
+}
+
 export function DexieProvider({ children }: { children: React.ReactNode }) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_ready, setReady] = useState(false);
+  const [ready, setReady] = useState(false);
   const initRef = useRef(false);
 
   useEffect(() => {
@@ -20,6 +25,25 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
 
     async function init() {
       try {
+        // Napraw uszkodzonej bazy (v20 z 0 tabel) — Dexie nie może z niej migrować
+        const needReset = await new Promise<boolean>((resolve) => {
+          const req = indexedDB.open("PosKarczma");
+          req.onsuccess = () => {
+            const idb = req.result;
+            const storeCount = idb.objectStoreNames.length;
+            const version = idb.version;
+            idb.close();
+            resolve(version === 20 && storeCount === 0);
+          };
+          req.onerror = () => resolve(false);
+        });
+        if (needReset) {
+          console.warn("[DexieProvider] Wykryto uszkodzoną bazę (v20, 0 tabel) — reset i przeładowanie");
+          indexedDB.deleteDatabase("PosKarczma");
+          location.reload();
+          return;
+        }
+
         await clearExpiredSessions();
 
         // V4-17: App version check — force refresh przy update (nie przy fresh install)
@@ -74,6 +98,24 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
           console.warn("[DexieProvider] Sync errors:", result.errors);
         }
 
+        // Diagnostyka — dev only, dostęp do db w konsoli
+        if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
+          (window as unknown as { __POS_DB__?: typeof db }).__POS_DB__ = db;
+          const rooms = await db.rooms.toArray();
+          const tables = await db.posTables.toArray();
+          console.log("[DexieProvider] DIAG: rooms count:", rooms.length);
+          console.log("[DexieProvider] DIAG: sample isActive:", rooms[0]?.isActive, typeof rooms[0]?.isActive);
+          console.log("[DexieProvider] DIAG: tables count:", tables.length);
+          console.log("[DexieProvider] DIAG: sample isAvailable:", tables[0]?.isAvailable, typeof tables[0]?.isAvailable);
+          if (rooms.length === 0) {
+            console.warn("[DexieProvider] DIAG → Dane NIE trafiły do Dexie (problem w sync)");
+          } else if (rooms[0] && (rooms[0].isActive === 0 || rooms[0].isActive === false)) {
+            console.warn("[DexieProvider] DIAG → isActive=0/false — filtr active() może odrzucać");
+          } else if (rooms.length > 0) {
+            console.warn("[DexieProvider] DIAG → Dane OK w Dexie — problem w useLiveQuery/useMemo");
+          }
+        }
+
         // P20-FIX: Auto-purge starych zamówień (timestamp w Dexie)
         const lastPurgeCheckpoint = await db.syncCheckpoints.get("_lastPurge");
         const now = Date.now();
@@ -122,7 +164,9 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Don't block render — show app immediately, sync happens in background
-  // The `ready` state can be used for a loading indicator if needed
-  return <>{children}</>;
+  return (
+    <DexieSyncContext.Provider value={{ isReady: ready }}>
+      {children}
+    </DexieSyncContext.Provider>
+  );
 }

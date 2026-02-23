@@ -18,10 +18,11 @@ export function useRoomsWithTables(): { rooms: RoomWithTables[]; isLoading: bool
     async () => {
       if (!isBrowser()) return [];
 
-      const allRooms = await db.rooms
-        .where("isActive")
-        .equals(1)
-        .sortBy("sortOrder");
+      const allRoomsRaw = await db.rooms.toArray();
+      const active = (v: unknown) => v === true || v === 1;
+      const allRooms = allRoomsRaw
+        .filter((r) => active(r.isActive))
+        .sort((a, b) => a.sortOrder - b.sortOrder);
       const allTables = await db.posTables.toArray();
 
       const tablesByRoom = new Map<string, typeof allTables>();
@@ -34,7 +35,7 @@ export function useRoomsWithTables(): { rooms: RoomWithTables[]; isLoading: bool
         id: r.id,
         name: r.name,
         tables: (tablesByRoom.get(r.id) ?? [])
-          .filter((t) => t.isAvailable)
+          .filter((t) => active(t.isAvailable))
           .sort((a, b) => a.number - b.number)
           .map((t) => ({ id: t.id, number: t.number, status: t.status })),
       }));

@@ -66,10 +66,12 @@ export function ConnectionMonitor() {
   }, [checkServerWithLatency]);
 
   const checkBothServers = useCallback(async (): Promise<{ main: ServerCheckResult; local: ServerCheckResult }> => {
-    const [main, local] = await Promise.all([
-      checkServerWithLatency(MAIN_SERVER),
-      checkServerWithLatency(LOCAL_SERVER),
-    ]);
+    // Na HTTPS nie możemy pingować http:// (mixed content) — pomijamy local
+    const onHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+    const main = await checkServerWithLatency(MAIN_SERVER);
+    const local: ServerCheckResult = onHttps
+      ? { url: LOCAL_SERVER, available: false, latencyMs: Infinity }
+      : await checkServerWithLatency(LOCAL_SERVER);
     return { main, local };
   }, [checkServerWithLatency]);
 

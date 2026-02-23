@@ -45,10 +45,8 @@ log "Generating Prisma client..."
 npx prisma generate
 log "Prisma generate OK"
 
-# 4. Build
-log "Building application..."
-npm run build
-log "Build OK"
+# 4. Build — NIE na serwerze (za malo RAM). Uzyj: .\scripts\deploy-build.ps1
+log "Build: pomijany (robiony lokalnie przez deploy-build.ps1)"
 
 # 5. Prisma db push (sync schema)
 log "Syncing database schema..."

@@ -3,13 +3,14 @@ import { db } from "@/lib/db/offline-db";
 import type { LocalRoom, LocalTable } from "@/lib/db/offline-db";
 
 const isBrowser = () => typeof window !== "undefined";
+const active = (v: unknown) => v === true || v === 1;
 
 export function useRooms(activeOnly = true): { rooms: LocalRoom[]; isLoading: boolean } {
   const rooms = useLiveQuery(
     async () => {
       if (!isBrowser()) return [];
       const allRooms = await db.rooms.toArray();
-      const filtered = activeOnly ? allRooms.filter(r => r.isActive) : allRooms;
+      const filtered = activeOnly ? allRooms.filter((r) => active(r.isActive)) : allRooms;
       return filtered.sort((a, b) => a.sortOrder - b.sortOrder);
     },
     [activeOnly],

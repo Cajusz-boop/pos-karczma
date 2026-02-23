@@ -1,13 +1,14 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import Dexie from "dexie";
 import { db } from "@/lib/db/offline-db";
 import type { LocalProduct } from "@/lib/db/offline-db";
 
 const isBrowser = () => typeof window !== "undefined";
+const active = (v: unknown) => v === true || v === 1;
 
 /**
  * Reactive products from Dexie — auto-updates when data changes.
  * Drop-in replacement for React Query useProducts.
+ * Używa toArray + filter zamiast .where/.between — IndexedDB nie akceptuje boolean/null w IDBKeyRange.
  */
 export function useProducts(categoryId?: string): {
   products: LocalProduct[];
@@ -16,16 +17,11 @@ export function useProducts(categoryId?: string): {
   const products = useLiveQuery(
     async () => {
       if (!isBrowser()) return [];
-      if (categoryId) {
-        return db.products
-          .where("[categoryId+isActive+sortOrder]")
-          .between([categoryId, 1, Dexie.minKey], [categoryId, 1, Dexie.maxKey])
-          .toArray();
-      }
-      return db.products
-        .where("[isActive+isAvailable]")
-        .between([1, 1], [1, 1])
-        .toArray();
+      const all = await db.products.toArray();
+      const filtered = all
+        .filter((p) => active(p.isActive) && active(p.isAvailable) && (categoryId ? p.categoryId === categoryId : true))
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      return filtered;
     },
     [categoryId],
     []

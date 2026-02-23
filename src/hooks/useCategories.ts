@@ -1,9 +1,9 @@
 import { useLiveQuery } from "dexie-react-hooks";
-import Dexie from "dexie";
 import { db } from "@/lib/db/offline-db";
 import type { LocalCategory } from "@/lib/db/offline-db";
 
 const isBrowser = () => typeof window !== "undefined";
+const active = (v: unknown) => v === true || v === 1;
 
 export function useCategories(parentId?: string): {
   categories: LocalCategory[];
@@ -12,17 +12,11 @@ export function useCategories(parentId?: string): {
   const categories = useLiveQuery(
     async () => {
       if (!isBrowser()) return [];
-      if (parentId) {
-        return db.categories
-          .where("[parentId+sortOrder]")
-          .between([parentId, Dexie.minKey], [parentId, Dexie.maxKey])
-          .filter((c) => c.isActive)
-          .toArray();
-      }
-      return db.categories
-        .where("[isActive+sortOrder]")
-        .between([1, Dexie.minKey], [1, Dexie.maxKey])
-        .toArray();
+      const all = await db.categories.toArray();
+      const filtered = all
+        .filter((c) => active(c.isActive) && (parentId ? c.parentId === parentId : !c.parentId))
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      return filtered;
     },
     [parentId],
     []

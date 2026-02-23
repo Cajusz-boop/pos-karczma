@@ -301,11 +301,15 @@ module.exports = {
       NODE_ENV: 'production',
       PORT: 3001
     },
-    env_file: '/var/www/pos/.env',
     instances: 1,
     exec_mode: 'fork',
     watch: false,
-    max_memory_restart: '500M'
+    autorestart: true,
+    max_restarts: 10,
+    min_uptime: '10s',
+    max_memory_restart: '600M',
+    restart_delay: 5000,
+    kill_timeout: 10000
   }]
 };
 PMEOF
@@ -342,15 +346,35 @@ if pm2 list | grep -q pos-karczma; then
 else
     echo "Pierwsza konfiguracja PM2..."
     cd .next/standalone
-    pm2 start server.js --name pos-karczma --env production
-    pm2 save
+    pm2 start server.js --name pos-karczma -i 1 --env production --max-memory-restart 600M
 fi
-
+pm2 save
 pm2 list
+
+# Health check - weryfikacja ze aplikacja odpowiada
+echo "Weryfikacja health..."
+for i in 1 2 3 4 5 6; do
+  sleep 5
+  if curl -sf --max-time 10 http://127.0.0.1:3001/api/health >/dev/null; then
+    echo "Health OK"
+    break
+  fi
+  echo "Proba \$i/6 - czekam..."
+  if [ \$i -eq 6 ]; then
+    echo "BLAD: Aplikacja nie odpowiada po restarcie. Sprawdz: pm2 logs pos-karczma"
+    exit 1
+  fi
+done
+
 echo "DEPLOY_OK"
 "@
 
 $restartCmd | ssh -i $keyPath $SSH_TARGET "bash -s"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "[BLAD] Deploy nie powiodl sie - health check failed" -ForegroundColor Red
+    exit 1
+}
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green

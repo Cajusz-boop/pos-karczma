@@ -28,6 +28,9 @@ const nextConfig = {
   output: isCapacitorBuild ? "export" : "standalone",
   trailingSlash: isCapacitorBuild,
   images: isCapacitorBuild ? { unoptimized: true } : undefined,
+  experimental: {
+    staticPageGenerationTimeout: 300, // 5 min - serwer produkcyjny ma wiele dynamicznych API
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -36,7 +39,8 @@ const nextConfig = {
   },
 };
 
-const sentryEnabled = !!process.env.NEXT_PUBLIC_SENTRY_DSN && !isCapacitorBuild;
+const sentryEnabled =
+  !!process.env.NEXT_PUBLIC_SENTRY_DSN && !isCapacitorBuild && process.env.NODE_ENV === "production";
 
 export default sentryEnabled
   ? withSentryConfig(nextConfig, {

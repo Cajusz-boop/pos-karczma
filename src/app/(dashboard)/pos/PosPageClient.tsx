@@ -554,10 +554,20 @@ export function PosPageClient() {
 
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-          <p className="text-muted-foreground">Ładowanie mapy sal…</p>
+      <div className="flex h-[calc(100vh-4rem)] flex-col">
+        <div className="flex items-center gap-2 border-b bg-card px-3 py-2 sm:px-4">
+          <div className="relative h-8 w-10 flex-shrink-0">
+            <Image src="/logo.png" alt="Łabędź" fill className="object-contain object-left" unoptimized />
+          </div>
+          <span className="text-sm font-semibold text-foreground">Karczma Łabędź</span>
+          <span className="flex-1" />
+          <span className="font-mono text-lg font-semibold tabular-nums text-foreground">{time}</span>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <p className="text-muted-foreground">Ładowanie mapy sal…</p>
+          </div>
         </div>
       </div>
     );
@@ -567,7 +577,7 @@ export function PosPageClient() {
     <div className="flex h-[calc(100vh-4rem)] flex-col">
       {/* === TOP BAR === */}
       <div className="flex flex-wrap items-center gap-2 border-b bg-card px-3 py-2 sm:px-4">
-        <div className="relative mr-1 hidden h-8 w-10 flex-shrink-0 sm:block">
+        <div className="relative mr-1 h-8 w-10 flex-shrink-0">
           <Image src="/logo.png" alt="Łabędź" fill className="object-contain object-left" unoptimized />
         </div>
         <div className="flex flex-1 flex-wrap gap-1.5">
@@ -632,7 +642,11 @@ export function PosPageClient() {
 
       {/* === TABLE GRID === */}
       <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
-        {rooms.length === 0 ? (
+        {isLoading ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
+            <p className="text-lg font-medium text-muted-foreground">Ładowanie sal i stolików…</p>
+          </div>
+        ) : rooms.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <p className="text-lg font-medium text-muted-foreground">Brak sal i stolików</p>
             <p className="max-w-sm text-sm text-muted-foreground">

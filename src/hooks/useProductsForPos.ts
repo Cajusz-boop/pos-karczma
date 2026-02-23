@@ -4,6 +4,7 @@ import type { LocalProduct, LocalCategory, LocalModifierGroup, LocalAllergen, Lo
 import type { CategoryNode, ProductRow } from "@/app/(dashboard)/pos/order/[orderId]/orderPageTypes";
 
 const isBrowser = () => typeof window !== "undefined";
+const active = (v: unknown) => v === true || v === 1;
 
 function buildCategoryTree(categories: LocalCategory[]): CategoryNode[] {
   const byParent = new Map<string | null, LocalCategory[]>();
@@ -47,16 +48,20 @@ export function useProductsForPos(): {
     async () => {
       if (!isBrowser()) return { categories: [], products: [], isLoading: false };
 
-      const [products, categories, modifierGroups, allergens, taxRates] = await Promise.all([
-        db.products
-          .where("[isActive+isAvailable]")
-          .between([1, 1], [1, 1])
-          .toArray(),
-        db.categories.where("isActive").equals(1).toArray(),
+      const [productsRaw, categoriesRaw, modifierGroups, allergens, taxRates] = await Promise.all([
+        db.products.toArray(),
+        db.categories.toArray(),
         db.modifierGroups.toArray(),
         db.allergens.toArray(),
         db.taxRates.toArray(),
       ]);
+
+      const products = productsRaw
+        .filter((p) => active(p.isActive) && active(p.isAvailable))
+        .sort((a, b) => a.sortOrder - b.sortOrder);
+      const categories = categoriesRaw
+        .filter((c) => active(c.isActive))
+        .sort((a, b) => a.sortOrder - b.sortOrder);
 
       const modMap = new Map<string, LocalModifierGroup>();
       for (const m of modifierGroups) modMap.set(m.id, m);
