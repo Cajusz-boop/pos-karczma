@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 
+export const dynamic = 'force-dynamic';
+
+
 /**
- * GET /api/gdpr?customerId= — export all personal data for a customer (Art. 15 RODO)
+ * GET /api/gdpr?customerId= â€” export all personal data for a customer (Art. 15 RODO)
  * Returns JSON with all data related to the customer.
  */
 export async function GET(request: NextRequest) {
@@ -148,12 +151,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd eksportu danych RODO" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d eksportu danych RODO" }, { status: 500 });
   }
 }
 
 /**
- * DELETE /api/gdpr?customerId= — right to erasure (Art. 17 RODO)
+ * DELETE /api/gdpr?customerId= â€” right to erasure (Art. 17 RODO)
  * Anonymizes personal data while preserving financial records (required by tax law).
  */
 export async function DELETE(request: NextRequest) {
@@ -178,7 +181,7 @@ export async function DELETE(request: NextRequest) {
       where: { id: customerId },
       data: {
         phone: `ANON-${customerId.slice(0, 8)}`,
-        name: "Dane usunięte (RODO)",
+        name: "Dane usuniÄ™te (RODO)",
         email: null,
         notes: null,
       },
@@ -206,7 +209,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.reservation.updateMany({
       where: { guestPhone: customer.phone },
       data: {
-        guestName: "Dane usunięte (RODO)",
+        guestName: "Dane usuniÄ™te (RODO)",
         guestPhone: null,
         guestEmail: null,
         notes: null,
@@ -224,16 +227,16 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       customerId,
-      message: "Dane osobowe zostały zanonimizowane zgodnie z Art. 17 RODO. Dane finansowe zachowane zgodnie z wymogami prawa podatkowego.",
+      message: "Dane osobowe zostaĹ‚y zanonimizowane zgodnie z Art. 17 RODO. Dane finansowe zachowane zgodnie z wymogami prawa podatkowego.",
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd usuwania danych RODO" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d usuwania danych RODO" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/gdpr — record consent
+ * POST /api/gdpr â€” record consent
  * Body: { customerId, consentType, granted }
  */
 export async function POST(request: NextRequest) {
@@ -276,6 +279,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd zapisu zgody RODO" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zapisu zgody RODO" }, { status: 500 });
   }
 }

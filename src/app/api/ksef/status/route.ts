@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { pollKsefStatus } from "@/lib/ksef";
 
+export const dynamic = 'force-dynamic';
+
+
 /**
- * GET /api/ksef/status?invoiceId= — poll KSeF for invoice status
+ * GET /api/ksef/status?invoiceId= â€” poll KSeF for invoice status
  */
 export async function GET(request: NextRequest) {
   try {
@@ -15,6 +18,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result);
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd sprawdzania statusu KSeF" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d sprawdzania statusu KSeF" }, { status: 500 });
   }
 }

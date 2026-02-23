@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
+
 
 /**
  * GET /api/cash/current - get current cash in drawer
@@ -122,6 +125,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[CashCurrent GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania stanu kasy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania stanu kasy" }, { status: 500 });
   }
 }

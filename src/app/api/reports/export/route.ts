@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { createWorkbook, exportFilename } from "@/lib/export/excel";
 import { startOfDay, endOfDay, format, subMonths } from "date-fns";
 
+export const dynamic = 'force-dynamic';
+
 const PAYMENT_LABELS: Record<string, string> = {
   CASH: "Gotówka",
   CARD: "Karta",

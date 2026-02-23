@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { processPolcardGoCallback } from "@/lib/payment-terminal/client";
 import type { PolcardGoResponse } from "@/lib/payment-terminal/types";
+
+export const dynamic = 'force-dynamic';
+
 
 /**
  * POST /api/payment/polcard-callback

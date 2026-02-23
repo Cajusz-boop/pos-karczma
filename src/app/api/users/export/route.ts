@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
+
+export const dynamic = 'force-dynamic';
+
 
 /**
  * GET /api/users/export?id=xxx - export user to JSON
@@ -11,7 +14,7 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get("id");
 
     if (!userId) {
-      return NextResponse.json({ error: "Brak ID użytkownika" }, { status: 400 });
+      return NextResponse.json({ error: "Brak ID uĹĽytkownika" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "Użytkownik nie istnieje" }, { status: 404 });
+      return NextResponse.json({ error: "UĹĽytkownik nie istnieje" }, { status: 404 });
     }
 
     const exportData = {
@@ -54,6 +57,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[UserExport GET]", e);
-    return NextResponse.json({ error: "Błąd eksportu użytkownika" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d eksportu uĹĽytkownika" }, { status: 500 });
   }
 }

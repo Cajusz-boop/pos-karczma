@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
+
+export const dynamic = 'force-dynamic';
+
 
 const DEFAULT_CONFIG: Record<string, unknown> = {
   maxOrderNumber: 9999,
@@ -15,11 +18,11 @@ const DEFAULT_CONFIG: Record<string, unknown> = {
   hideSetContentsOnClick: false,
   reservationAlertMinutes: 30,
   billingIntervalMinutes: null,
-  rwDocumentTypes: ["Straty", "Surowce", "Zużycie"],
+  rwDocumentTypes: ["Straty", "Surowce", "ZuĹĽycie"],
   vatDescriptions: {
-    A: "Usługi gastronomiczne",
-    B: "Usługi gastronomiczne",
-    C: "Usługi gastronomiczne",
+    A: "UsĹ‚ugi gastronomiczne",
+    B: "UsĹ‚ugi gastronomiczne",
+    C: "UsĹ‚ugi gastronomiczne",
   },
 };
 
@@ -38,7 +41,7 @@ export async function GET() {
     return NextResponse.json({ config: result, defaults: DEFAULT_CONFIG });
   } catch (e) {
     console.error("[SystemConfig GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania konfiguracji" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania konfiguracji" }, { status: 500 });
   }
 }
 
@@ -70,7 +73,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ config, message: `Ustawienie "${key}" zaktualizowane` });
   } catch (e) {
     console.error("[SystemConfig PUT]", e);
-    return NextResponse.json({ error: "Błąd aktualizacji konfiguracji" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji konfiguracji" }, { status: 500 });
   }
 }
 
@@ -82,7 +85,7 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     
     if (!body || typeof body !== "object") {
-      return NextResponse.json({ error: "Nieprawidłowe dane" }, { status: 400 });
+      return NextResponse.json({ error: "NieprawidĹ‚owe dane" }, { status: 400 });
     }
 
     const updates: { key: string; value: unknown }[] = [];
@@ -100,12 +103,12 @@ export async function PATCH(request: NextRequest) {
     await auditLog(userId, "SYSTEM_CONFIG_BULK_UPDATE", "SystemConfig", "bulk", undefined, { updates });
 
     return NextResponse.json({
-      message: `Zaktualizowano ${updates.length} ustawień`,
+      message: `Zaktualizowano ${updates.length} ustawieĹ„`,
       updated: updates.map((u) => u.key),
     });
   } catch (e) {
     console.error("[SystemConfig PATCH]", e);
-    return NextResponse.json({ error: "Błąd aktualizacji konfiguracji" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji konfiguracji" }, { status: 500 });
   }
 }
 
@@ -131,11 +134,11 @@ export async function DELETE(request: NextRequest) {
     const defaultValue = DEFAULT_CONFIG[key] ?? null;
 
     return NextResponse.json({
-      message: `Ustawienie "${key}" przywrócone do domyślnego`,
+      message: `Ustawienie "${key}" przywrĂłcone do domyĹ›lnego`,
       defaultValue,
     });
   } catch (e) {
     console.error("[SystemConfig DELETE]", e);
-    return NextResponse.json({ error: "Błąd resetowania konfiguracji" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d resetowania konfiguracji" }, { status: 500 });
   }
 }

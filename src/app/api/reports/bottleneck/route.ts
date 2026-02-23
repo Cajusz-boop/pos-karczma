@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
+
 /**
- * GET /api/reports/bottleneck?dateFrom=&dateTo= — bottleneck analysis per table
+ * GET /api/reports/bottleneck?dateFrom=&dateTo= â€” bottleneck analysis per table
  * Shows average wait times, prep times, and service times per table.
  * Identifies which tables/areas have the longest delays.
  */
@@ -138,9 +141,9 @@ export async function GET(request: NextRequest) {
     // Identify bottleneck type
     const bottlenecks = tables.slice(0, 5).map((t) => {
       const issues: string[] = [];
-      if ((t.avgWaitMinutes ?? 0) > 5) issues.push("Długi czas oczekiwania na kuchnię");
-      if ((t.avgServiceMinutes ?? 0) > 3) issues.push("Długi czas podania po przygotowaniu");
-      if (t.overduePercent > 20) issues.push(`${t.overduePercent}% dań przekracza normę`);
+      if ((t.avgWaitMinutes ?? 0) > 5) issues.push("DĹ‚ugi czas oczekiwania na kuchniÄ™");
+      if ((t.avgServiceMinutes ?? 0) > 3) issues.push("DĹ‚ugi czas podania po przygotowaniu");
+      if (t.overduePercent > 20) issues.push(`${t.overduePercent}% daĹ„ przekracza normÄ™`);
       return {
         ...t,
         issues,
@@ -161,7 +164,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd raportu wąskich gardeł" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu wÄ…skich gardeĹ‚" }, { status: 500 });
   }
 }
 

@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
+
+export const dynamic = 'force-dynamic';
+
 
 const POINTS_PER_ZL = 1;
 
@@ -28,7 +31,7 @@ const adjustSchema = z.object({
 });
 
 /**
- * GET /api/loyalty?phone=xxx — lookup customer loyalty info
+ * GET /api/loyalty?phone=xxx â€” lookup customer loyalty info
  */
 export async function GET(request: NextRequest) {
   try {
@@ -76,12 +79,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Loyalty GET]", e);
-    return NextResponse.json({ error: "Błąd programu lojalnościowego" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d programu lojalnoĹ›ciowego" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/loyalty — earn points, redeem reward, or adjust
+ * POST /api/loyalty â€” earn points, redeem reward, or adjust
  * Body: { action: "earn" | "redeem" | "adjust", ... }
  */
 export async function POST(request: NextRequest) {
@@ -98,7 +101,7 @@ export async function POST(request: NextRequest) {
 
       const points = Math.floor(amount * POINTS_PER_ZL);
       if (points <= 0) {
-        return NextResponse.json({ error: "Za mało do naliczenia punktów" }, { status: 400 });
+        return NextResponse.json({ error: "Za maĹ‚o do naliczenia punktĂłw" }, { status: 400 });
       }
 
       const result = await prisma.$transaction(async (tx) => {
@@ -118,7 +121,7 @@ export async function POST(request: NextRequest) {
             points,
             type: "EARNED",
             orderId,
-            description: `+${points} pkt za zamówienie ${amount.toFixed(2)} zł`,
+            description: `+${points} pkt za zamĂłwienie ${amount.toFixed(2)} zĹ‚`,
           },
         });
 
@@ -150,7 +153,7 @@ export async function POST(request: NextRequest) {
 
       if (customer.loyaltyPoints < reward.pointsCost) {
         return NextResponse.json({
-          error: `Za mało punktów (${customer.loyaltyPoints}/${reward.pointsCost})`,
+          error: `Za maĹ‚o punktĂłw (${customer.loyaltyPoints}/${reward.pointsCost})`,
         }, { status: 400 });
       }
 
@@ -230,6 +233,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Nieznana akcja" }, { status: 400 });
   } catch (e) {
     console.error("[Loyalty POST]", e);
-    return NextResponse.json({ error: "Błąd programu lojalnościowego" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d programu lojalnoĹ›ciowego" }, { status: 500 });
   }
 }

@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
+
+export const dynamic = 'force-dynamic';
+
 
 const createZoneSchema = z.object({
   number: z.number().int().min(1),
@@ -62,7 +65,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DeliveryZones GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania stref" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania stref" }, { status: 500 });
   }
 }
 
@@ -76,7 +79,7 @@ export async function POST(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -89,7 +92,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: `Strefa o numerze ${number} już istnieje` },
+        { error: `Strefa o numerze ${number} juĹĽ istnieje` },
         { status: 400 }
       );
     }
@@ -130,7 +133,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (e) {
     console.error("[DeliveryZones POST]", e);
-    return NextResponse.json({ error: "Błąd tworzenia strefy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia strefy" }, { status: 500 });
   }
 }
 
@@ -144,7 +147,7 @@ export async function PATCH(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -160,7 +163,7 @@ export async function PATCH(request: NextRequest) {
       });
       if (existing) {
         return NextResponse.json(
-          { error: `Strefa o numerze ${updateData.number} już istnieje` },
+          { error: `Strefa o numerze ${updateData.number} juĹĽ istnieje` },
           { status: 400 }
         );
       }
@@ -189,7 +192,7 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DeliveryZones PATCH]", e);
-    return NextResponse.json({ error: "Błąd aktualizacji strefy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji strefy" }, { status: 500 });
   }
 }
 
@@ -222,7 +225,7 @@ export async function DELETE(request: NextRequest) {
         data: { isActive: false },
       });
       return NextResponse.json({
-        message: "Strefa dezaktywowana (ma przypisane zamówienia)",
+        message: "Strefa dezaktywowana (ma przypisane zamĂłwienia)",
         deactivated: true,
       });
     }
@@ -234,9 +237,9 @@ export async function DELETE(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "DELIVERY_ZONE_DELETED", "DeliveryZone", id);
 
-    return NextResponse.json({ message: "Strefa usunięta", deleted: true });
+    return NextResponse.json({ message: "Strefa usuniÄ™ta", deleted: true });
   } catch (e) {
     console.error("[DeliveryZones DELETE]", e);
-    return NextResponse.json({ error: "Błąd usuwania strefy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d usuwania strefy" }, { status: 500 });
   }
 }

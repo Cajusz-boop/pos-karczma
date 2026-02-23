@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createCustomerSchema } from "@/lib/validation";
+
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -70,7 +73,7 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd wyszukiwania klientów" },
+      { error: "BĹ‚Ä…d wyszukiwania klientĂłw" },
       { status: 500 }
     );
   }
@@ -156,7 +159,7 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd tworzenia klienta" },
+      { error: "BĹ‚Ä…d tworzenia klienta" },
       { status: 500 }
     );
   }

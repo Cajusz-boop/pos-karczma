@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+
+export const dynamic = 'force-dynamic';
+
 
 const upsertSchema = z.object({
   userId: z.string().min(1),
@@ -12,7 +15,7 @@ const upsertSchema = z.object({
 });
 
 /**
- * GET /api/schedule/availability — get staff availability for a date range
+ * GET /api/schedule/availability â€” get staff availability for a date range
  */
 export async function GET(request: NextRequest) {
   try {
@@ -43,12 +46,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Availability GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania dostępności" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania dostÄ™pnoĹ›ci" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/schedule/availability — set availability for a user/date
+ * POST /api/schedule/availability â€” set availability for a user/date
  */
 export async function POST(request: NextRequest) {
   try {
@@ -81,6 +84,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ entry });
   } catch (e) {
     console.error("[Availability POST]", e);
-    return NextResponse.json({ error: "Błąd zapisu dostępności" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zapisu dostÄ™pnoĹ›ci" }, { status: 500 });
   }
 }

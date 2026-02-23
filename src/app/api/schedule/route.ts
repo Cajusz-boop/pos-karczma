@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+
+export const dynamic = 'force-dynamic';
+
 
 const createSchema = z.object({
   userId: z.string().min(1),
@@ -12,7 +15,7 @@ const createSchema = z.object({
 });
 
 /**
- * GET /api/schedule — get work schedule for a date range
+ * GET /api/schedule â€” get work schedule for a date range
  * Query: ?from=YYYY-MM-DD&to=YYYY-MM-DD&userId=xxx
  */
 export async function GET(request: NextRequest) {
@@ -61,12 +64,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Schedule GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania grafiku" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania grafiku" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/schedule — create or update a schedule entry
+ * POST /api/schedule â€” create or update a schedule entry
  */
 export async function POST(request: NextRequest) {
   try {
@@ -101,12 +104,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ schedule });
   } catch (e) {
     console.error("[Schedule POST]", e);
-    return NextResponse.json({ error: "Błąd zapisu grafiku" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zapisu grafiku" }, { status: 500 });
   }
 }
 
 /**
- * DELETE /api/schedule — remove a schedule entry
+ * DELETE /api/schedule â€” remove a schedule entry
  */
 export async function DELETE(request: NextRequest) {
   try {
@@ -121,6 +124,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[Schedule DELETE]", e);
-    return NextResponse.json({ error: "Błąd usuwania" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d usuwania" }, { status: 500 });
   }
 }

@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
+
 
 export interface CurrencyRate {
   code: string;
@@ -11,10 +14,10 @@ export interface CurrencyRate {
 }
 
 const DEFAULT_RATES: CurrencyRate[] = [
-  { code: "EUR", name: "Euro", rate: 4.30, symbol: "€", isActive: true, updatedAt: new Date().toISOString() },
-  { code: "USD", name: "Dolar amerykański", rate: 4.00, symbol: "$", isActive: true, updatedAt: new Date().toISOString() },
-  { code: "GBP", name: "Funt brytyjski", rate: 5.10, symbol: "£", isActive: false, updatedAt: new Date().toISOString() },
-  { code: "CZK", name: "Korona czeska", rate: 0.17, symbol: "Kč", isActive: false, updatedAt: new Date().toISOString() },
+  { code: "EUR", name: "Euro", rate: 4.30, symbol: "â‚¬", isActive: true, updatedAt: new Date().toISOString() },
+  { code: "USD", name: "Dolar amerykaĹ„ski", rate: 4.00, symbol: "$", isActive: true, updatedAt: new Date().toISOString() },
+  { code: "GBP", name: "Funt brytyjski", rate: 5.10, symbol: "ÂŁ", isActive: false, updatedAt: new Date().toISOString() },
+  { code: "CZK", name: "Korona czeska", rate: 0.17, symbol: "KÄŤ", isActive: false, updatedAt: new Date().toISOString() },
 ];
 
 const CONFIG_KEY = "currency_rates";
@@ -34,7 +37,7 @@ async function getRates(): Promise<CurrencyRate[]> {
 }
 
 /**
- * GET /api/currency — list configured exchange rates
+ * GET /api/currency â€” list configured exchange rates
  * Optional ?active=true to filter only active currencies
  */
 export async function GET(request: NextRequest) {
@@ -48,12 +51,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ rates: filtered });
   } catch (e) {
     console.error("[Currency GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania kursów" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania kursĂłw" }, { status: 500 });
   }
 }
 
 /**
- * PUT /api/currency — update exchange rates
+ * PUT /api/currency â€” update exchange rates
  * Body: { rates: CurrencyRate[] }
  */
 export async function PUT(request: NextRequest) {
@@ -67,7 +70,7 @@ export async function PUT(request: NextRequest) {
 
     for (const r of rates) {
       if (!r.code || !r.name || typeof r.rate !== "number" || r.rate <= 0) {
-        return NextResponse.json({ error: `Nieprawidłowy kurs dla ${r.code}` }, { status: 400 });
+        return NextResponse.json({ error: `NieprawidĹ‚owy kurs dla ${r.code}` }, { status: 400 });
       }
     }
 
@@ -85,12 +88,12 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ rates: updatedRates });
   } catch (e) {
     console.error("[Currency PUT]", e);
-    return NextResponse.json({ error: "Błąd zapisu kursów" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zapisu kursĂłw" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/currency — convert amount from foreign currency to PLN
+ * POST /api/currency â€” convert amount from foreign currency to PLN
  * Body: { amount, currency }
  */
 export async function POST(request: NextRequest) {
@@ -106,7 +109,7 @@ export async function POST(request: NextRequest) {
     const rate = rates.find((r) => r.code === currency && r.isActive);
 
     if (!rate) {
-      return NextResponse.json({ error: `Waluta ${currency} nie jest obsługiwana` }, { status: 400 });
+      return NextResponse.json({ error: `Waluta ${currency} nie jest obsĹ‚ugiwana` }, { status: 400 });
     }
 
     const plnAmount = Math.round(amount * rate.rate * 100) / 100;
@@ -120,6 +123,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Currency POST]", e);
-    return NextResponse.json({ error: "Błąd przeliczenia" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d przeliczenia" }, { status: 500 });
   }
 }

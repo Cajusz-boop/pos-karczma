@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
 
-/** GET /api/reports/shift?userId=&dateFrom=&dateTo= — raport zmianowy (obrót kelnera, rachunki, goście, płatności, napiwki, storna) */
+export const dynamic = 'force-dynamic';
+
+
+/** GET /api/reports/shift?userId=&dateFrom=&dateTo= â€” raport zmianowy (obrĂłt kelnera, rachunki, goĹ›cie, pĹ‚atnoĹ›ci, napiwki, storna) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -111,6 +114,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ dateFrom: dateFrom.slice(0, 10), dateTo: dateTo.slice(0, 10), shifts: list });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd raportu zmianowego" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu zmianowego" }, { status: 500 });
   }
 }

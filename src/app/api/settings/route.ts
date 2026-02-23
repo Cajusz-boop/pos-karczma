@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 
+export const dynamic = 'force-dynamic';
+
+
 /**
- * GET /api/settings?key=xxx — get a system config value
+ * GET /api/settings?key=xxx â€” get a system config value
  */
 export async function GET(request: NextRequest) {
   try {
@@ -21,12 +24,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Settings GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania ustawień" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania ustawieĹ„" }, { status: 500 });
   }
 }
 
 /**
- * PUT /api/settings — upsert a system config value
+ * PUT /api/settings â€” upsert a system config value
  * Body: { key, value }
  */
 export async function PUT(request: NextRequest) {
@@ -49,6 +52,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[Settings PUT]", e);
-    return NextResponse.json({ error: "Błąd zapisu ustawień" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zapisu ustawieĹ„" }, { status: 500 });
   }
 }

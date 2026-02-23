@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
+
 /**
- * GET /api/reports/waste?dateFrom=&dateTo= — waste/loss analysis
+ * GET /api/reports/waste?dateFrom=&dateTo= â€” waste/loss analysis
  * Cancelled items cost, grouped by product, reason, and stage.
  */
 export async function GET(request: NextRequest) {
@@ -79,9 +82,9 @@ export async function GET(request: NextRequest) {
       byReason[reason].totalCost += cost;
 
       // By stage (determine at which stage it was cancelled)
-      let stage = "Przed wysłaniem";
+      let stage = "Przed wysĹ‚aniem";
       if (item.sentToKitchenAt) {
-        stage = "Po wysłaniu do kuchni";
+        stage = "Po wysĹ‚aniu do kuchni";
         if (item.startedAt) stage = "W trakcie przygotowania";
         if (item.readyAt) stage = "Po przygotowaniu";
         if (item.servedAt) stage = "Po podaniu";
@@ -120,7 +123,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd raportu strat" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu strat" }, { status: 500 });
   }
 }
 

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   startOfWeek,
@@ -8,6 +8,9 @@ import {
   parseISO,
 } from "date-fns";
 import { parseBody, timeTrackingSchema } from "@/lib/validation";
+
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -93,7 +96,7 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd pobierania rejestru czasu" },
+      { error: "BĹ‚Ä…d pobierania rejestru czasu" },
       { status: 500 }
     );
   }
@@ -122,7 +125,7 @@ export async function POST(request: NextRequest) {
     });
     if (!user || !user.isActive) {
       return NextResponse.json(
-        { error: "Użytkownik nie istnieje lub jest nieaktywny" },
+        { error: "UĹĽytkownik nie istnieje lub jest nieaktywny" },
         { status: 404 }
       );
     }
@@ -133,7 +136,7 @@ export async function POST(request: NextRequest) {
       });
       if (openEntry) {
         return NextResponse.json(
-          { error: "Masz już otwarty wpis. Najpierw wyjdź z pracy." },
+          { error: "Masz juĹĽ otwarty wpis. Najpierw wyjdĹş z pracy." },
           { status: 400 }
         );
       }
@@ -156,7 +159,7 @@ export async function POST(request: NextRequest) {
       });
       if (!openEntry) {
         return NextResponse.json(
-          { error: "Brak otwartego wpisu. Najpierw rozpocznij pracę." },
+          { error: "Brak otwartego wpisu. Najpierw rozpocznij pracÄ™." },
           { status: 400 }
         );
       }
@@ -168,13 +171,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Nieznana akcja. Użyj clock-in lub clock-out." },
+      { error: "Nieznana akcja. UĹĽyj clock-in lub clock-out." },
       { status: 400 }
     );
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd rejestracji czasu" },
+      { error: "BĹ‚Ä…d rejestracji czasu" },
       { status: 500 }
     );
   }

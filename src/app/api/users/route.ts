@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createUserSchema } from "@/lib/validation";
 import { hashPin } from "@/lib/auth";
 import { auditLog } from "@/lib/audit";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
+
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -34,7 +37,7 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd pobierania użytkowników" },
+      { error: "BĹ‚Ä…d pobierania uĹĽytkownikĂłw" },
       { status: 500 }
     );
   }
@@ -90,7 +93,7 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd tworzenia użytkownika" },
+      { error: "BĹ‚Ä…d tworzenia uĹĽytkownika" },
       { status: 500 }
     );
   }

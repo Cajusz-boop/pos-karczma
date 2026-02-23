@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createShiftSchema } from "@/lib/validation";
 
-/** GET /api/shifts?status=OPEN&userId= — lista zmian (status OPEN zwraca otwarte z obrotem) */
+export const dynamic = 'force-dynamic';
+
+
+/** GET /api/shifts?status=OPEN&userId= â€” lista zmian (status OPEN zwraca otwarte z obrotem) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -49,11 +52,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result);
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd listy zmian" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d listy zmian" }, { status: 500 });
   }
 }
 
-/** POST /api/shifts — otwarcie zmiany (userId, cashStart) */
+/** POST /api/shifts â€” otwarcie zmiany (userId, cashStart) */
 export async function POST(request: NextRequest) {
   try {
     const { data, error: valError } = await parseBody(request, createShiftSchema);
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
       where: { userId, status: "OPEN" },
     });
     if (existing) {
-      return NextResponse.json({ error: "Użytkownik ma już otwartą zmianę", shiftId: existing.id }, { status: 400 });
+      return NextResponse.json({ error: "UĹĽytkownik ma juĹĽ otwartÄ… zmianÄ™", shiftId: existing.id }, { status: 400 });
     }
 
     const shift = await prisma.shift.create({
@@ -84,6 +87,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd otwarcia zmiany" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d otwarcia zmiany" }, { status: 500 });
   }
 }

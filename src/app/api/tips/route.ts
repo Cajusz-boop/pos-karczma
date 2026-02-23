@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
+
 
 export interface TipConfig {
   poolEnabled: boolean;
@@ -32,7 +35,7 @@ async function getTipConfig(): Promise<TipConfig> {
 }
 
 /**
- * GET /api/tips — tip report for a date range
+ * GET /api/tips â€” tip report for a date range
  * Query: ?from=YYYY-MM-DD&to=YYYY-MM-DD&userId=xxx
  */
 export async function GET(request: NextRequest) {
@@ -134,12 +137,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Tips GET]", e);
-    return NextResponse.json({ error: "Błąd raportu napiwków" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu napiwkĂłw" }, { status: 500 });
   }
 }
 
 /**
- * PUT /api/tips — update tip pooling configuration
+ * PUT /api/tips â€” update tip pooling configuration
  */
 export async function PUT(request: NextRequest) {
   try {
@@ -160,6 +163,6 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ config });
   } catch (e) {
     console.error("[Tips PUT]", e);
-    return NextResponse.json({ error: "Błąd zapisu konfiguracji" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zapisu konfiguracji" }, { status: 500 });
   }
 }

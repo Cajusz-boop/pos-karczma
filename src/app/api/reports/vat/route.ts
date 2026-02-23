@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
 
-/** GET /api/reports/vat?dateFrom=&dateTo= — raport VAT miesięczny (sprzedaż wg stawek, lista faktur, paragony) */
+export const dynamic = 'force-dynamic';
+
+
+/** GET /api/reports/vat?dateFrom=&dateTo= â€” raport VAT miesiÄ™czny (sprzedaĹĽ wg stawek, lista faktur, paragony) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -68,6 +71,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd raportu VAT" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu VAT" }, { status: 500 });
   }
 }

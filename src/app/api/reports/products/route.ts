@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
 
-/** GET /api/reports/products?dateFrom=&dateTo=&categoryId=&roomId=&userId= — raport produktowy TOP/BOTTOM */
+export const dynamic = 'force-dynamic';
+
+
+/** GET /api/reports/products?dateFrom=&dateTo=&categoryId=&roomId=&userId= â€” raport produktowy TOP/BOTTOM */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -65,6 +68,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd raportu produktowego" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu produktowego" }, { status: 500 });
   }
 }

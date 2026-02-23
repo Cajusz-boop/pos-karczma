@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 const SCANNER_SCRIPT = `#!/usr/bin/env python3
 """
 POS Karczma - Skaner srodowiskowy v3.0.0

@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
+
 /**
- * GET /api/reports/kitchen?dateFrom=&dateTo= — kitchen performance report
+ * GET /api/reports/kitchen?dateFrom=&dateTo= â€” kitchen performance report
  * Returns timing data grouped by dish, station, and cook.
  */
 export async function GET(request: NextRequest) {
@@ -180,7 +183,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd raportu kuchni" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu kuchni" }, { status: 500 });
   }
 }
 

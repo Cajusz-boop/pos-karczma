@@ -1,6 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createOrderSchema } from "@/lib/validation";
+
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,7 +69,7 @@ export async function GET(request: NextRequest) {
         id: o.id,
         orderNumber: o.orderNumber,
         tableNumber: o.table?.number ?? null,
-        tableName: o.table ? `Stolik #${o.table.number}` : o.room?.name ?? "—",
+        tableName: o.table ? `Stolik #${o.table.number}` : o.room?.name ?? "â€”",
         waiterName: o.user.name,
         status: o.status,
         total: Math.round(total * 100) / 100,
@@ -78,7 +81,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(result);
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd listy zamówień" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d listy zamĂłwieĹ„" }, { status: 500 });
   }
 }
 
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
     });
     const nextOrderNumber = (maxOrder._max.orderNumber ?? 0) + 1;
 
-    // Takeaway order — no table required
+    // Takeaway order â€” no table required
     if (orderType === "TAKEAWAY" || !tableId) {
       const order = await prisma.order.create({
         data: {
@@ -110,7 +113,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ order: { id: order.id, orderNumber: order.orderNumber, type: "TAKEAWAY" } });
     }
 
-    // Dine-in order — table required
+    // Dine-in order â€” table required
     const table = await prisma.table.findUnique({
       where: { id: tableId },
       include: { orders: { where: { status: { notIn: ["CLOSED", "CANCELLED"] } } } },
@@ -119,11 +122,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Stolik nie istnieje" }, { status: 404 });
     }
     if (roomId && table.roomId !== roomId) {
-      return NextResponse.json({ error: "Stolik nie należy do tej sali" }, { status: 400 });
+      return NextResponse.json({ error: "Stolik nie naleĹĽy do tej sali" }, { status: 400 });
     }
     if (table.status !== "FREE") {
       return NextResponse.json(
-        { error: "Stolik jest już zajęty" },
+        { error: "Stolik jest juĹĽ zajÄ™ty" },
         { status: 400 }
       );
     }
@@ -150,7 +153,7 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd tworzenia zamówienia" },
+      { error: "BĹ‚Ä…d tworzenia zamĂłwienia" },
       { status: 500 }
     );
   }

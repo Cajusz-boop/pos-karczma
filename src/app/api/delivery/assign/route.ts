@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
 import { sendPushToUser } from "@/lib/push/web-push";
 
+export const dynamic = 'force-dynamic';
+
+
 const assignDriverSchema = z.object({
-  orderId: z.string().min(1, "ID zamówienia jest wymagane"),
+  orderId: z.string().min(1, "ID zamĂłwienia jest wymagane"),
   driverId: z.string().min(1, "ID kierowcy jest wymagane"),
 });
 
@@ -23,7 +26,7 @@ export async function POST(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -41,11 +44,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json({ error: "Zamówienie nie istnieje" }, { status: 404 });
+      return NextResponse.json({ error: "ZamĂłwienie nie istnieje" }, { status: 404 });
     }
 
     if (order.type !== "DELIVERY") {
-      return NextResponse.json({ error: "To zamówienie nie jest dostawą" }, { status: 400 });
+      return NextResponse.json({ error: "To zamĂłwienie nie jest dostawÄ…" }, { status: 400 });
     }
 
     const driver = await prisma.deliveryDriver.findUnique({
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!driver.isAvailable) {
-      return NextResponse.json({ error: "Kierowca jest niedostępny" }, { status: 400 });
+      return NextResponse.json({ error: "Kierowca jest niedostÄ™pny" }, { status: 400 });
     }
 
     await prisma.$transaction([
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
 
     sendPushToUser(driver.userId, {
       title: "Nowe zlecenie dostawy!",
-      body: `Zamówienie #${fullOrder?.orderNumber ?? "?"} - ${fullOrder?.deliveryAddress ?? "odbiór osobisty"}`,
+      body: `ZamĂłwienie #${fullOrder?.orderNumber ?? "?"} - ${fullOrder?.deliveryAddress ?? "odbiĂłr osobisty"}`,
       data: { type: "DELIVERY_ASSIGNED", orderId },
     }).catch(console.error);
 
@@ -101,7 +104,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DeliveryAssign POST]", e);
-    return NextResponse.json({ error: "Błąd przypisania kierowcy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d przypisania kierowcy" }, { status: 500 });
   }
 }
 
@@ -115,7 +118,7 @@ export async function PUT(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -123,7 +126,7 @@ export async function PUT(request: NextRequest) {
     const { address } = parsed.data;
 
     const normalizedAddress = address.toLowerCase().trim();
-    const streetMatch = normalizedAddress.match(/^(ul\.?\s*)?([a-ząćęłńóśźż\s]+)/i);
+    const streetMatch = normalizedAddress.match(/^(ul\.?\s*)?([a-zÄ…Ä‡Ä™Ĺ‚Ĺ„ĂłĹ›ĹşĹĽ\s]+)/i);
     const streetName = streetMatch?.[2]?.trim() ?? normalizedAddress;
     const houseNumber = parseInt(normalizedAddress.match(/\d+/)?.[0] ?? "0");
 
@@ -193,23 +196,23 @@ export async function PUT(request: NextRequest) {
             deliveryCost: Number(defaultZone.deliveryCost),
             driverCommission: Number(defaultZone.driverCommission),
           },
-          message: "Nie znaleziono ulicy, użyto domyślnej strefy",
+          message: "Nie znaleziono ulicy, uĹĽyto domyĹ›lnej strefy",
         });
       }
 
       return NextResponse.json({
         match: null,
-        message: "Nie znaleziono pasującej strefy",
+        message: "Nie znaleziono pasujÄ…cej strefy",
       });
     }
 
     return NextResponse.json({
       match: bestMatch,
-      message: `Znaleziono: ${bestMatch.street.streetName} → Strefa ${bestMatch.zone.number}`,
+      message: `Znaleziono: ${bestMatch.street.streetName} â†’ Strefa ${bestMatch.zone.number}`,
     });
   } catch (e) {
     console.error("[DeliveryAssign PUT]", e);
-    return NextResponse.json({ error: "Błąd wyszukiwania strefy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d wyszukiwania strefy" }, { status: 500 });
   }
 }
 
@@ -238,7 +241,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json({ error: "Zamówienie nie istnieje" }, { status: 404 });
+      return NextResponse.json({ error: "ZamĂłwienie nie istnieje" }, { status: 404 });
     }
 
     const newStatus = status ?? "DELIVERED";
@@ -277,11 +280,11 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: newStatus === "DELIVERED" ? "Dostawa zakończona" : "Dostawa anulowana",
+      message: newStatus === "DELIVERED" ? "Dostawa zakoĹ„czona" : "Dostawa anulowana",
       status: newStatus,
     });
   } catch (e) {
     console.error("[DeliveryAssign DELETE]", e);
-    return NextResponse.json({ error: "Błąd zakończenia dostawy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zakoĹ„czenia dostawy" }, { status: 500 });
   }
 }

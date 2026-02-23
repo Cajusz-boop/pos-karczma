@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
+
+export const dynamic = 'force-dynamic';
+
 
 const streetSchema = z.object({
   zoneId: z.string().min(1, "ID strefy jest wymagane"),
@@ -80,7 +83,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DeliveryStreets GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania ulic" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania ulic" }, { status: 500 });
   }
 }
 
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -132,7 +135,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ street }, { status: 201 });
   } catch (e) {
     console.error("[DeliveryStreets POST]", e);
-    return NextResponse.json({ error: "Błąd dodawania ulicy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d dodawania ulicy" }, { status: 500 });
   }
 }
 
@@ -146,7 +149,7 @@ export async function PUT(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -184,7 +187,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DeliveryStreets PUT]", e);
-    return NextResponse.json({ error: "Błąd importu ulic" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d importu ulic" }, { status: 500 });
   }
 }
 
@@ -207,9 +210,9 @@ export async function DELETE(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "DELIVERY_STREET_DELETED", "DeliveryStreet", id);
 
-    return NextResponse.json({ message: "Ulica usunięta" });
+    return NextResponse.json({ message: "Ulica usuniÄ™ta" });
   } catch (e) {
     console.error("[DeliveryStreets DELETE]", e);
-    return NextResponse.json({ error: "Błąd usuwania ulicy" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d usuwania ulicy" }, { status: 500 });
   }
 }

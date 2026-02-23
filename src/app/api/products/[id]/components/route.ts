@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
 
+export const dynamic = 'force-dynamic';
+
 const addComponentSchema = z.object({
   componentId: z.string().min(1, "ID składnika jest wymagane"),
   quantity: z.number().min(0.001).default(1),

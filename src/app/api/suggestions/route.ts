@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createSuggestionSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
+
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd pobierania sugestii produktów" },
+      { error: "BĹ‚Ä…d pobierania sugestii produktĂłw" },
       { status: 500 }
     );
   }
@@ -67,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
     if (productId === suggestedId) {
       return NextResponse.json(
-        { error: "Produkt nie może sugerować samego siebie" },
+        { error: "Produkt nie moĹĽe sugerowaÄ‡ samego siebie" },
         { status: 400 }
       );
     }
@@ -98,7 +101,7 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "Błąd tworzenia sugestii produktu" },
+      { error: "BĹ‚Ä…d tworzenia sugestii produktu" },
       { status: 500 }
     );
   }

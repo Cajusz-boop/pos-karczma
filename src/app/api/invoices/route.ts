@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addDays } from "date-fns";
 import { nextInvoiceNumber, getPrefixForType } from "@/lib/invoice-number";
 import { sendInvoiceToKsef } from "@/lib/ksef";
 import { parseBody, createInvoiceSchema } from "@/lib/validation";
 
+export const dynamic = 'force-dynamic';
+
+
 function computeNetFromGross(gross: number, ratePercent: number): number {
   return gross / (1 + ratePercent / 100);
 }
 
-/** GET /api/invoices — rejestr faktur (filtr: type, dateFrom, dateTo, ksefStatus) */
+/** GET /api/invoices â€” rejestr faktur (filtr: type, dateFrom, dateTo, ksefStatus) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -53,7 +56,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(invoices);
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd listy faktur" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d listy faktur" }, { status: 500 });
   }
 }
 
@@ -76,7 +79,7 @@ export async function POST(request: NextRequest) {
       },
     });
     if (!order) {
-      return NextResponse.json({ error: "Zamówienie nie istnieje" }, { status: 404 });
+      return NextResponse.json({ error: "ZamĂłwienie nie istnieje" }, { status: 404 });
     }
 
     const discount = order.discountJson as { type?: string; value?: number } | null;
@@ -162,6 +165,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "Błąd tworzenia faktury" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia faktury" }, { status: 500 });
   }
 }

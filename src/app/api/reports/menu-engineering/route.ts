@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
+
 
 /**
  * Menu Engineering BCG Matrix
@@ -29,17 +32,17 @@ interface MenuEngineeringItem {
 }
 
 const RECOMMENDATIONS: Record<BCGCategory, string> = {
-  STAR: "Promuj i utrzymaj — to Twoje najlepsze dania. Daj im widoczne miejsce w menu.",
-  PLOWHORSE: "Zwiększ marżę — popularne, ale mało zyskowne. Podnieś cenę lub zmniejsz porcję.",
-  PUZZLE: "Zwiększ sprzedaż — zyskowne, ale mało popularne. Lepsze zdjęcie, sugestia kelnera.",
-  DOG: "Rozważ usunięcie — ani popularne, ani zyskowne. Zamień na nowe danie lub popraw recepturę.",
+  STAR: "Promuj i utrzymaj â€” to Twoje najlepsze dania. Daj im widoczne miejsce w menu.",
+  PLOWHORSE: "ZwiÄ™ksz marĹĽÄ™ â€” popularne, ale maĹ‚o zyskowne. PodnieĹ› cenÄ™ lub zmniejsz porcjÄ™.",
+  PUZZLE: "ZwiÄ™ksz sprzedaĹĽ â€” zyskowne, ale maĹ‚o popularne. Lepsze zdjÄ™cie, sugestia kelnera.",
+  DOG: "RozwaĹĽ usuniÄ™cie â€” ani popularne, ani zyskowne. ZamieĹ„ na nowe danie lub popraw recepturÄ™.",
 };
 
 const BCG_LABELS: Record<BCGCategory, string> = {
-  STAR: "⭐ Gwiazda",
-  PLOWHORSE: "🐴 Koń",
-  PUZZLE: "🧩 Zagadka",
-  DOG: "🐕 Pies",
+  STAR: "â­ Gwiazda",
+  PLOWHORSE: "đź´ KoĹ„",
+  PUZZLE: "đź§© Zagadka",
+  DOG: "đź• Pies",
 };
 
 export async function GET(request: NextRequest) {
@@ -175,6 +178,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Menu Engineering]", e);
-    return NextResponse.json({ error: "Błąd raportu menu engineering" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d raportu menu engineering" }, { status: 500 });
   }
 }

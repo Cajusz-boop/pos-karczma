@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
+
+export const dynamic = 'force-dynamic';
+
 
 const generateSettlementSchema = z.object({
   driverId: z.string().min(1, "ID kierowcy jest wymagane"),
@@ -73,7 +76,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DriverSettlements GET]", e);
-    return NextResponse.json({ error: "Błąd pobierania rozliczeń" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d pobierania rozliczeĹ„" }, { status: 500 });
   }
 }
 
@@ -88,7 +91,7 @@ export async function POST(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -117,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     if (existing && existing.status === "SETTLED") {
       return NextResponse.json(
-        { error: "To rozliczenie zostało już zamknięte" },
+        { error: "To rozliczenie zostaĹ‚o juĹĽ zamkniÄ™te" },
         { status: 400 }
       );
     }
@@ -203,7 +206,7 @@ export async function POST(request: NextRequest) {
     }, { status: existing ? 200 : 201 });
   } catch (e) {
     console.error("[DriverSettlements POST]", e);
-    return NextResponse.json({ error: "Błąd generowania rozliczenia" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d generowania rozliczenia" }, { status: 500 });
   }
 }
 
@@ -217,7 +220,7 @@ export async function PATCH(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
+        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
         { status: 400 }
       );
     }
@@ -234,7 +237,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (settlement.status === "SETTLED") {
-      return NextResponse.json({ error: "To rozliczenie zostało już zamknięte" }, { status: 400 });
+      return NextResponse.json({ error: "To rozliczenie zostaĹ‚o juĹĽ zamkniÄ™te" }, { status: 400 });
     }
 
     const updated = await prisma.driverSettlement.update({
@@ -275,6 +278,6 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DriverSettlements PATCH]", e);
-    return NextResponse.json({ error: "Błąd zamykania rozliczenia" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d zamykania rozliczenia" }, { status: 500 });
   }
 }

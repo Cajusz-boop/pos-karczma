@@ -1,5 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = 'force-dynamic';
+
 
 /**
  * GET /api/reports/shift-extended - extended shift report
@@ -153,6 +156,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[ReportShiftExtended GET]", e);
-    return NextResponse.json({ error: "Błąd generowania raportu" }, { status: 500 });
+    return NextResponse.json({ error: "BĹ‚Ä…d generowania raportu" }, { status: 500 });
   }
 }
