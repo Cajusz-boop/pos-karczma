@@ -787,6 +787,15 @@ export function PaymentDialog({
               />
             </div>
 
+            {change > 0 && (
+              <div className="rounded-xl border-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-center">
+                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">Reszta do wydania</p>
+                <p className="text-3xl font-black text-emerald-800 dark:text-emerald-300 tabular-nums">
+                  {change.toFixed(2)} zł
+                </p>
+              </div>
+            )}
+
             <div className="grid grid-cols-3 gap-2">
               {QUICK_CASH.map((v) => (
                 <Button

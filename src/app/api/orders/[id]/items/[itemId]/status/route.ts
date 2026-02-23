@@ -5,6 +5,12 @@ import { touchOrderInteraction } from "@/lib/pos/order-cache";
 
 const VALID_STATUSES = ["IN_PROGRESS", "READY", "SERVED"] as const;
 type ValidStatus = typeof VALID_STATUSES[number];
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_","itemId":"_"} ];
+}
+
+
 
 export async function PATCH(
   request: NextRequest,

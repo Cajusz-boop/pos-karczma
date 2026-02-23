@@ -9,6 +9,13 @@ const CHECK_INTERVAL = Number(process.env.NEXT_PUBLIC_CONNECTION_CHECK_INTERVAL)
 const REDIRECT_DELAY = Number(process.env.NEXT_PUBLIC_REDIRECT_DELAY) || 5000;
 const PREFERRED_SERVER_KEY = "pos-preferred-server";
 
+/** W APK (Capacitor) NIGDY nie przekierowuj — UI jest z bundla, LOCAL_SERVER jest niedostępny poza siecią. */
+function isNativeApp(): boolean {
+  if (typeof window === "undefined") return false;
+  const cap = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor;
+  return !!cap?.isNativePlatform?.();
+}
+
 type ConnectionStatus = "online" | "offline" | "checking" | "local";
 type ServerCheckResult = { url: string; available: boolean; latencyMs: number };
 
@@ -75,19 +82,21 @@ export function ConnectionMonitor() {
       
       if (!isOnline) {
         setStatus("offline");
-        if (!isOnLocalServer) {
+        if (!isOnLocalServer && !isNativeApp()) {
           setShowBanner(true);
           setCountdown(REDIRECT_DELAY / 1000);
           countdownInterval = setInterval(() => {
             setCountdown((prev) => {
               if (prev <= 1) {
                 if (countdownInterval) clearInterval(countdownInterval);
-                window.location.href = LOCAL_SERVER;
+                if (!isNativeApp()) window.location.href = LOCAL_SERVER;
                 return 0;
               }
               return prev - 1;
             });
           }, 1000);
+        } else if (isNativeApp()) {
+          setShowBanner(true);
         }
         return;
       }
@@ -122,7 +131,7 @@ export function ConnectionMonitor() {
         }
       } else if (!main.available && local.available) {
         setFasterServer(LOCAL_SERVER);
-        if (!isOnLocalServer) {
+        if (!isOnLocalServer && !isNativeApp()) {
           setStatus("offline");
           setShowBanner(true);
           setCountdown(REDIRECT_DELAY / 1000);
@@ -130,7 +139,7 @@ export function ConnectionMonitor() {
             setCountdown((prev) => {
               if (prev <= 1) {
                 if (countdownInterval) clearInterval(countdownInterval);
-                window.location.href = LOCAL_SERVER;
+                if (!isNativeApp()) window.location.href = LOCAL_SERVER;
                 return 0;
               }
               return prev - 1;
@@ -181,6 +190,20 @@ export function ConnectionMonitor() {
   };
 
   if (!showBanner) return null;
+
+  // APK (Capacitor) offline — tylko informacja, bez przekierowań
+  if (isNativeApp() && status === "offline") {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-[9999] bg-amber-600 text-white px-4 py-3 shadow-lg">
+        <div className="max-w-4xl mx-auto flex items-center gap-3">
+          <WifiOff className="w-5 h-5 shrink-0" />
+          <p className="font-medium">
+            Brak połączenia z serwerem. Aplikacja działa offline — dane zostaną zsynchronizowane po powrocie sieci.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   // Na serwerze lokalnym, główny dostępny - sugestia przejścia do chmury
   if (isOnLocalServer && mainServerAvailable && fasterServer === MAIN_SERVER) {

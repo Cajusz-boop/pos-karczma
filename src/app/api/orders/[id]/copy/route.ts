@@ -8,6 +8,12 @@ import { auditLog } from "@/lib/audit";
  * Creates a new order with same items and resends to kitchen printers.
  * Used for reprinting or creating duplicate orders.
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

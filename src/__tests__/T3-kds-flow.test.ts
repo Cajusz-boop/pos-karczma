@@ -6,7 +6,7 @@ import { authFetch, url } from "./helpers/auth";
 
 describe("T3: KDS Flow", () => {
   it("TC-3.1: KDS stations endpoint", async () => {
-    const res = await authFetch(url("/api/kds/stations"));
+    const res = await authFetch(url("/api/kds/station-list"));
     expect(res.status).toBe(200);
   });
 

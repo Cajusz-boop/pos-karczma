@@ -1,6 +1,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRooms } from "@/hooks/useRooms";
+import { useAllProducts } from "@/hooks/useProducts";
 import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -57,27 +59,11 @@ export default function BanquetsPage() {
     enabled: tab === "menus",
   });
 
-  const { data: rooms = [] } = useQuery({
-    queryKey: ["rooms-simple"],
-    queryFn: async () => {
-      const r = await fetch("/api/rooms");
-      if (!r.ok) throw new Error("Błąd");
-      const d = await r.json();
-      return Array.isArray(d) ? d.map((x: { id: string; name: string }) => ({ id: x.id, name: x.name })) : [];
-    },
-    enabled: tab === "events",
-  });
+  const { rooms: roomsRaw } = useRooms();
+  const rooms = roomsRaw.map((r) => ({ id: r.id, name: r.name }));
 
-  const { data: products = [] } = useQuery({
-    queryKey: ["products-simple"],
-    queryFn: async () => {
-      const r = await fetch("/api/products");
-      if (!r.ok) throw new Error("Błąd");
-      const d = await r.json();
-      return (d.products ?? []).map((p: { id: string; name: string; priceGross: number }) => ({ id: p.id, name: p.name, priceGross: p.priceGross }));
-    },
-    enabled: tab === "menus",
-  });
+  const { products: productsRaw } = useAllProducts();
+  const products = productsRaw.map((p) => ({ id: p.id, name: p.name, priceGross: p.priceGross }));
 
   return (
     <div className="space-y-4">

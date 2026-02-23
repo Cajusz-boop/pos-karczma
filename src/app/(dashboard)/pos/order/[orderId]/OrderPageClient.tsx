@@ -4,6 +4,9 @@ import { useEffect, useRef, useState, useMemo, lazy, Suspense, useDeferredValue 
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOrderStore, type OrderItemLine } from "@/store/useOrderStore";
+import { useProductsForPos } from "@/hooks/useProductsForPos";
+import { useRoomsWithTables } from "@/hooks/useRoomsWithTables";
+import { useOrder, useOrderItems, useOpenOrders } from "@/hooks/useOrder";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,17 +18,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { OrderPageView } from "./OrderPageView";
+import { OrderSyncBadge } from "@/components/OrderSyncBadge";
 import { SuggestionPopup, type SuggestionProduct } from "@/components/pos/SuggestionPopup";
 import type { CategoryNode } from "./orderPageTypes";
 
 const PaymentDialog = lazy(() => import("./PaymentDialog").then(m => ({ default: m.PaymentDialog })));
 
 type ProductRow = import("./orderPageTypes").ProductRow;
-
-type ProductsResponse = {
-  categories: CategoryNode[];
-  products: ProductRow[];
-};
 
 type OrderResponse = {
   id: string;
@@ -112,13 +111,14 @@ function getBreadcrumb(tree: CategoryNode[], targetId: string): CategoryNode[] {
   return path;
 }
 
-type RoomWithTables = {
+type OpenOrderRow = {
   id: string;
-  name: string;
-  tables: { id: string; number: number; status: string }[];
+  orderNumber: number;
+  tableId: string | null;
+  tableNumber: number | null;
+  userName: string;
+  syncStatus?: string;
 };
-
-type OpenOrderRow = { id: string; orderNumber: number; tableId: string | null; tableNumber: number | null; userName: string };
 
 export function OrderPageClient({ orderId }: { orderId: string }) {
   const queryClient = useQueryClient();
@@ -159,62 +159,65 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const prevOrderStatusRef = useRef<string | null>(null);
   const currentUser = useAuthStore((s) => s.currentUser);
 
-  const { data: rooms = [] } = useQuery<RoomWithTables[]>({
-    queryKey: ["rooms"],
-    queryFn: async () => {
-      const res = await fetch("/api/rooms");
-      if (!res.ok) throw new Error("Błąd sal");
-      return res.json();
-    },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-  const { data: openOrders = [] } = useQuery<OpenOrderRow[]>({
-    queryKey: ["orders", "open"],
-    queryFn: async () => {
-      const res = await fetch("/api/orders?status=open");
-      if (!res.ok) throw new Error("Błąd listy");
-      return res.json();
-    },
-    enabled: mergeDialogOpen,
-  });
+  // Dexie — products, categories, rooms, orders (offline-first)
+  const { categories, products, isLoading: productsLoading } = useProductsForPos();
+  const { rooms } = useRoomsWithTables();
+  const { orders: openOrdersRaw } = useOpenOrders();
+  const localOrder = useOrder(orderId);
+  const { items: localOrderItems } = useOrderItems(localOrder?._localId);
 
-  const { data: orderData, isLoading: orderLoading } = useQuery<OrderResponse>({
-    queryKey: ["order", orderId],
-    queryFn: async () => {
-      const res = await fetch(`/api/orders/${orderId}`);
-      if (!res.ok) throw new Error("Błąd zamówienia");
-      return res.json();
-    },
-    enabled: !!orderId,
-    refetchInterval: 5000,
-  });
+  // Map open orders to OpenOrderRow format (for merge dialog)
+  const openOrders: OpenOrderRow[] = useMemo(
+    () =>
+      openOrdersRaw
+        .filter((o) => (o._serverId ?? o._localId) !== orderId)
+        .map((o) => ({
+          id: o._serverId ?? o._localId,
+          orderNumber: o.orderNumber ?? 0,
+          tableId: o.tableId ?? null,
+          tableNumber: o.tableNumber ?? null,
+          userName: o.userName ?? "",
+          syncStatus: o._syncStatus,
+        })),
+    [openOrdersRaw, orderId]
+  );
 
-  const { data: productsData } = useQuery<ProductsResponse>({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const res = await fetch("/api/products");
-      if (!res.ok) throw new Error("Błąd produktów");
-      return res.json();
-    },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  });
+  // Order data: prefer Dexie; fallback structure for store population
+  const orderData: OrderResponse | null = useMemo(() => {
+    const ord = localOrder;
+    if (!ord) return null;
+    const items = localOrderItems ?? [];
+    return {
+      id: ord._serverId ?? ord._localId,
+      orderNumber: ord.orderNumber ?? 0,
+      tableNumber: ord.tableNumber ?? null,
+      tableId: ord.tableId ?? null,
+      userId: ord.userId,
+      userName: ord.userName ?? "",
+      guestCount: ord.guestCount ?? 0,
+      status: ord.status,
+      type: ord.type,
+      courseReleasedUpTo: 1,
+      discountJson: ord.discountJson ?? null,
+      items: items.map((i) => ({
+        id: i._localId ?? i.productId + "-" + i.quantity,
+        productId: i.productId,
+        productName: i.productName,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+        taxRateId: i.taxRateId,
+        taxRatePercent: i.taxRatePercent ?? 0,
+        taxRateSymbol: i.fiscalSymbol ?? "?",
+        modifiersJson: i.modifiersJson ?? [],
+        note: i.note ?? null,
+        courseNumber: i.courseNumber,
+        status: i.status,
+      })),
+    };
+  }, [localOrder, localOrderItems]);
 
-  const { data: popularProducts = [] } = useQuery<Array<{ id: string; name: string; priceGross: number; taxRateId: string; color: string | null; categoryName: string; orderCount: number }>>({
-    queryKey: ["popular-products"],
-    queryFn: async () => {
-      const res = await fetch("/api/products/popular?limit=8&days=7");
-      if (!res.ok) return [];
-      return res.json();
-    },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  const orderLoading = productsLoading || (!!orderId && localOrder === undefined);
+  const popularProducts: Array<{ id: string; name: string; priceGross: number; taxRateId: string; color: string | null; categoryName: string; orderCount: number }> = [];
 
   // Favorites
   const { data: userPrefs } = useQuery<{ preferences: { favoriteProducts: string[] } }>({
@@ -273,7 +276,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   }, [orderData?.status]);
 
   useEffect(() => {
-    if (orderData && orderData.id === orderId) {
+    if (orderData) {
       const lines: OrderItemLine[] = orderData.items.map((i) => ({
         id: i.id,
         productId: i.productId,
@@ -286,12 +289,10 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         courseNumber: i.courseNumber,
         status: i.status === "CANCELLED" ? "CANCELLED" : i.status === "SENT" ? "SENT" : "ORDERED",
       }));
-      setOrder(orderId, orderData.orderNumber, orderData.tableNumber ?? null, lines);
+      setOrder(orderData.id, orderData.orderNumber, orderData.tableNumber ?? null, lines);
     }
   }, [orderId, orderData, setOrder]);
 
-  const categories = useMemo(() => productsData?.categories ?? [], [productsData?.categories]);
-  const products = useMemo(() => productsData?.products ?? [], [productsData?.products]);
   const currentCategoryId = categoryStack[categoryStack.length - 1] ?? null;
   const childCategories = useMemo(
     () => getDirectChildren(categories, currentCategoryId),
@@ -724,7 +725,13 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   return (
     <>
       <OrderPageView
-        orderNumber={orderNumber}
+        orderNumber={orderData?.orderNumber ?? orderNumber ?? null}
+        orderNumberLabel={
+          localOrder?._syncStatus === "pending" && localOrder?.orderNumber
+            ? `L-${localOrder.orderNumber}`
+            : undefined
+        }
+        syncStatus={localOrder?._syncStatus}
         tableNumber={tableNumber}
         items={items}
         categoryStack={effectiveCategoryStack}
@@ -948,10 +955,11 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
               <Button
                 key={o.id}
                 variant={mergeTargetOrderId === o.id ? "default" : "outline"}
-                className="w-full justify-start"
+                className="w-full justify-start gap-2"
                 size="sm"
                 onClick={() => setMergeTargetOrderId(o.id)}
               >
+                <OrderSyncBadge syncStatus={o.syncStatus ?? "pending"} className="shrink-0" />
                 #{o.orderNumber} · Stolik {o.tableNumber ?? "?"} · {o.userName}
               </Button>
             ))}

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAllRooms } from "@/hooks/useRooms";
+import { db } from "@/lib/db/offline-db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import "@/components/ui/dialog";
@@ -368,15 +370,7 @@ export default function SettingsPageClient() {
     },
   });
 
-  const { data: rooms = [] } = useQuery({
-    queryKey: ["rooms-all"],
-    queryFn: async () => {
-      const r = await fetch("/api/rooms?all=true");
-      if (!r.ok) throw new Error("Błąd");
-      return r.json();
-    },
-    enabled: tab === "rooms",
-  });
+  const { rooms } = useAllRooms();
 
   const roomToggle = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
@@ -387,8 +381,10 @@ export default function SettingsPageClient() {
       });
       if (!r.ok) throw new Error("Błąd");
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rooms-all"] });
+    onSuccess: async (_data, { id, isActive }) => {
+      if (typeof window !== "undefined") {
+        await db.rooms.update(id, { isActive });
+      }
     },
   });
 

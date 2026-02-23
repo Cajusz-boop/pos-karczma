@@ -367,3 +367,18 @@ export type UserPosPreference = Prisma.UserPosPreferenceModel
  * 
  */
 export type PendingPayment = Prisma.PendingPaymentModel
+/**
+ * Model SyncLog
+ * 
+ */
+export type SyncLog = Prisma.SyncLogModel
+/**
+ * Model ReceiptErrorLog
+ * 
+ */
+export type ReceiptErrorLog = Prisma.ReceiptErrorLogModel
+/**
+ * Model FiscalEvent
+ * 
+ */
+export type FiscalEvent = Prisma.FiscalEventModel

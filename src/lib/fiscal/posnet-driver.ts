@@ -142,6 +142,12 @@ export const posnetDriver = {
     }
 
     // LIVE mode — test connection
+    // HTTP JSONPOS (Posnet Trio WiFi)
+    if (config.connectionType === "HTTP" && config.address) {
+      return getStatusJsonPos(config.address, config.port ?? 80);
+    }
+
+    // TCP mode
     if (config.connectionType === "TCP" && config.address) {
       const result = await sendTcpCommand(
         config.address,
@@ -176,10 +182,13 @@ export const posnetDriver = {
       return { success: true, fiscalNumber: generateDemoFiscalNumber() };
     }
 
-    // LIVE mode — send receipt to printer
+    // HTTP JSONPOS (Posnet Trio WiFi)
+    if (config.connectionType === "HTTP" && config.address) {
+      return printReceiptJsonPos(config.address, config.port ?? 80, payload);
+    }
+
+    // LIVE mode — send receipt to printer via TCP
     if (config.connectionType === "TCP" && config.address) {
-      // Build Posnet thermal protocol command for receipt
-      // This is a simplified placeholder — real implementation needs full Posnet protocol
       const command = buildReceiptCommand(payload);
       const result = await sendTcpCommand(
         config.address,
@@ -187,7 +196,6 @@ export const posnetDriver = {
         command
       );
       if (result.success) {
-        // Parse fiscal number from response
         const fiscalNumber = parseFiscalNumber(result.response ?? "") || generateDemoFiscalNumber();
         return { success: true, fiscalNumber };
       }
@@ -205,8 +213,12 @@ export const posnetDriver = {
       return { success: true };
     }
 
+    // HTTP JSONPOS
+    if (config.connectionType === "HTTP" && config.address) {
+      return printDailyReportJsonPos(config.address, config.port ?? 80);
+    }
+
     if (config.connectionType === "TCP" && config.address) {
-      // Posnet daily report command
       const result = await sendTcpCommand(
         config.address,
         config.port ?? DEFAULT_TCP_PORT,
@@ -227,6 +239,20 @@ export const posnetDriver = {
     if (config.mode === "DEMO") {
       console.log(`[Posnet DEMO] Raport okresowy ${dateFrom} - ${dateTo}`);
       return { success: true };
+    }
+
+    // HTTP JSONPOS
+    if (config.connectionType === "HTTP" && config.address) {
+      const result = await sendJsonPosCommand(
+        config.address,
+        config.port ?? 80,
+        "periodReport",
+        { dateFrom, dateTo }
+      );
+      return {
+        success: result.success,
+        error: result.success ? undefined : result.error,
+      };
     }
 
     if (config.connectionType === "TCP" && config.address) {
@@ -262,4 +288,107 @@ function parseFiscalNumber(response: string): string | null {
   // Look for fiscal number pattern in response
   const match = response.match(/FP[-/]\d+/);
   return match ? match[0] : null;
+}
+
+// ─── JSONPOS HTTP API (Posnet Trio WiFi) ───────────────────
+
+async function sendJsonPosCommand(
+  address: string,
+  port: number,
+  method: string,
+  params: Record<string, unknown> = {}
+): Promise<{ success: boolean; result?: Record<string, unknown>; error?: string }> {
+  try {
+    const response = await fetch(`http://${address}:${port}/jsonpos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method,
+        id: Date.now(),
+        params,
+      }),
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    if (data.error) {
+      return { success: false, error: data.error.message || "Błąd drukarki" };
+    }
+    return { success: true, result: data.result };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : "Błąd komunikacji" };
+  }
+}
+
+/**
+ * Print receipt via JSONPOS HTTP API (Posnet Trio WiFi).
+ */
+async function printReceiptJsonPos(
+  address: string,
+  port: number,
+  payload: ReceiptPayload
+): Promise<PrintReceiptResult> {
+  const result = await sendJsonPosCommand(
+    address,
+    port,
+    "receipt",
+    {
+      lines: payload.items.map((item) => ({
+        type: "sale",
+        name: truncateName(item.name),
+        quantity: item.quantity,
+        price: Math.round(item.unitPrice * 100),
+        taxRate: item.vatSymbol,
+        unit: "szt",
+      })),
+      payments: payload.payments.map((p) => ({
+        type: p.method.toLowerCase(),
+        value: Math.round(p.amount * 100),
+      })),
+      ...(payload.buyerNip && { buyerNip: payload.buyerNip }),
+    }
+  );
+
+  if (result.success) {
+    return {
+      success: true,
+      fiscalNumber: (typeof result.result?.receiptNumber === "string" ? result.result.receiptNumber : null) ?? generateDemoFiscalNumber(),
+    };
+  }
+  return { success: false, error: result.error };
+}
+
+/**
+ * Get printer status via JSONPOS HTTP API.
+ */
+async function getStatusJsonPos(
+  address: string,
+  port: number
+): Promise<FiscalStatus> {
+  const result = await sendJsonPosCommand(address, port, "getStatus");
+  return {
+    ok: result.success,
+    connected: result.success,
+    message: result.success
+      ? `Połączono z ${address}:${port} (JSONPOS HTTP)`
+      : result.error ?? "Brak połączenia",
+    mode: "LIVE",
+  };
+}
+
+/**
+ * Print daily report via JSONPOS HTTP API.
+ */
+async function printDailyReportJsonPos(
+  address: string,
+  port: number
+): Promise<DailyReportResult> {
+  const result = await sendJsonPosCommand(address, port, "dailyReport");
+  return {
+    success: result.success,
+    error: result.success ? undefined : result.error,
+  };
 }

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 
 export async function GET(
   _request: NextRequest,

@@ -10,6 +10,12 @@ const limitSchema = z.object({
 /**
  * PUT /api/orders/[id]/limit - set order spending limit
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

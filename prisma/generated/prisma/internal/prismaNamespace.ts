@@ -453,7 +453,10 @@ export const ModelName = {
   Announcement: 'Announcement',
   UserMacro: 'UserMacro',
   UserPosPreference: 'UserPosPreference',
-  PendingPayment: 'PendingPayment'
+  PendingPayment: 'PendingPayment',
+  SyncLog: 'SyncLog',
+  ReceiptErrorLog: 'ReceiptErrorLog',
+  FiscalEvent: 'FiscalEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -469,7 +472,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "cardReaderConfig" | "role" | "room" | "roomMerge" | "table" | "category" | "product" | "superGroup" | "setComponent" | "taxRate" | "modifierGroup" | "modifier" | "productModifierGroup" | "allergen" | "productAllergen" | "order" | "orderItem" | "payment" | "tip" | "discount" | "promotion" | "invoice" | "receipt" | "warehouse" | "ingredient" | "stockItem" | "stockMove" | "recipe" | "recipeItem" | "kDSStation" | "kDSOrderArchive" | "kDSStationCategory" | "kDSLoadSnapshot" | "kitchenMessage" | "customerDisplay" | "printer" | "printerCategory" | "printLog" | "reservation" | "banquetEvent" | "banquetMenu" | "banquetMenuModification" | "shift" | "cashDrawer" | "cashOperation" | "auditLog" | "dailyReport" | "exportBatch" | "notification" | "pushSubscription" | "deliveryZone" | "deliveryStreet" | "deliveryDriver" | "driverSettlement" | "systemConfig" | "workstationConfig" | "customer" | "loyaltyTransaction" | "loyaltyReward" | "productSuggestion" | "timeEntry" | "giftVoucher" | "workSchedule" | "staffAvailability" | "shiftSwapRequest" | "announcement" | "userMacro" | "userPosPreference" | "pendingPayment"
+    modelProps: "user" | "cardReaderConfig" | "role" | "room" | "roomMerge" | "table" | "category" | "product" | "superGroup" | "setComponent" | "taxRate" | "modifierGroup" | "modifier" | "productModifierGroup" | "allergen" | "productAllergen" | "order" | "orderItem" | "payment" | "tip" | "discount" | "promotion" | "invoice" | "receipt" | "warehouse" | "ingredient" | "stockItem" | "stockMove" | "recipe" | "recipeItem" | "kDSStation" | "kDSOrderArchive" | "kDSStationCategory" | "kDSLoadSnapshot" | "kitchenMessage" | "customerDisplay" | "printer" | "printerCategory" | "printLog" | "reservation" | "banquetEvent" | "banquetMenu" | "banquetMenuModification" | "shift" | "cashDrawer" | "cashOperation" | "auditLog" | "dailyReport" | "exportBatch" | "notification" | "pushSubscription" | "deliveryZone" | "deliveryStreet" | "deliveryDriver" | "driverSettlement" | "systemConfig" | "workstationConfig" | "customer" | "loyaltyTransaction" | "loyaltyReward" | "productSuggestion" | "timeEntry" | "giftVoucher" | "workSchedule" | "staffAvailability" | "shiftSwapRequest" | "announcement" | "userMacro" | "userPosPreference" | "pendingPayment" | "syncLog" | "receiptErrorLog" | "fiscalEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -5093,6 +5096,204 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SyncLog: {
+      payload: Prisma.$SyncLogPayload<ExtArgs>
+      fields: Prisma.SyncLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SyncLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SyncLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        findFirst: {
+          args: Prisma.SyncLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SyncLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        findMany: {
+          args: Prisma.SyncLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>[]
+        }
+        create: {
+          args: Prisma.SyncLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        createMany: {
+          args: Prisma.SyncLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.SyncLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        update: {
+          args: Prisma.SyncLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.SyncLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SyncLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.SyncLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SyncLogPayload>
+        }
+        aggregate: {
+          args: Prisma.SyncLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSyncLog>
+        }
+        groupBy: {
+          args: Prisma.SyncLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SyncLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SyncLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SyncLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    ReceiptErrorLog: {
+      payload: Prisma.$ReceiptErrorLogPayload<ExtArgs>
+      fields: Prisma.ReceiptErrorLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReceiptErrorLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReceiptErrorLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload>
+        }
+        findFirst: {
+          args: Prisma.ReceiptErrorLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReceiptErrorLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload>
+        }
+        findMany: {
+          args: Prisma.ReceiptErrorLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload>[]
+        }
+        create: {
+          args: Prisma.ReceiptErrorLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload>
+        }
+        createMany: {
+          args: Prisma.ReceiptErrorLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ReceiptErrorLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload>
+        }
+        update: {
+          args: Prisma.ReceiptErrorLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReceiptErrorLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReceiptErrorLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ReceiptErrorLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReceiptErrorLogPayload>
+        }
+        aggregate: {
+          args: Prisma.ReceiptErrorLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReceiptErrorLog>
+        }
+        groupBy: {
+          args: Prisma.ReceiptErrorLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReceiptErrorLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReceiptErrorLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReceiptErrorLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    FiscalEvent: {
+      payload: Prisma.$FiscalEventPayload<ExtArgs>
+      fields: Prisma.FiscalEventFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FiscalEventFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FiscalEventFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload>
+        }
+        findFirst: {
+          args: Prisma.FiscalEventFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FiscalEventFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload>
+        }
+        findMany: {
+          args: Prisma.FiscalEventFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload>[]
+        }
+        create: {
+          args: Prisma.FiscalEventCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload>
+        }
+        createMany: {
+          args: Prisma.FiscalEventCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.FiscalEventDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload>
+        }
+        update: {
+          args: Prisma.FiscalEventUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload>
+        }
+        deleteMany: {
+          args: Prisma.FiscalEventDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FiscalEventUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.FiscalEventUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FiscalEventPayload>
+        }
+        aggregate: {
+          args: Prisma.FiscalEventAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFiscalEvent>
+        }
+        groupBy: {
+          args: Prisma.FiscalEventGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FiscalEventGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FiscalEventCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FiscalEventCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -6266,6 +6467,50 @@ export const PendingPaymentScalarFieldEnum = {
 export type PendingPaymentScalarFieldEnum = (typeof PendingPaymentScalarFieldEnum)[keyof typeof PendingPaymentScalarFieldEnum]
 
 
+export const SyncLogScalarFieldEnum = {
+  id: 'id',
+  operationId: 'operationId',
+  table: 'table',
+  localId: 'localId',
+  serverId: 'serverId',
+  serverVersion: 'serverVersion',
+  success: 'success',
+  processedAt: 'processedAt'
+} as const
+
+export type SyncLogScalarFieldEnum = (typeof SyncLogScalarFieldEnum)[keyof typeof SyncLogScalarFieldEnum]
+
+
+export const ReceiptErrorLogScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  errorMessage: 'errorMessage',
+  retryCount: 'retryCount',
+  resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ReceiptErrorLogScalarFieldEnum = (typeof ReceiptErrorLogScalarFieldEnum)[keyof typeof ReceiptErrorLogScalarFieldEnum]
+
+
+export const FiscalEventScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  type: 'type',
+  status: 'status',
+  payloadJson: 'payloadJson',
+  fiscalNumber: 'fiscalNumber',
+  errorMessage: 'errorMessage',
+  retryCount: 'retryCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FiscalEventScalarFieldEnum = (typeof FiscalEventScalarFieldEnum)[keyof typeof FiscalEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -7043,6 +7288,40 @@ export const PendingPaymentOrderByRelevanceFieldEnum = {
 export type PendingPaymentOrderByRelevanceFieldEnum = (typeof PendingPaymentOrderByRelevanceFieldEnum)[keyof typeof PendingPaymentOrderByRelevanceFieldEnum]
 
 
+export const SyncLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  operationId: 'operationId',
+  table: 'table',
+  localId: 'localId',
+  serverId: 'serverId'
+} as const
+
+export type SyncLogOrderByRelevanceFieldEnum = (typeof SyncLogOrderByRelevanceFieldEnum)[keyof typeof SyncLogOrderByRelevanceFieldEnum]
+
+
+export const ReceiptErrorLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  errorMessage: 'errorMessage'
+} as const
+
+export type ReceiptErrorLogOrderByRelevanceFieldEnum = (typeof ReceiptErrorLogOrderByRelevanceFieldEnum)[keyof typeof ReceiptErrorLogOrderByRelevanceFieldEnum]
+
+
+export const FiscalEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  type: 'type',
+  status: 'status',
+  fiscalNumber: 'fiscalNumber',
+  errorMessage: 'errorMessage'
+} as const
+
+export type FiscalEventOrderByRelevanceFieldEnum = (typeof FiscalEventOrderByRelevanceFieldEnum)[keyof typeof FiscalEventOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -7493,6 +7772,9 @@ export type GlobalOmitConfig = {
   userMacro?: Prisma.UserMacroOmit
   userPosPreference?: Prisma.UserPosPreferenceOmit
   pendingPayment?: Prisma.PendingPaymentOmit
+  syncLog?: Prisma.SyncLogOmit
+  receiptErrorLog?: Prisma.ReceiptErrorLogOmit
+  fiscalEvent?: Prisma.FiscalEventOmit
 }
 
 /* Types for Logging */

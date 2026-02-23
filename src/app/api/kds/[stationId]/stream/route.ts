@@ -1,17 +1,29 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const dynamic = process.env.CAPACITOR_BUILD === "1" ? "force-static" : "force-dynamic";
 export const runtime = "nodejs";
 
 /**
  * SSE endpoint for real-time KDS order updates.
  * Replaces polling with push-based updates for kitchen displays.
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"stationId":"_"} ];
+}
+
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ stationId: string }> }
 ) {
+  if (process.env.CAPACITOR_BUILD === "1") {
+    return new Response(JSON.stringify({ error: "SSE not available in static build" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const { stationId } = await params;
   const encoder = new TextEncoder();
 

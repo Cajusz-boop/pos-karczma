@@ -54,7 +54,7 @@ export default function KDSSettingsPage() {
     try {
       const [cRes, sRes] = await Promise.all([
         fetch("/api/kds/config"),
-        fetch("/api/kds/stations"),
+        fetch("/api/kds/station-list"),
       ]);
       const cData = await cRes.json();
       const sData = await sRes.json();

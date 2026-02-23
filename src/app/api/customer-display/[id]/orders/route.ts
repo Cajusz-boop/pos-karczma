@@ -8,6 +8,12 @@ import { prisma } from "@/lib/prisma";
  * - Being prepared (status = IN_PROGRESS or items in progress)
  * - Ready for pickup (status = READY or all items ready)
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

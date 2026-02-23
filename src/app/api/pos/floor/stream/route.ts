@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const dynamic = process.env.CAPACITOR_BUILD === "1" ? "force-static" : "force-dynamic";
 export const runtime = "nodejs";
 
 /**
@@ -11,6 +11,12 @@ export const runtime = "nodejs";
  * Usage: const eventSource = new EventSource('/api/pos/floor/stream');
  */
 export async function GET(request: NextRequest) {
+  if (process.env.CAPACITOR_BUILD === "1") {
+    return new Response(JSON.stringify({ error: "SSE not available in static build" }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
   const encoder = new TextEncoder();
   
   const stream = new ReadableStream({

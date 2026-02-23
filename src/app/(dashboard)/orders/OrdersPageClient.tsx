@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useMemo } from "react";
+import { useAllOrders } from "@/hooks/useOrder";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, ChevronRight } from "lucide-react";
@@ -47,22 +47,35 @@ export default function OrdersPageClient() {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState<string>("");
 
-  const { data: orders = [], isLoading } = useQuery<OrderRow[]>({
-    queryKey: ["orders-history", statusFilter],
-    queryFn: async () => {
-      const params = new URLSearchParams();
-      params.set("limit", "50");
-      if (statusFilter === "open")
-        params.set("status", "open");
-      else if (statusFilter === "closed")
-        params.set("status", "closed");
-      else if (statusFilter === "cancelled")
-        params.set("status", "cancelled");
-      const r = await fetch(`/api/orders?${params}`);
-      if (!r.ok) throw new Error("Błąd pobierania zamówień");
-      return r.json();
-    },
+  const statusFilterForDexie =
+    statusFilter === "open"
+      ? (["OPEN", "SENT_TO_KITCHEN", "IN_PROGRESS", "READY", "SERVED", "BILL_REQUESTED"] as const)
+      : statusFilter === "closed"
+        ? (["CLOSED"] as const)
+        : statusFilter === "cancelled"
+          ? (["CANCELLED"] as const)
+          : undefined;
+
+  const { orders: ordersRaw, isLoading } = useAllOrders({
+    limit: 50,
+    status: statusFilterForDexie,
   });
+
+  const orders: OrderRow[] = useMemo(
+    () =>
+      ordersRaw.map((o) => ({
+        id: o._serverId ?? o._localId,
+        orderNumber: o.orderNumber ?? 0,
+        tableNumber: o.tableNumber ?? null,
+        tableName: o.tableNumber != null ? `Stolik #${o.tableNumber}` : o.roomName ?? "—",
+        waiterName: o.userName ?? "",
+        status: o.status,
+        total: o.totalGross ?? 0,
+        createdAt: o.createdAt,
+        closedAt: o.closedAt ?? null,
+      })),
+    [ordersRaw]
+  );
 
   return (
     <div className="space-y-4">

@@ -6,6 +6,12 @@ import { prisma } from "@/lib/prisma";
  * Public endpoint (no auth). Returns e-receipt HTML by token.
  * Marks viewedAt on first view.
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"token":"_"} ];
+}
+
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ token: string }> }

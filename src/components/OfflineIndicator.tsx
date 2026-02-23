@@ -2,24 +2,37 @@
 
 import { useEffect, useState } from "react";
 import { WifiOff, CloudOff, RefreshCw, AlertTriangle, Check } from "lucide-react";
-import { useOfflineStore } from "@/store/useOfflineStore";
-import { syncPendingActions, getSyncStatus } from "@/lib/offline/sync";
-
-interface SyncStatus {
-  pending: number;
-  failed: number;
-  lastSync: string | null;
-  inProgress: boolean;
-}
+import { useSyncStatus } from "@/hooks/useOrder";
+import { syncEngine } from "@/lib/sync/sync-engine";
 
 export function OfflineIndicator() {
-  const isOnline = useOfflineStore((s) => s.isOnline);
-  const pendingCount = useOfflineStore((s) => s.pendingActions.length);
-  const failedCount = useOfflineStore((s) => s.failedPermanently.length);
-  const syncInProgress = useOfflineStore((s) => s.syncInProgress);
-  
+  const { pendingCount, errorCount } = useSyncStatus();
+  const [isOnline, setIsOnline] = useState(true);
+  const [syncInProgress, setSyncInProgress] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [syncResult, setSyncResult] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsOnline(navigator.onLine);
+
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", onOnline);
+    window.addEventListener("offline", onOffline);
+
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.removeEventListener("offline", onOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = syncEngine.subscribe((status) => {
+      setSyncInProgress(status.state === "syncing");
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (syncResult) {
@@ -31,16 +44,20 @@ export function OfflineIndicator() {
   const handleManualSync = async () => {
     if (syncInProgress || !isOnline) return;
     
-    const result = await syncPendingActions();
+    setSyncInProgress(true);
+    const result = await syncEngine.pushNow();
+    setSyncInProgress(false);
     
     if (result.synced > 0) {
-      setSyncResult(`Zsynchronizowano ${result.synced} ${result.synced === 1 ? "akcję" : "akcji"}`);
+      setSyncResult(`Zsynchronizowano ${result.synced} ${result.synced === 1 ? "operację" : "operacji"}`);
     } else if (result.failed > 0) {
       setSyncResult(`${result.failed} ${result.failed === 1 ? "błąd" : "błędów"} synchronizacji`);
+    } else if (result.pending === 0) {
+      setSyncResult("Wszystko zsynchronizowane");
     }
   };
 
-  if (isOnline && pendingCount === 0 && failedCount === 0) {
+  if (isOnline && pendingCount === 0 && errorCount === 0) {
     return null;
   }
 
@@ -54,7 +71,7 @@ export function OfflineIndicator() {
             ? "bg-red-600 text-white" 
             : pendingCount > 0 
               ? "bg-yellow-500 text-white"
-              : failedCount > 0
+              : errorCount > 0
                 ? "bg-orange-500 text-white"
                 : "bg-gray-600 text-white"
           }
@@ -64,7 +81,7 @@ export function OfflineIndicator() {
           <WifiOff className="w-4 h-4" />
         ) : syncInProgress ? (
           <RefreshCw className="w-4 h-4 animate-spin" />
-        ) : failedCount > 0 ? (
+        ) : errorCount > 0 ? (
           <AlertTriangle className="w-4 h-4" />
         ) : (
           <CloudOff className="w-4 h-4" />
@@ -77,7 +94,7 @@ export function OfflineIndicator() {
               ? "Synchronizuję..."
               : pendingCount > 0
                 ? `${pendingCount} oczekujących`
-                : `${failedCount} błędów`
+                : `${errorCount} błędów`
           }
         </span>
       </button>
@@ -97,16 +114,16 @@ export function OfflineIndicator() {
           
           <div className="p-3 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Oczekujące akcje:</span>
+              <span className="text-gray-600">Operacje w kolejce:</span>
               <span className={`font-medium ${pendingCount > 0 ? "text-yellow-600" : "text-gray-900"}`}>
                 {pendingCount}
               </span>
             </div>
             
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Błędy trwałe:</span>
-              <span className={`font-medium ${failedCount > 0 ? "text-red-600" : "text-gray-900"}`}>
-                {failedCount}
+              <span className="text-gray-600">Zamówienia z błędami:</span>
+              <span className={`font-medium ${errorCount > 0 ? "text-red-600" : "text-gray-900"}`}>
+                {errorCount}
               </span>
             </div>
             
@@ -131,15 +148,6 @@ export function OfflineIndicator() {
               )}
               Synchronizuj
             </button>
-            
-            {failedCount > 0 && (
-              <button
-                onClick={() => useOfflineStore.getState().clearFailedActions()}
-                className="px-3 py-1.5 bg-gray-100 text-gray-700 text-sm rounded hover:bg-gray-200 transition-colors"
-              >
-                Wyczyść błędy
-              </button>
-            )}
           </div>
         </div>
       )}

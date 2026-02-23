@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 /** POST /api/printers/[id]/test — test wydruku (w trybie DEMO zwraca sukces bez wysyłki) */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

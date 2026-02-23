@@ -54,7 +54,7 @@ describe("SC-04: Wysyłka do kuchni", () => {
 
   describe("SC-04-01: KDS stations", () => {
     it("powinno pobrać listę stanowisk KDS", async () => {
-      const res = await authFetch(url("/api/kds/stations"));
+      const res = await authFetch(url("/api/kds/station-list"));
       expect(res.status).toBe(200);
       const data = await res.json();
       expect(Array.isArray(data) || data.stations).toBeTruthy();

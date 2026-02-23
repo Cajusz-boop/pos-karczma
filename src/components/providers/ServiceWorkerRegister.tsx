@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { syncPendingActions } from "@/lib/offline/sync";
-import { useOfflineStore } from "@/store/useOfflineStore";
+import { useSyncStatus } from "@/hooks/useOrder";
 
 interface SWStatus {
   registered: boolean;
@@ -17,11 +16,27 @@ export function ServiceWorkerRegister() {
     updateAvailable: false,
   });
   
-  const pendingCount = useOfflineStore((s) => s.pendingActions.length);
+  const { pendingCount } = useSyncStatus();
 
-  const handleSWMessage = useCallback((event: MessageEvent) => {
+  const handleSWMessage = useCallback(async (event: MessageEvent) => {
     if (event.data?.type === "SYNC_REQUESTED") {
-      syncPendingActions();
+      // Legacy sync - can be removed after full migration
+      try {
+        const { syncPendingActions } = await import("@/lib/offline/sync");
+        syncPendingActions();
+      } catch {
+        // Old sync not available
+      }
+    }
+    
+    if (event.data?.type === "DEXIE_SYNC_REQUESTED") {
+      // New Dexie sync engine
+      try {
+        const { syncEngine } = await import("@/lib/sync/sync-engine");
+        syncEngine.pushNow();
+      } catch (e) {
+        console.error("[SW] Dexie sync failed:", e);
+      }
     }
   }, []);
 

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { DexieProvider } from "@/components/providers/DexieProvider";
 import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegister";
 import { ConnectionMonitor } from "@/components/ConnectionMonitor";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
@@ -65,7 +66,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ConnectionMonitor />
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <DexieProvider>{children}</DexieProvider>
+        </QueryProvider>
         <OfflineIndicator />
         <ServiceWorkerRegister />
       </body>

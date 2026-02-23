@@ -120,7 +120,10 @@ export const ModelName = {
   Announcement: 'Announcement',
   UserMacro: 'UserMacro',
   UserPosPreference: 'UserPosPreference',
-  PendingPayment: 'PendingPayment'
+  PendingPayment: 'PendingPayment',
+  SyncLog: 'SyncLog',
+  ReceiptErrorLog: 'ReceiptErrorLog',
+  FiscalEvent: 'FiscalEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1273,6 +1276,50 @@ export const PendingPaymentScalarFieldEnum = {
 export type PendingPaymentScalarFieldEnum = (typeof PendingPaymentScalarFieldEnum)[keyof typeof PendingPaymentScalarFieldEnum]
 
 
+export const SyncLogScalarFieldEnum = {
+  id: 'id',
+  operationId: 'operationId',
+  table: 'table',
+  localId: 'localId',
+  serverId: 'serverId',
+  serverVersion: 'serverVersion',
+  success: 'success',
+  processedAt: 'processedAt'
+} as const
+
+export type SyncLogScalarFieldEnum = (typeof SyncLogScalarFieldEnum)[keyof typeof SyncLogScalarFieldEnum]
+
+
+export const ReceiptErrorLogScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  errorMessage: 'errorMessage',
+  retryCount: 'retryCount',
+  resolvedAt: 'resolvedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type ReceiptErrorLogScalarFieldEnum = (typeof ReceiptErrorLogScalarFieldEnum)[keyof typeof ReceiptErrorLogScalarFieldEnum]
+
+
+export const FiscalEventScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  type: 'type',
+  status: 'status',
+  payloadJson: 'payloadJson',
+  fiscalNumber: 'fiscalNumber',
+  errorMessage: 'errorMessage',
+  retryCount: 'retryCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FiscalEventScalarFieldEnum = (typeof FiscalEventScalarFieldEnum)[keyof typeof FiscalEventScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2048,4 +2095,38 @@ export const PendingPaymentOrderByRelevanceFieldEnum = {
 } as const
 
 export type PendingPaymentOrderByRelevanceFieldEnum = (typeof PendingPaymentOrderByRelevanceFieldEnum)[keyof typeof PendingPaymentOrderByRelevanceFieldEnum]
+
+
+export const SyncLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  operationId: 'operationId',
+  table: 'table',
+  localId: 'localId',
+  serverId: 'serverId'
+} as const
+
+export type SyncLogOrderByRelevanceFieldEnum = (typeof SyncLogOrderByRelevanceFieldEnum)[keyof typeof SyncLogOrderByRelevanceFieldEnum]
+
+
+export const ReceiptErrorLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  errorMessage: 'errorMessage'
+} as const
+
+export type ReceiptErrorLogOrderByRelevanceFieldEnum = (typeof ReceiptErrorLogOrderByRelevanceFieldEnum)[keyof typeof ReceiptErrorLogOrderByRelevanceFieldEnum]
+
+
+export const FiscalEventOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paymentId: 'paymentId',
+  type: 'type',
+  status: 'status',
+  fiscalNumber: 'fiscalNumber',
+  errorMessage: 'errorMessage'
+} as const
+
+export type FiscalEventOrderByRelevanceFieldEnum = (typeof FiscalEventOrderByRelevanceFieldEnum)[keyof typeof FiscalEventOrderByRelevanceFieldEnum]
 

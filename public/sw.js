@@ -58,7 +58,9 @@ async function doBackgroundSync() {
   const clients = await self.clients.matchAll({ type: "window" });
   
   for (const client of clients) {
+    // Trigger both old sync and new Dexie sync
     client.postMessage({ type: "SYNC_REQUESTED" });
+    client.postMessage({ type: "DEXIE_SYNC_REQUESTED" });
   }
 }
 

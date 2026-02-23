@@ -12,11 +12,13 @@ import {
   AlertTriangle,
   CheckCircle,
   RefreshCw,
+  Database,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function ManagerPage() {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"counter" | "cleanup" | "backup" | "fiscalize">("counter");
+  const [activeTab, setActiveTab] = useState<"counter" | "cleanup" | "backup" | "fiscalize" | "cache">("counter");
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -51,6 +53,40 @@ export default function ManagerPage() {
       {activeTab === "cleanup" && <CleanupSection />}
       {activeTab === "backup" && <BackupSection />}
       {activeTab === "fiscalize" && <FiscalizeSection />}
+      {activeTab === "cache" && <CacheSection />}
+    </div>
+  );
+}
+
+function CacheSection() {
+  const [resetting, setResetting] = useState(false);
+  const handleResetCache = async () => {
+    if (!confirm("Resetować cache offline? Wszystkie dane lokalne (produkty, zamówienia pending) zostaną usunięte. Aplikacja się przeładuje.")) return;
+    setResetting(true);
+    try {
+      const Dexie = (await import("dexie")).default;
+      await Dexie.delete("PosKarczma");
+      window.location.reload();
+    } catch (e) {
+      console.error("Reset cache failed:", e);
+      alert("Błąd resetowania cache");
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+        <Database className="w-5 h-5" />
+        Cache offline (Dexie / IndexedDB)
+      </h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        W razie problemów (uszkodzone dane, błędy synchronizacji) możesz wyczyścić lokalną bazę. Dane z serwera zostaną pobrane ponownie po przeładowaniu.
+      </p>
+      <Button variant="destructive" onClick={handleResetCache} disabled={resetting}>
+        {resetting ? "Resetowanie…" : "Resetuj cache offline"}
+      </Button>
     </div>
   );
 }

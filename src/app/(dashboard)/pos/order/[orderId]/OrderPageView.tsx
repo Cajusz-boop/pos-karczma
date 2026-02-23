@@ -32,12 +32,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { OrderSyncBadge } from "@/components/OrderSyncBadge";
 import { AllergenFilter } from "@/components/pos/AllergenFilter";
 import type { OrderItemLine } from "@/store/useOrderStore";
 import type { CategoryNode, ProductRow } from "./orderPageTypes";
 
 export interface OrderPageViewProps {
   orderNumber: number | null;
+  orderNumberLabel?: string;
+  syncStatus?: string;
   tableNumber: number | null;
   items: OrderItemLine[];
   categoryStack: string[];
@@ -105,6 +108,8 @@ const CATEGORY_COLORS = [
 export function OrderPageView(props: OrderPageViewProps) {
   const {
     orderNumber,
+    orderNumberLabel,
+    syncStatus,
     tableNumber,
     items,
     categoryStack,
@@ -279,7 +284,8 @@ export function OrderPageView(props: OrderPageViewProps) {
                   Stolik {tableNumber}
                 </span>
               )}
-              <span className="text-muted-foreground">#{orderNumber ?? "-"}</span>
+              <OrderSyncBadge syncStatus={syncStatus ?? "synced"} className="shrink-0" />
+              <span className="text-muted-foreground">#{orderNumberLabel ?? orderNumber ?? "-"}</span>
             </div>
           </div>
           {/* Mobile: show total as tap target */}

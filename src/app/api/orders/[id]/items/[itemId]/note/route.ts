@@ -14,6 +14,12 @@ const noteSchema = z.object({
 /**
  * PUT /api/orders/[id]/items/[itemId]/note - update item note and flags
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_","itemId":"_"} ];
+}
+
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; itemId: string }> }

@@ -50,11 +50,11 @@ export interface DailyReportResult {
 export interface FiscalPrinterConfig {
   /** Tryb: DEMO (symulacja) lub LIVE (prawdziwa drukarka) */
   mode: "DEMO" | "LIVE";
-  /** Typ połączenia */
-  connectionType: "USB" | "COM" | "TCP";
-  /** Adres IP (TCP) lub ścieżka portu (COM) */
+  /** Typ połączenia: USB, COM, TCP (stary protokół), HTTP (JSONPOS API) */
+  connectionType: "USB" | "COM" | "TCP" | "HTTP";
+  /** Adres IP (TCP/HTTP) lub ścieżka portu (COM) */
   address?: string;
-  /** Port TCP (domyślnie 9100 dla Posnet) */
+  /** Port TCP (domyślnie 9100 dla Posnet, 80 dla HTTP JSONPOS) */
   port?: number;
   /** Model drukarki */
   model?: string;

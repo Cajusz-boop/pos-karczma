@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-/** GET /api/reports — lista typów raportów (użyj /api/reports/daily, /shift, /products, /warehouse, /vat, /banquets, /audit, /export) */
+/** GET /api/report-list — lista typów raportów (alias dla /api/reports, unika konfliktu ścieżek przy export) */
 export async function GET() {
   return NextResponse.json({
     reports: [

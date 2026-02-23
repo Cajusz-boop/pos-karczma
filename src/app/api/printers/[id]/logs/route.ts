@@ -10,6 +10,12 @@ import { prisma } from "@/lib/prisma";
  * - status: filter by status (PENDING, PRINTING, PRINTED, FAILED)
  * - type: filter by print type
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

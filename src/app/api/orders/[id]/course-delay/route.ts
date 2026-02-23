@@ -11,6 +11,12 @@ const courseDelaySchema = z.object({
 /**
  * POST /api/orders/[id]/course-delay - set delay for entire course
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

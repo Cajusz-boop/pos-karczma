@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+
 import { createWorkbook, exportFilename } from "@/lib/export/excel";
 import { startOfDay, endOfDay, format, subMonths } from "date-fns";
 
@@ -14,7 +15,10 @@ const PAYMENT_LABELS: Record<string, string> = {
 /** GET /api/reports/export?type=daily|monthly|vat|products|warehouse|banquets|audit&date=YYYY-MM-DD lub dateFrom=&dateTo= */
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    if (process.env.CAPACITOR_BUILD === "1") {
+      return NextResponse.json({ error: "Export not available in static build" }, { status: 404 });
+    }
+    const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get("type") ?? "daily";
     const date = searchParams.get("date");
     const dateFrom = searchParams.get("dateFrom");

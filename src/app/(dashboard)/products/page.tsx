@@ -1,6 +1,9 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAllProducts } from "@/hooks/useProducts";
+import { useAllCategories } from "@/hooks/useCategories";
+import { useTaxRates } from "@/hooks/useTaxRates";
 import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -78,28 +81,41 @@ export default function ProductsPage() {
   const [formColor, setFormColor] = useState("");
   const [formSortOrder, setFormSortOrder] = useState("0");
 
-  const { data: productsData, isLoading: productsLoading } = useQuery({
-    queryKey: ["admin-products", showInactive],
-    queryFn: async () => {
-      const url = showInactive ? "/api/products?all=true" : "/api/products?all=true";
-      const r = await fetch(url);
-      if (!r.ok) throw new Error("Błąd");
-      return r.json();
-    },
-  });
+  const { products: productsRaw, isLoading: productsLoading } = useAllProducts();
+  const { categories: categoriesRaw } = useAllCategories();
+  const { taxRates: taxRatesRaw } = useTaxRates();
 
-  const { data: metaData } = useQuery({
-    queryKey: ["categories-taxrates"],
-    queryFn: async () => {
-      const r = await fetch("/api/categories");
-      if (!r.ok) throw new Error("Błąd");
-      return r.json();
-    },
-  });
+  const catMap = useMemo(() => new Map(categoriesRaw.map((c) => [c.id, c])), [categoriesRaw]);
+  const taxMap = useMemo(() => new Map(taxRatesRaw.map((t) => [t.id, t])), [taxRatesRaw]);
 
-  const products: ProductRow[] = productsData?.products ?? [];
-  const categories: CategoryFlat[] = metaData?.categories ?? [];
-  const taxRates: TaxRate[] = metaData?.taxRates ?? [];
+  const products: ProductRow[] = useMemo(
+    () =>
+      productsRaw.map((p) => ({
+        id: p.id,
+        name: p.name,
+        nameShort: p.nameShort ?? null,
+        categoryId: p.categoryId,
+        category: { id: p.categoryId, name: catMap.get(p.categoryId)?.name ?? "" },
+        priceGross: p.priceGross,
+        taxRateId: p.taxRateId,
+        taxRate: { id: p.taxRateId, fiscalSymbol: taxMap.get(p.taxRateId)?.fiscalSymbol ?? "?" },
+        isActive: p.isActive,
+        isAvailable: p.isAvailable,
+        color: p.color ?? null,
+        imageUrl: p.imageUrl ?? null,
+        sortOrder: p.sortOrder,
+      })),
+    [productsRaw, catMap, taxMap]
+  );
+  const categories: CategoryFlat[] = categoriesRaw.map((c) => ({
+    id: c.id,
+    name: c.name,
+    parentId: c.parentId ?? null,
+    sortOrder: c.sortOrder,
+    color: c.color ?? null,
+    icon: c.icon ?? null,
+  }));
+  const taxRates: TaxRate[] = taxRatesRaw;
 
   const filteredProducts = useMemo(() => {
     let list = products;

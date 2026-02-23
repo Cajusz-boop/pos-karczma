@@ -14,6 +14,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import {
+  cacheSession,
+  getCachedUsers,
+  getCachedSession,
+  verifyCachedPin,
+} from "@/lib/auth/cached-auth";
+import { safeFetch } from "@/lib/utils/safe-fetch";
 
 type UserItem = {
   id: string;
@@ -49,38 +56,54 @@ export function LoginClient() {
   const [tokenLoading, setTokenLoading] = useState(false);
   const [tokenSuccess, setTokenSuccess] = useState(false);
 
-  const loadUsers = useCallback(() => {
+  const [isOfflineMode, setIsOfflineMode] = useState(false);
+
+  const loadUsers = useCallback(async () => {
     if (currentUser) return;
     setUsersLoading(true);
     setUsersError(null);
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    const url = typeof window !== "undefined" ? `${window.location.origin}/api/auth/users` : "/api/auth/users";
-    fetch(url, { signal: controller.signal, cache: "no-store" })
-      .then((r) => {
-        if (!r.ok) throw new Error(r.status === 500 ? "Błąd serwera (sprawdź bazę danych)" : `Błąd ${r.status}`);
-        return r.json();
-      })
-      .then((data) => {
-        if (Array.isArray(data)) {
-          setUsers(data);
-        } else {
+
+    if (!navigator.onLine) {
+      try {
+        const cached = await getCachedUsers();
+        if (cached.length === 0) {
           setUsers([]);
-          setUsersError("Nieprawidłowa odpowiedź serwera");
-        }
-      })
-      .catch((err) => {
-        setUsers([]);
-        if (err.name === "AbortError") {
-          setUsersError("Przekroczono czas oczekiwania. Sprawdź połączenie i spróbuj ponownie.");
+          setUsersError("Zaloguj się online za pierwszym razem");
         } else {
-          setUsersError(err instanceof Error ? err.message : "Nie można załadować użytkowników");
+          setUsers(cached);
+          setIsOfflineMode(true);
         }
-      })
-      .finally(() => {
-        clearTimeout(timeoutId);
+      } catch {
+        setUsers([]);
+        setUsersError("Błąd odczytu cache");
+      } finally {
         setUsersLoading(false);
-      });
+      }
+      return;
+    }
+
+    try {
+      const url = typeof window !== "undefined" ? `${window.location.origin}/api/auth/users` : "/api/auth/users";
+      const { data, error, offline } = await safeFetch<UserItem[]>(url, { cache: "no-store" });
+      if (offline) {
+        setUsers([]);
+        setUsersError("Brak połączenia z serwerem — sprawdź sieć i spróbuj ponownie");
+      } else if (error || !data) {
+        setUsers([]);
+        setUsersError(error ?? "Nie można załadować użytkowników");
+      } else if (Array.isArray(data)) {
+        setUsers(data);
+        setIsOfflineMode(false);
+      } else {
+        setUsers([]);
+        setUsersError("Nieprawidłowa odpowiedź serwera");
+      }
+    } catch {
+      setUsers([]);
+      setUsersError("Nie można załadować użytkowników");
+    } finally {
+      setUsersLoading(false);
+    }
   }, [currentUser]);
 
   useEffect(() => {
@@ -99,8 +122,11 @@ export function LoginClient() {
       }
       try {
         const base = typeof window !== "undefined" ? window.location.origin : "";
-        const res = await fetch(`${base}/api/shifts?userId=${user.id}&status=OPEN`);
-        const data = await res.json();
+        const { data, offline } = await safeFetch<unknown[]>(`${base}/api/shifts?userId=${user.id}&status=OPEN`);
+        if (offline || !data) {
+          router.replace("/pos");
+          return;
+        }
         if (Array.isArray(data) && data.length > 0) {
           router.replace("/pos");
         } else {
@@ -122,15 +148,21 @@ export function LoginClient() {
     setShiftError("");
     try {
       const base = typeof window !== "undefined" ? window.location.origin : "";
-      const res = await fetch(`${base}/api/shifts`, {
+      const { data, error, offline } = await safeFetch<{ error?: string }>(`${base}/api/shifts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: pendingUser.id, cashStart: parseFloat(cashStart) || 0 }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setShiftError(data.error ?? "Błąd otwarcia zmiany");
-        setShiftLoading(false);
+      if (offline) {
+        setShiftError("Brak połączenia z serwerem — sprawdź sieć");
+        return;
+      }
+      if (error) {
+        setShiftError(error);
+        return;
+      }
+      if (data?.error) {
+        setShiftError(data.error);
         return;
       }
       setShiftDialogOpen(false);
@@ -152,14 +184,21 @@ export function LoginClient() {
       setTokenSuccess(false);
       try {
         const base = typeof window !== "undefined" ? window.location.origin : "";
-        const res = await fetch(`${base}/api/auth/token-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tokenId }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          setTokenError(data.error ?? "Błąd logowania tokenem");
+        const { data, error, offline } = await safeFetch<{ error?: string; user?: AuthUser }>(
+          `${base}/api/auth/token-login`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tokenId }),
+          }
+        );
+        if (offline) {
+          setTokenError("Brak połączenia z serwerem — sprawdź sieć");
+          setTokenLoading(false);
+          return;
+        }
+        if (error || !data?.user) {
+          setTokenError(data?.error ?? error ?? "Błąd logowania tokenem");
           setTokenLoading(false);
           return;
         }
@@ -235,15 +274,48 @@ export function LoginClient() {
     setLoading(true);
     setError("");
     try {
+      if (!navigator.onLine) {
+        const valid = await verifyCachedPin(selectedUser.id, pin);
+        if (!valid) {
+          setError("Błędny PIN");
+          setLoading(false);
+          return;
+        }
+        const session = await getCachedSession(selectedUser.id);
+        if (!session) {
+          setError("Sesja wygasła — zaloguj się online");
+          setLoading(false);
+          return;
+        }
+        const user: AuthUser = {
+          id: session.userId,
+          name: session.userName,
+          roleId: "",
+          roleName: session.userRole,
+          isOwner: session.isOwner,
+        };
+        setCurrentUser(user);
+        closeDialog();
+        router.replace("/pos");
+        return;
+      }
+
       const base = typeof window !== "undefined" ? window.location.origin : "";
-      const res = await fetch(`${base}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: selectedUser.id, pin }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Błąd logowania");
+      const { data, error, offline } = await safeFetch<{ error?: string; user?: AuthUser }>(
+        `${base}/api/auth/login`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: selectedUser.id, pin }),
+        }
+      );
+      if (offline) {
+        setError("Brak połączenia z serwerem — sprawdź sieć");
+        setLoading(false);
+        return;
+      }
+      if (error || !data?.user) {
+        setError(data?.error ?? error ?? "Błąd logowania");
         setLoading(false);
         return;
       }
@@ -254,6 +326,7 @@ export function LoginClient() {
         roleName: data.user.roleName,
         isOwner: data.user.isOwner,
       };
+      await cacheSession(user, pin);
       setCurrentUser(user);
       closeDialog();
       await checkShiftAndRedirect(user);
@@ -262,7 +335,7 @@ export function LoginClient() {
     } finally {
       setLoading(false);
     }
-  }, [selectedUser, pin, setCurrentUser, checkShiftAndRedirect]);
+  }, [selectedUser, pin, setCurrentUser, checkShiftAndRedirect, router]);
 
   const keypad = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "0"];
 
@@ -387,6 +460,11 @@ export function LoginClient() {
       {/* PIN mode — user selection grid */}
       {mode === "pin" && (
         <div className="w-full max-w-md">
+          {isOfflineMode && (
+            <div className="mb-4 rounded-lg border border-amber-500/50 bg-amber-500/10 px-4 py-2 text-center text-sm font-medium text-amber-800 dark:text-amber-200">
+              Tryb offline — logowanie z cache
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {usersLoading && (
               <p className="col-span-full text-center text-muted-foreground">Ładowanie użytkowników…</p>

@@ -16,6 +16,12 @@ const addHelperSetSchema = z.object({
  * without showing the set itself as a line item.
  * Example: "Zestaw śniadaniowy" adds eggs, bread, butter as separate items
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

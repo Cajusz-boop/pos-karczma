@@ -1514,3 +1514,56 @@ model PendingPayment {
   @@index([orderId])
   @@index([status])
 }
+
+// ============================================================
+// OFFLINE SYNC (idempotency + audit)
+// ============================================================
+
+model SyncLog {
+  id            String   @id @default(cuid())
+  operationId   String   @unique
+  table         String
+  localId       String
+  serverId      String?
+  serverVersion Int?
+  success       Boolean
+  processedAt   DateTime @default(now())
+
+  @@index([operationId])
+  @@index([processedAt])
+  @@index([localId, table])
+}
+
+// P-RECEIPT-FIX: Audit trail dla błędów fiskalizacji — nigdy nie gubimy dowodów
+model ReceiptErrorLog {
+  id           String   @id @default(cuid())
+  orderId      String
+  paymentId    String?
+  errorMessage String
+  retryCount   Int      @default(0)
+  resolvedAt   DateTime?
+  createdAt    DateTime @default(now())
+
+  @@index([orderId])
+  @@index([createdAt])
+  @@index([resolvedAt])
+}
+
+// FISCAL-EVENTS: Kolejka zdarzeń fiskalnych (receipt, correction, refund, daily report)
+model FiscalEvent {
+  id           String   @id @default(cuid())
+  orderId      String?
+  paymentId    String?
+  type         String   // RECEIPT_PRINTED | RECEIPT_CANCELLED | REFUND_PRINTED | DAILY_REPORT
+  status       String   @default("PENDING") // PENDING | SENT | OK | ERROR
+  payloadJson  Json?
+  fiscalNumber String?
+  errorMessage String?
+  retryCount   Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([orderId, createdAt])
+  @@index([status, createdAt])
+  @@index([type, status])
+}

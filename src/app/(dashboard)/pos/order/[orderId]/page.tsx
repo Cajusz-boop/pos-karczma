@@ -1,5 +1,9 @@
 import { OrderPageClient } from "./OrderPageClient";
 
+export async function generateStaticParams() {
+  return [{ orderId: "_" }];
+}
+
 export default async function PosOrderPage({
   params,
 }: {

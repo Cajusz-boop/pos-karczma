@@ -2,6 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { extractReceiptBody } from "@/lib/e-receipt/generator";
 import { notFound } from "next/navigation";
 
+export async function generateStaticParams() {
+  return [{ token: "_" }];
+}
+
 type Props = {
   params: Promise<{ token: string }>;
 };

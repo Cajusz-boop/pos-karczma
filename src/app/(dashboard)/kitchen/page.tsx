@@ -453,7 +453,7 @@ export default function KitchenPage() {
   const { data: stations = [] } = useQuery<KDSStation[]>({
     queryKey: ["kds-stations"],
     queryFn: async () => {
-      const r = await fetch("/api/kds/stations");
+      const r = await fetch("/api/kds/station-list");
       if (!r.ok) throw new Error("Błąd stacji");
       return r.json();
     },

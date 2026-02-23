@@ -21,9 +21,13 @@ try {
   // snapshot nie istnieje lub jest uszkodzony — ignoruj
 }
 
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === "1";
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
+  output: isCapacitorBuild ? "export" : "standalone",
+  trailingSlash: isCapacitorBuild,
+  images: isCapacitorBuild ? { unoptimized: true } : undefined,
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -32,7 +36,7 @@ const nextConfig = {
   },
 };
 
-const sentryEnabled = !!process.env.NEXT_PUBLIC_SENTRY_DSN;
+const sentryEnabled = !!process.env.NEXT_PUBLIC_SENTRY_DSN && !isCapacitorBuild;
 
 export default sentryEnabled
   ? withSentryConfig(nextConfig, {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+/** GET /api/kds/station-list - list KDS stations (alias for /api/kds/stations, avoids export path conflict) */
 export async function GET() {
   try {
     const stations = await prisma.kDSStation.findMany({

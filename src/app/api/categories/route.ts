@@ -35,7 +35,7 @@ const reorderSchema = z.object({
   })),
 });
 
-export const dynamic = "force-dynamic";
+export const dynamic = process.env.CAPACITOR_BUILD === "1" ? "force-static" : "force-dynamic";
 
 async function fetchCategoriesWithCount() {
   return prisma.category.findMany({

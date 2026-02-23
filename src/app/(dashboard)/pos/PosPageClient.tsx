@@ -3,9 +3,10 @@
 import { useState, useEffect, useCallback, useRef, memo } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useFloorStream } from "@/lib/hooks/useFloorStream";
+import { useFloorFromDexie, type TableView } from "@/hooks/useFloorFromDexie";
+import { hydrateOrderFromApiCreate } from "@/lib/orders/order-actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,76 +36,6 @@ import {
 
 type TableShape = "RECTANGLE" | "ROUND" | "LONG";
 type TableStatus = "FREE" | "OCCUPIED" | "BILL_REQUESTED" | "RESERVED" | "BANQUET_MODE" | "INACTIVE";
-
-interface KitchenStatus {
-  ordered: number;
-  inProgress: number;
-  ready: number;
-  served: number;
-}
-
-interface Timing {
-  minutesSinceCreated: number;
-  minutesSinceLastInteraction: number;
-  minutesSinceLastKitchenEvent: number | null;
-}
-
-interface TableView {
-  id: string;
-  number: number;
-  seats: number;
-  shape: TableShape;
-  status: TableStatus;
-  positionX: number;
-  positionY: number;
-  assignedUserId: string | null;
-  assignedUserName: string | null;
-  assignedUserInitials: string | null;
-  activeOrder: {
-    id: string;
-    orderNumber: number;
-    createdAt: string;
-    totalGross: number;
-    itemCount: number;
-    guestCount: number;
-    userId: string;
-    userName: string;
-  } | null;
-  kitchenStatus: KitchenStatus | null;
-  timing: Timing | null;
-  nextReservation: {
-    id: string;
-    timeFrom: string;
-    guestName: string;
-    guestCount: number;
-    minutesUntil: number;
-    isVip: boolean;
-  } | null;
-  needsAttention: boolean;
-  hasKitchenAlert: boolean;
-}
-
-interface RoomView {
-  id: string;
-  name: string;
-  capacity: number;
-  type: string;
-  tables: TableView[];
-  stats: {
-    total: number;
-    free: number;
-    occupied: number;
-    billRequested: number;
-    reserved: number;
-    withAlerts: number;
-    totalRevenue: number;
-  };
-}
-
-interface FloorResponse {
-  rooms: RoomView[];
-  meta: { timestamp: string; queryTimeMs: number };
-}
 
 interface PosAlert {
   id: string;
@@ -398,7 +329,6 @@ TableCard.displayName = "TableCard";
 
 export function PosPageClient() {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const currentUser = useAuthStore((s) => s.currentUser);
   const logout = useAuthStore((s) => s.logout);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -422,24 +352,8 @@ export function PosPageClient() {
     return () => clearInterval(id);
   }, []);
 
-  // Real-time floor data via SSE (Server-Sent Events)
-  const { rooms: sseRooms, isLoading: sseLoading, isConnected } = useFloorStream({ enabled: true });
-
-  // Fetch floor od razu – nie czekaj na SSE (SSE może się opóźnić lub nie połączyć)
-  const { data: floorData } = useQuery<FloorResponse>({
-    queryKey: ["floor"],
-    queryFn: async () => {
-      const res = await fetch("/api/pos/floor");
-      if (!res.ok) throw new Error("Błąd pobierania mapy");
-      return res.json();
-    },
-    refetchInterval: isConnected ? false : 5_000,
-    staleTime: 3_000,
-    refetchOnWindowFocus: false,
-    enabled: true,
-  });
-
-  const isLoading = sseLoading && floorData === undefined;
+  // Dexie — floor (rooms + tables + orders) — offline-first
+  const { rooms: dexieRooms, isLoading } = useFloorFromDexie();
 
   // Fetch alerts
   const { data: alertsData } = useQuery<AlertsResponse>({
@@ -456,7 +370,7 @@ export function PosPageClient() {
     refetchOnWindowFocus: false,
   });
 
-  const rooms = isConnected ? sseRooms : (floorData?.rooms ?? []);
+  const rooms = dexieRooms;
   const alerts = (alertsData?.alerts ?? []).filter(a => !dismissedAlerts.has(a.id));
 
   useEffect(() => {
@@ -465,29 +379,8 @@ export function PosPageClient() {
 
   const selectedRoom = rooms.find((r) => r.id === selectedRoomId) ?? rooms[0];
 
-  const prefetchOrder = useCallback(
-    (orderId: string) => {
-      queryClient.prefetchQuery({
-        queryKey: ["order", orderId],
-        queryFn: async () => {
-          const res = await fetch(`/api/orders/${orderId}`);
-          if (!res.ok) throw new Error("Błąd");
-          return res.json();
-        },
-        staleTime: 10_000,
-      });
-      queryClient.prefetchQuery({
-        queryKey: ["products"],
-        queryFn: async () => {
-          const res = await fetch("/api/products");
-          if (!res.ok) throw new Error("Błąd");
-          return res.json();
-        },
-        staleTime: 5 * 60 * 1000,
-      });
-    },
-    [queryClient]
-  );
+  // Data comes from Dexie — no prefetch needed
+  const prefetchOrder = useCallback((_orderId: string) => {}, []);
 
   const handleTableHover = useCallback(
     (table: TableView) => {
@@ -552,7 +445,16 @@ export function PosPageClient() {
         return;
       }
       setGuestDialog(null);
-      queryClient.invalidateQueries({ queryKey: ["floor"] });
+      await hydrateOrderFromApiCreate({
+        serverId: data.order.id,
+        orderNumber: data.order.orderNumber,
+        type: "DINE_IN",
+        tableId: guestDialog.tableId,
+        roomId: guestDialog.roomId,
+        userId: currentUser.id,
+        userName: currentUser.name ?? "",
+        guestCount: count,
+      });
       router.push(`/pos/order/${data.order.id}`);
     } catch {
       setCreateError("Błąd połączenia");
@@ -590,6 +492,14 @@ export function PosPageClient() {
         setCreating(false);
         return;
       }
+      await hydrateOrderFromApiCreate({
+        serverId: data.order.id,
+        orderNumber: data.order.orderNumber,
+        type: "TAKEAWAY",
+        userId: currentUser.id,
+        userName: currentUser.name ?? "",
+        guestCount: 1,
+      });
       router.push(`/pos/order/${data.order.id}`);
     } catch {
       setCreateError("Błąd połączenia");
@@ -618,6 +528,14 @@ export function PosPageClient() {
         setCreating(false);
         return;
       }
+      await hydrateOrderFromApiCreate({
+        serverId: data.order.id,
+        orderNumber: data.order.orderNumber,
+        type: "TAKEAWAY",
+        userId: currentUser.id,
+        userName: currentUser.name ?? "",
+        guestCount: 1,
+      });
       router.push(`/pos/order/${data.order.id}?quick=true`);
     } catch {
       setCreateError("Błąd połączenia");

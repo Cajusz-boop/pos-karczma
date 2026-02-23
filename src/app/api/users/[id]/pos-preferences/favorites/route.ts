@@ -4,6 +4,12 @@ import { prisma } from "@/lib/prisma";
 /**
  * POST /api/users/[id]/pos-preferences/favorites - toggle favorite product
  */
+// Required for output: 'export' (Capacitor build) – API not used in static bundle
+export async function generateStaticParams() {
+  return [ {"id":"_"} ];
+}
+
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

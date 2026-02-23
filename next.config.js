@@ -2,40 +2,50 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === '1';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  output: isCapacitorBuild ? 'export' : 'standalone',
   compress: true,
   poweredByHeader: false,
-  
+
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: isCapacitorBuild,
   },
-  
+
   typescript: {
     ignoreBuildErrors: false,
   },
 
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '2mb',
-    },
-    optimizePackageImports: [
-      'lucide-react',
-      '@tanstack/react-query',
-      'date-fns',
-      'zod',
-    ],
-  },
+  experimental: isCapacitorBuild
+    ? {
+        optimizePackageImports: [
+          'lucide-react',
+          '@tanstack/react-query',
+          'date-fns',
+          'zod',
+        ],
+      }
+    : {
+        serverActions: { bodySizeLimit: '2mb' },
+        optimizePackageImports: [
+          'lucide-react',
+          '@tanstack/react-query',
+          'date-fns',
+          'zod',
+        ],
+      },
 
   images: {
+    unoptimized: isCapacitorBuild,
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
     minimumCacheTTL: 60 * 60 * 24,
   },
 
-  headers: async () => [
+  headers: isCapacitorBuild ? undefined : async () => [
     {
       source: '/api/products',
       headers: [
