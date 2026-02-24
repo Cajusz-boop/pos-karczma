@@ -1,9 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { posnetDriver } from "@/lib/fiscal";
 
 /** POST /api/fiscal/period-report — raport okresowy (wydruk na drukarce fiskalnej) */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -15,8 +17,6 @@ const noteSchema = z.object({
  * PUT /api/orders/[id]/items/[itemId]/note - update item note and flags
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   return [ {"id":"_","itemId":"_"} ];
 }

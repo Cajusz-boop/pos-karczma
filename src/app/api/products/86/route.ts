@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
@@ -8,8 +10,6 @@ import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
  * GET /api/products/86 — list all products with availability status
  * Returns products grouped by category, highlighting unavailable ones.
  */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const products = await prisma.product.findMany({

@@ -1,9 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createSuggestionSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
-
-export const dynamic = 'force-dynamic';
 
 
 export async function GET(request: NextRequest) {

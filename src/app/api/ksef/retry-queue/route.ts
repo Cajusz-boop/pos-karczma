@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { retryOfflineQueue } from "@/lib/ksef";
@@ -5,8 +7,6 @@ import { retryOfflineQueue } from "@/lib/ksef";
 /**
  * GET /api/ksef/retry-queue — list queued invoices
  */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const queued = await prisma.invoice.findMany({

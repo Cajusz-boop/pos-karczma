@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
@@ -16,8 +18,6 @@ const DEFAULT_CONFIG: FiscalPrinterConfig = {
 };
 
 /** GET /api/fiscal/config — current fiscal printer configuration */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const config = await prisma.systemConfig.findUnique({

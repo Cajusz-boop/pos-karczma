@@ -1,10 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
 import { sendPushToUser } from "@/lib/push/web-push";
-
-export const dynamic = 'force-dynamic';
 
 
 const assignDriverSchema = z.object({

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
@@ -12,8 +14,6 @@ const failedAttempts = new Map<
   string,
   { count: number; lockedUntil: Date }
 >();
-
-export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   try {

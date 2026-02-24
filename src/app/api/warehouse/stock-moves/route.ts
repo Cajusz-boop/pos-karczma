@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { nextStockMoveNumber } from "@/lib/stock-move-number";
-
-export const dynamic = 'force-dynamic';
 
 type MoveItem = { ingredientId: string; quantity: number; unit: string; price?: number };
 

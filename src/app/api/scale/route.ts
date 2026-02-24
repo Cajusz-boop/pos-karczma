@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import {
   getCurrentWeight,
@@ -11,8 +13,6 @@ import {
 /**
  * GET /api/scale - get current weight from scale
  */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const weight = getCurrentWeight();

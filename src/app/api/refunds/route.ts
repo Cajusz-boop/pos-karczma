@@ -1,10 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 import { z } from "zod";
 import { parseBody } from "@/lib/validation";
-
-export const dynamic = 'force-dynamic';
 
 
 const refundSchema = z.object({

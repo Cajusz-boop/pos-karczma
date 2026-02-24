@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendPushToUser } from "@/lib/push/web-push";
@@ -6,8 +8,6 @@ import { touchOrderInteraction } from "@/lib/pos/order-cache";
 const VALID_STATUSES = ["IN_PROGRESS", "READY", "SERVED"] as const;
 type ValidStatus = typeof VALID_STATUSES[number];
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   return [ {"id":"_","itemId":"_"} ];
 }

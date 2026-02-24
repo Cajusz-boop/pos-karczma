@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
@@ -28,8 +30,6 @@ interface BatchResultItem {
 }
 
 // P14-FIX: Batch endpoint WYMAGA autoryzacji — NIE dodawaj do PUBLIC_API_ROUTES!
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   // P14-FIX: Auth sprawdzany przez middleware (JWT/session)
   const userId = request.headers.get("x-user-id");

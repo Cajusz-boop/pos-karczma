@@ -1,10 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { posnetDriver } from "@/lib/fiscal";
 
 /** GET /api/fiscal — status drukarki fiskalnej (test połączenia) */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const status = await posnetDriver.getStatus();

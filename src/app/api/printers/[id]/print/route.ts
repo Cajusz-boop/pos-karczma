@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { sendToPrinter } from "@/lib/printer/print-service";
 import { ESCPOS, createPrintJob, addText, addCommand, finalize } from "@/lib/printer/escpos";
@@ -7,8 +9,6 @@ import { auditLog } from "@/lib/audit";
  * POST /api/printers/[id]/print - send print job to printer
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   return [ {"id":"_"} ];
 }

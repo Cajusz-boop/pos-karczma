@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
@@ -11,8 +13,6 @@ import { auditLog } from "@/lib/audit";
 /**
  * GET /api/payment-terminal — terminal status
  */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const status = await getTerminalStatus();

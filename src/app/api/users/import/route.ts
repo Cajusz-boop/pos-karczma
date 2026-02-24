@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -24,8 +26,6 @@ const importSchema = z.object({
 /**
  * POST /api/users/import - import user from JSON
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

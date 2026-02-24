@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
@@ -5,8 +7,6 @@ import path from "path";
 
 type RouteContext = { params: Promise<{ id: string }> };
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   return [ {"id":"_"} ];
 }

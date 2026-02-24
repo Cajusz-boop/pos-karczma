@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
@@ -10,8 +12,6 @@ import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
  * CSV format (semicolon separated):
  * Nazwa;Nazwa skrócona;Kategoria;Cena brutto;Koszt;Stawka VAT;Aktywny
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

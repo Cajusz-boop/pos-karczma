@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/reports/vat?dateFrom=&dateTo= â€” raport VAT miesiÄ™czny (sprzedaĹĽ wg stawek, lista faktur, paragony) */

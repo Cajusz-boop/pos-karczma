@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -14,8 +16,6 @@ const createRewardSchema = z.object({
 /**
  * GET /api/loyalty/rewards — list all rewards
  */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const rewards = await prisma.loyaltyReward.findMany({

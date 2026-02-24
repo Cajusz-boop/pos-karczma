@@ -1,10 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createProductSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 import { cached, cacheDeletePattern } from "@/lib/redis";
-
-export const dynamic = process.env.CAPACITOR_BUILD === "1" ? "force-static" : "force-dynamic";
 
 const CACHE_TTL = 120;
 

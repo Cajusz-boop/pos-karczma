@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -11,8 +13,6 @@ const bulkScanSchema = z.object({
  * POST /api/orders/weight-scan - bulk scan weight barcodes
  * Matches barcodes to pending weight confirmations and updates them
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

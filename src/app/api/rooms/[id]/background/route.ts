@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -27,8 +29,6 @@ const decorSchema = z.object({
  * GET /api/rooms/[id]/background - get room background and decor
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   return [ {"id":"_"} ];
 }

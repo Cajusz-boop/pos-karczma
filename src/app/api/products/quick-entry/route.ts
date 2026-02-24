@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -10,8 +12,6 @@ import { prisma } from "@/lib/prisma";
  * - "2*1003*5.50" - quantity * product code * price override
  * - "1003*5.50" - product code * price override
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

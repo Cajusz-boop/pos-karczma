@@ -1,7 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export const dynamic = 'force-dynamic';
 
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
 export async function generateStaticParams() {

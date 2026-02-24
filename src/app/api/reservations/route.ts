@@ -1,9 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { processNoShows } from "@/lib/reservations/no-show";
 import { parseBody, createReservationSchema } from "@/lib/validation";
-
-export const dynamic = 'force-dynamic';
 
 /** GET /api/reservations — lista rezerwacji (filtr: dateFrom, dateTo, roomId, status) */
 export async function GET(request: NextRequest) {

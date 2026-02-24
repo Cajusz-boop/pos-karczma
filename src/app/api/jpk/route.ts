@@ -1,9 +1,9 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateJpkV7M } from "@/lib/jpk/jpk-v7m";
 import { auditLog } from "@/lib/audit";
-
-export const dynamic = 'force-dynamic';
 
 
 /**

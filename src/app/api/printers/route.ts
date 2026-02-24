@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/printers â€” lista drukarek (filtr: type, isActive) */

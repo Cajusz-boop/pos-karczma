@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/reports/audit?dateFrom=&dateTo=&userId=&action=&entityType= â€” log audytowy */

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { 
   createPaymentIntent, 
@@ -10,8 +12,6 @@ import {
  * POST /api/payment/terminal
  * Create, confirm, or cancel a payment intent.
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

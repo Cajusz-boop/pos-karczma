@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { parseBody, createShiftSchema } from "@/lib/validation";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/shifts?status=OPEN&userId= â€” lista zmian (status OPEN zwraca otwarte z obrotem) */

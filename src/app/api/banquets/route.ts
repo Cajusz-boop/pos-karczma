@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { parseBody, createBanquetSchema } from "@/lib/validation";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/banquets â€” lista imprez bankietowych */

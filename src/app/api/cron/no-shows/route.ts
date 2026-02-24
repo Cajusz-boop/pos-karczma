@@ -1,8 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { processNoShows } from "@/lib/reservations/no-show";
 
-export const dynamic = process.env.CAPACITOR_BUILD === "1" ? "force-static" : "force-dynamic";
+
 export const revalidate = process.env.CAPACITOR_BUILD === "1" ? 999999 : 0;
 
 /**

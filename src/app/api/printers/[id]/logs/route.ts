@@ -1,7 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/printers/[id]/logs - get print logs for printer

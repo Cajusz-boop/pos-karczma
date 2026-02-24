@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/reports/shift?userId=&dateFrom=&dateTo= â€” raport zmianowy (obrĂłt kelnera, rachunki, goĹ›cie, pĹ‚atnoĹ›ci, napiwki, storna) */

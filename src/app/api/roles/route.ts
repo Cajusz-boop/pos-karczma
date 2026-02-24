@@ -1,7 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = process.env.CAPACITOR_BUILD === "1" ? "force-static" : "force-dynamic";
 
 export async function GET() {
   try {

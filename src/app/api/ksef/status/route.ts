@@ -1,7 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { pollKsefStatus } from "@/lib/ksef";
-
-export const dynamic = 'force-dynamic';
 
 
 /**

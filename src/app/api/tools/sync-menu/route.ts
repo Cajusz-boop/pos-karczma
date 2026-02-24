@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
@@ -77,8 +79,6 @@ const MENU = {
     { name: 'Pinacolada', price: 20, category: 'Drink Bar 0%' },
   ]
 };
-
-export const dynamic = "force-dynamic";
 
 export async function POST() {
   try {

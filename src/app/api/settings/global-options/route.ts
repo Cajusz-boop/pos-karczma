@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -54,8 +56,6 @@ const optionsSchema = z.object({
 /**
  * GET /api/settings/global-options - get all global options
  */
-export const dynamic = "force-dynamic";
-
 export async function GET() {
   try {
     const config = await prisma.systemConfig.findUnique({

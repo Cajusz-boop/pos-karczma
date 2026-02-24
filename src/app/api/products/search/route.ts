@@ -1,7 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export const dynamic = 'force-dynamic';
 
 
 const T9_MAP: Record<string, string[]> = {

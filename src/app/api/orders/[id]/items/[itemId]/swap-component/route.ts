@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -17,8 +19,6 @@ type AddedComponent = { productId: string; name: string; price: number };
  * Example: swap "ziemniaki" for "ryż" in a set meal
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   return [ {"id":"_","itemId":"_"} ];
 }

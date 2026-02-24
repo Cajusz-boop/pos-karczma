@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -43,8 +45,6 @@ $[Ilosc,3,1]$x $[Nazwa,30,0]$`,
  * GET /api/printers/[id]/templates - get printer templates
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
-export const dynamic = "force-dynamic";
-
 export async function generateStaticParams() {
   return [ {"id":"_"} ];
 }

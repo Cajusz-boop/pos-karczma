@@ -1,11 +1,11 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { addDays } from "date-fns";
 import { nextInvoiceNumber, getPrefixForType } from "@/lib/invoice-number";
 import { sendInvoiceToKsef } from "@/lib/ksef";
 import { parseBody, createInvoiceSchema } from "@/lib/validation";
-
-export const dynamic = 'force-dynamic';
 
 
 function computeNetFromGross(gross: number, ratePercent: number): number {

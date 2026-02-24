@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/reports/products?dateFrom=&dateTo=&categoryId=&roomId=&userId= â€” raport produktowy TOP/BOTTOM */

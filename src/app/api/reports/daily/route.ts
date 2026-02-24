@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/reports/daily?date=YYYY-MM-DD â€” raport dobowy (obrĂłt, pĹ‚atnoĹ›ci, VAT, paragony, faktury, goĹ›cie, Ĺ›redni rachunek, storna) */

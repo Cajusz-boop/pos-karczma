@@ -1,9 +1,10 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
 
-export const dynamic = 'force-dynamic';
 
 const macroActionSchema = z.object({
   type: z.enum([

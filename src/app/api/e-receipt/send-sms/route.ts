@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendSms } from "@/lib/sms/client";
@@ -8,8 +10,6 @@ import { parseBody, sendSmsSchema } from "@/lib/validation";
  * Body: { receiptId: string, phone: string }
  * Finds receipt, sends SMS with e-receipt link, updates receipt.
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const { data, error: valError } = await parseBody(request, sendSmsSchema);

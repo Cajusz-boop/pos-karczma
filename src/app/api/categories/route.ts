@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -34,8 +36,6 @@ const reorderSchema = z.object({
     sortOrder: z.number().int(),
   })),
 });
-
-export const dynamic = process.env.CAPACITOR_BUILD === "1" ? "force-static" : "force-dynamic";
 
 async function fetchCategoriesWithCount() {
   return prisma.category.findMany({

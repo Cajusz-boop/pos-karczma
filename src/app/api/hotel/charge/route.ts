@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { postRoomCharge } from "@/lib/hotel/client";
@@ -18,8 +20,6 @@ const chargeSchema = z.object({
  * POST /api/hotel/charge — proxy to hotel system, posts room charge
  * Body: { roomNumber, orderId, guestName? }
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { formatKitchenTicket } from "@/lib/print/kitchen";
@@ -8,8 +10,6 @@ import { parseBody, printKitchenSchema } from "@/lib/validation";
  * Body: { orderId: string, reprint?: boolean }
  * Zwraca { ok, tickets: [{ printerId, printerName, text }] }. W trybie DEMO nie wysyła do sprzętu.
  */
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const { data, error: valError } = await parseBody(request, printKitchenSchema);

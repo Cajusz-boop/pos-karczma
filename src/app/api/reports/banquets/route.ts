@@ -1,8 +1,8 @@
+export const dynamic = 'force-dynamic';
+
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
-
-export const dynamic = 'force-dynamic';
 
 
 /** GET /api/reports/banquets?dateFrom=&dateTo= â€” raport bankietowy (lista imprez, typ, obrĂłt, zaliczki, rentownoĹ›Ä‡) */

@@ -1,7 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-export const dynamic = 'force-dynamic';
 
 /** GET /api/kds/station-list - list KDS stations (alias for /api/kds/stations, avoids export path conflict) */
 export async function GET() {
