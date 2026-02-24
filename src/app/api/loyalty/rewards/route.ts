@@ -14,6 +14,8 @@ const createRewardSchema = z.object({
 /**
  * GET /api/loyalty/rewards — list all rewards
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const rewards = await prisma.loyaltyReward.findMany({

@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { parseBody, createWarehouseSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const warehouses = await prisma.warehouse.findMany({

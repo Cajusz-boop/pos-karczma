@@ -19,6 +19,8 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
  * POST /api/invoices/advance — faktura zaliczkowa (z poziomu BanquetEvent).
  * Body: banquetEventId, amount, paymentMethod?, buyerNip?, buyerName?, buyerAddress?
  */
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const { data, error: valError } = await parseBody(request, advanceInvoiceSchema);

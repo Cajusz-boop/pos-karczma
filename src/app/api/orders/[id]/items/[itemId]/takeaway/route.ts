@@ -6,6 +6,8 @@ import { auditLog } from "@/lib/audit";
  * POST /api/orders/[id]/items/[itemId]/takeaway - mark item as takeaway
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   return [ {"id":"_","itemId":"_"} ];
 }

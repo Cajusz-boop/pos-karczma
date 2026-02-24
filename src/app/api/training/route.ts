@@ -6,6 +6,8 @@ const CONFIG_KEY = "training_mode";
 /**
  * GET /api/training — check if training mode is active
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const config = await prisma.systemConfig.findUnique({

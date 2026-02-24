@@ -7,6 +7,8 @@ import { sendPushToRole } from "@/lib/push/web-push";
  * POST /api/orders/[id]/items/[itemId]/fire - mark item as FIRE (immediate priority)
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   return [ {"id":"_","itemId":"_"} ];
 }

@@ -13,6 +13,8 @@ const failedAttempts = new Map<
   { count: number; lockedUntil: Date }
 >();
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const { data, error: valError } = await parseBody(request, loginSchema);

@@ -28,6 +28,8 @@ const colorSchema = z.object({
 /**
  * GET /api/settings/table-colors - get table status colors
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const config = await prisma.systemConfig.findUnique({

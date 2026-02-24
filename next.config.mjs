@@ -30,6 +30,7 @@ const nextConfig = {
   images: isCapacitorBuild ? { unoptimized: true } : undefined,
   experimental: {
     staticPageGenerationTimeout: 300, // 5 min - serwer produkcyjny ma wiele dynamicznych API
+    serverComponentsExternalPackages: ["@prisma/client"],
   },
   eslint: {
     ignoreDuringBuilds: true,

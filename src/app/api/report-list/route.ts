@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 
 /** GET /api/report-list — lista typów raportów (alias dla /api/reports, unika konfliktu ścieżek przy export) */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   return NextResponse.json({
     reports: [

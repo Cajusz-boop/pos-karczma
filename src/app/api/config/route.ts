@@ -14,6 +14,8 @@ const KNOWN_KEYS = [
 ] as const;
 
 /** GET /api/config — zwraca znane klucze z SystemConfig */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const rows = await prisma.systemConfig.findMany({

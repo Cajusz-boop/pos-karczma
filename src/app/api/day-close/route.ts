@@ -7,6 +7,8 @@ import { startOfDay, endOfDay } from "date-fns";
 /**
  * GET /api/day-close — preview: open shifts, open orders, cash summary
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const today = new Date();

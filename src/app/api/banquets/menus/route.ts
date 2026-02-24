@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const menus = await prisma.banquetMenu.findMany({

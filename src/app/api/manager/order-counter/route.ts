@@ -5,6 +5,8 @@ import { auditLog } from "@/lib/audit";
 /**
  * GET /api/manager/order-counter - get current order counter status
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const lastOrder = await prisma.order.findFirst({

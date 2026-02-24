@@ -6,6 +6,8 @@ import { auditLog } from "@/lib/audit";
 /**
  * GET /api/hotel — list occupied hotel rooms
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const result = await getOccupiedRooms();

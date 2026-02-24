@@ -21,6 +21,8 @@ const updateSchema = z.object({
 /**
  * GET /api/tax-rates — list all tax rates with product count
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const rates = await prisma.taxRate.findMany({

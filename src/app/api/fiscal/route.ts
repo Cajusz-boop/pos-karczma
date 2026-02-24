@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { posnetDriver } from "@/lib/fiscal";
 
 /** GET /api/fiscal — status drukarki fiskalnej (test połączenia) */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const status = await posnetDriver.getStatus();

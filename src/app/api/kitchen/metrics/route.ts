@@ -5,6 +5,8 @@ import { startOfDay, endOfDay } from "date-fns";
 /**
  * GET /api/kitchen/metrics — real-time and daily kitchen metrics
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const now = new Date();

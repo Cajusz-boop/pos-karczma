@@ -12,6 +12,8 @@ const moveItemSchema = z.object({
  * GET /api/orders/[id]/courses - get order items grouped by course number
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   return [ {"id":"_"} ];
 }

@@ -11,6 +11,8 @@ const BACKUP_DIR = path.join(process.cwd(), "backups");
 /**
  * GET /api/backup — list available backups
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     let files: string[] = [];

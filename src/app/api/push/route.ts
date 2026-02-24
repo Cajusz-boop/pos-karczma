@@ -5,6 +5,8 @@ import { VAPID_PUBLIC_KEY } from "@/lib/push/web-push";
 /**
  * GET /api/push — get VAPID public key for client subscription
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   return NextResponse.json({
     publicKey: VAPID_PUBLIC_KEY,

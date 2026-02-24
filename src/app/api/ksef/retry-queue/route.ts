@@ -5,6 +5,8 @@ import { retryOfflineQueue } from "@/lib/ksef";
 /**
  * GET /api/ksef/retry-queue — list queued invoices
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const queued = await prisma.invoice.findMany({

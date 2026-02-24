@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { parseBody, ingredientSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const ingredients = await prisma.ingredient.findMany({

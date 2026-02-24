@@ -40,6 +40,8 @@ const defaultsSchema = z.object({
 /**
  * GET /api/products/defaults - get default product settings
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const config = await prisma.systemConfig.findUnique({

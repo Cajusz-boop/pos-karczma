@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
  * Returns system status including database connectivity.
  * Public route (no auth required).
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const checks: Record<string, { ok: boolean; latencyMs?: number; error?: string }> = {};
 

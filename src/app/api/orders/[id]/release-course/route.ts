@@ -15,6 +15,8 @@ import { auditLog } from "@/lib/audit";
  * KDS only shows items where courseNumber <= courseReleasedUpTo
  */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   return [ {"id":"_"} ];
 }

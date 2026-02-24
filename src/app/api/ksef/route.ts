@@ -4,6 +4,8 @@ import { getKsefConfig, setKsefConfig } from "@/lib/ksef";
 import { sendInvoiceToKsef } from "@/lib/ksef";
 
 /** GET /api/ksef — konfiguracja KSeF (bez tokena w odpowiedzi) */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const config = await getKsefConfig();

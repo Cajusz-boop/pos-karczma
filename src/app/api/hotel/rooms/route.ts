@@ -4,6 +4,8 @@ import { getOccupiedRooms } from "@/lib/hotel/client";
 /**
  * GET /api/hotel/rooms — proxy to hotel system, returns occupied rooms
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const result = await getOccupiedRooms();

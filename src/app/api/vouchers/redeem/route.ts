@@ -13,6 +13,8 @@ const redeemSchema = z.object({
  * POST /api/vouchers/redeem — use voucher as payment
  * Validates balance, deducts amount, creates Payment record, returns remaining balance.
  */
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

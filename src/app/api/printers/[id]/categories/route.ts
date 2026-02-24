@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 
 /** GET /api/printers/[id]/categories — przypisane kategorie */
 // Required for output: 'export' (Capacitor build) – API not used in static bundle
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
   return [ {"id":"_"} ];
 }

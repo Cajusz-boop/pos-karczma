@@ -4,6 +4,8 @@ import { getBreakfastGuests } from "@/lib/hotel/client";
 /**
  * GET /api/hotel/breakfast — list hotel guests with breakfast for today
  */
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const result = await getBreakfastGuests();
