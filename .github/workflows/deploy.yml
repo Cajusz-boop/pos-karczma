@@ -1,25 +1,81 @@
 name: Deploy to Hetzner
 
 on:
-  workflow_dispatch:  # Tylko ręczne uruchomienie; webhook jest główną metodą deployu
+  push:
+    branches: [main]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.HETZNER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.HETZNER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Get Node version from server
+        id: node_version
+        run: |
+          NODE_VER=$(ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} "node -v" | sed 's/v//g' | cut -d. -f1)
+          echo "node_version=$NODE_VER" >> $GITHUB_OUTPUT
+          echo "Using Node $NODE_VER (from server)"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          host: 65.108.245.25
-          username: root
-          key: ${{ secrets.HETZNER_SSH_KEY }}
-          script: |
-            cd /var/www/pos
-            git pull origin master
-            npm install
-            npx prisma generate
-            npm run build
-            pm2 restart pos-karczma --update-env
-            pm2 save
-            sleep 10
-            curl -sf --max-time 15 http://127.0.0.1:3001/api/health || (pm2 logs pos-karczma --lines 30 --nostream; exit 1)
+          node-version: ${{ steps.node_version.outputs.node_version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Prepare standalone (copy static + public)
+        run: |
+          mkdir -p .next/standalone/.next
+          cp -r .next/static .next/standalone/.next/
+          cp -r public .next/standalone/
+
+      - name: Create archive
+        run: tar -czf _deploy_next.tar.gz -C .next standalone
+
+      - name: Upload to server
+        run: |
+          scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            _deploy_next.tar.gz \
+            ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }}:${{ secrets.DEPLOY_PATH }}/
+
+      - name: Extract and copy .env
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
+            "cd ${{ secrets.DEPLOY_PATH }} && rm -rf standalone && tar -xzf _deploy_next.tar.gz && rm -f _deploy_next.tar.gz && (test -f .env && cp .env standalone/.env || echo 'Brak .env - DATABASE_URL musi byc w zmiennych srodowiskowych')"
+
+      - name: PM2 delete + start
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
+            "cd ${{ secrets.DEPLOY_PATH }} && pm2 delete pos-karczma 2>/dev/null || true && pm2 start ecosystem.config.js --only pos-karczma && pm2 save"
+
+      - name: Health check
+        run: |
+          for i in 1 2 3 4 5; do
+            sleep 5
+            if ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+              ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
+              "curl -sf --max-time 10 http://127.0.0.1:3001/api/health"; then
+              echo "Health OK"
+              exit 0
+            fi
+            echo "Proba $i/5..."
+          done
+          echo "UWAGA: Health check nie przeszedl"
+          exit 1
