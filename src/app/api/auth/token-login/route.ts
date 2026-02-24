@@ -4,6 +4,8 @@ import { auditLog } from "@/lib/audit";
 import { signSession, COOKIE_NAME } from "@/lib/jwt";
 import { parseBody, tokenLoginSchema } from "@/lib/validation";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const { data, error: valError } = await parseBody(request, tokenLoginSchema);
