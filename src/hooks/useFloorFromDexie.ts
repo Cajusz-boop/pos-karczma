@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "@/lib/db/offline-db";
+import { db, type LocalOrder, type LocalOrderItem, type LocalRoom, type LocalTable } from "@/lib/db/offline-db";
 import { useDexieSyncReady } from "@/components/providers/DexieProvider";
 
 const isBrowser = () => typeof window !== "undefined";
@@ -105,9 +105,13 @@ export function useFloorFromDexie(): { rooms: RoomView[]; isLoading: boolean } {
 
   const rooms = useMemo((): RoomView[] => {
     if (!rawData) return [];
-    const { allRoomsRaw, allTables, allOrders, allOrderItems } = rawData;
+    const data = rawData as RawFloorData;
+    const allRoomsRaw = data.allRoomsRaw as LocalRoom[];
+    const allTables = data.allTables as LocalTable[];
+    const allOrders = data.allOrders as LocalOrder[];
+    const allOrderItems = data.allOrderItems as LocalOrderItem[];
 
-    const openStatuses = new Set(["OPEN", "SENT_TO_KITCHEN", "IN_PROGRESS", "READY", "SERVED", "BILL_REQUESTED"]);
+    const openStatuses = new Set<string>(["OPEN", "SENT_TO_KITCHEN", "IN_PROGRESS", "READY", "SERVED", "BILL_REQUESTED"]);
     const openOrders = allOrders.filter((o) => openStatuses.has(o.status));
 
     const active = (v: unknown) => v === true || v === 1;

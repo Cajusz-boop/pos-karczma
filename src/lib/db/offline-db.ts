@@ -83,7 +83,8 @@ export interface LocalRoom {
   name: string;
   type: "RESTAURANT" | "BANQUET" | "OUTDOOR" | "PRIVATE";
   capacity: number;
-  isActive: boolean;
+  /** W bazie 0/1 (number), TypeScript akceptuje też boolean */
+  isActive: boolean | number;
   isSeasonal: boolean;
   sortOrder: number;
   _serverUpdatedAt: string;

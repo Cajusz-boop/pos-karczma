@@ -508,14 +508,14 @@ export default function SettingsPageClient() {
             </Link>
           </div>
           <div className="space-y-2">
-            {rooms.map((room: { id: string; name: string; isActive: boolean }) => (
+            {rooms.map((room) => (
               <div key={room.id} className="flex items-center justify-between rounded border p-2">
                 <span className="font-medium">{room.name}</span>
                 <label className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">Aktywna</span>
                   <input
                     type="checkbox"
-                    checked={room.isActive}
+                    checked={!!room.isActive}
                     onChange={(e) => roomToggle.mutate({ id: room.id, isActive: e.target.checked })}
                     disabled={roomToggle.isPending}
                   />
