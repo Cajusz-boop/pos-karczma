@@ -5,6 +5,7 @@ import { initialSync, backgroundRefresh } from "@/lib/db/initial-sync";
 import { clearExpiredSessions } from "@/lib/auth/cached-auth";
 import { queueOperation } from "@/lib/sync/sync-engine";
 import { db } from "@/lib/db/offline-db";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minut
 const PURGE_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24h
@@ -18,12 +19,15 @@ export function useDexieSyncReady(): boolean {
 export function DexieProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const initRef = useRef(false);
+  const currentUser = useAuthStore((s) => s.currentUser);
+  const logout = useAuthStore((s) => s.logout);
 
+  // Krok 1: raz — naprawa bazy, setup (bez sync)
   useEffect(() => {
     if (initRef.current) return;
     initRef.current = true;
 
-    async function init() {
+    async function setup() {
       try {
         // Napraw uszkodzonej bazy (v20 z 0 tabel) — Dexie nie może z niej migrować
         const needReset = await new Promise<boolean>((resolve) => {
@@ -46,6 +50,23 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
 
         await clearExpiredSessions();
 
+        // Bez sync na razie — sync w drugim efekcie, gdy currentUser
+        setReady(true);
+      } catch (e) {
+        console.error("[DexieProvider] Setup failed:", e);
+        setReady(true);
+      }
+    }
+
+    setup();
+  }, []);
+
+  // Krok 2: sync — tylko gdy zalogowany (unikaj 401), i ponownie po logowaniu
+  useEffect(() => {
+    if (!currentUser) return;
+
+    async function runSync() {
+      try {
         // V4-17: App version check — force refresh przy update (nie przy fresh install)
         const APP_VERSION = "1.0.0";
         const storedVersion = await db.syncCheckpoints.get("_appVersion");
@@ -91,11 +112,16 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Initial sync
+        // Initial sync — tylko gdy zalogowany (unikaj 401)
         const result = await initialSync();
         console.log("[DexieProvider] Initial sync complete:", result.tables);
         if (result.errors.length > 0) {
           console.warn("[DexieProvider] Sync errors:", result.errors);
+          const has401 = result.errors.some((e) => e.includes("401"));
+          if (has401) {
+            console.warn("[DexieProvider] 401 Unauthorized — wylogowuję (sesja wygasła)");
+            logout();
+          }
         }
 
         // Diagnostyka — dev only, dostęp do db w konsoli
@@ -138,7 +164,7 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    init();
+    runSync();
 
     // V4-12: App foreground (Capacitor) — natychmiast sync
     let appListenerHandle: { remove: () => Promise<void> } | null = null;
@@ -162,7 +188,7 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
       clearInterval(interval);
       appListenerHandle?.remove?.().catch(() => {});
     };
-  }, []);
+  }, [currentUser, logout]);
 
   return (
     <DexieSyncContext.Provider value={{ isReady: ready }}>

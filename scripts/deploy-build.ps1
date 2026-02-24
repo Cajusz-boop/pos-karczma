@@ -89,12 +89,13 @@ if ($LASTEXITCODE -ne 0) {
 if (Test-Path $tarFile) { Remove-Item $tarFile -Force }
 Write-Host "Upload OK" -ForegroundColor Green
 
-# === 3. PM2 restart ===
+# === 3. PM2 restart (force ecosystem.config.js — usuwa stary wpis z .next/standalone) ===
 Write-Host "" ; Write-Host "=== 3/3 PM2 restart ===" -ForegroundColor Cyan
 
 $restartCmd = @"
 cd $REMOTE_PATH
-pm2 restart pos-karczma --update-env
+pm2 delete pos-karczma 2>/dev/null || true
+pm2 start ecosystem.config.js --only pos-karczma
 pm2 save
 
 # Health check

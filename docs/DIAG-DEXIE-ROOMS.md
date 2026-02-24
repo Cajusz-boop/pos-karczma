@@ -36,6 +36,17 @@ Interpretacja:
 - `rooms.length === 5` ale `isActive: 0` (number) → filter `active()` działa źle
 - `rooms.length === 5` i `isActive: true` → problem w useLiveQuery / useMemo
 
+## HTTP 401 — sync pull odrzucone (brak / wygasła sesja)
+
+Jeśli w konsoli widzisz:
+- `Sync pull failed for rooms: HTTP 401` (i pozostałe tabele)
+- `[DexieProvider] DIAG: rooms count: 0`
+- `[DexieProvider] DIAG → Dane NIE trafiły do Dexie (problem w sync)`
+
+**Przyczyna:** API `/api/sync/pull` wymaga zalogowania (middleware sprawdza JWT). Sesja wygasła lub użytkownik nie jest zalogowany.
+
+**Rozwiązanie:** Zaloguj się ponownie. Przejdź do `/login` → zaloguj się → wróć na `/pos`. Sync pobierze dane po uwierzytelnieniu.
+
 ## Baza z 0 tabel (uszkodzony schemat)
 
 Jeśli w DevTools → Application → IndexedDB widzisz `PosKarczma` z wersją 20 ale **Length: 0** tabel:
@@ -64,3 +75,10 @@ location.reload();
 5. **Niewyjaśniona wersja v20** — baza miała v20 (kod miał v1, v2), źródło v20 niejasne. Dopiero świadome sprawdzenie schematu ujawniło uszkodzoną bazę.
 
 **Lekcja na przyszłość:** przy „brak danych mimo sukcesu sync” — najpierw sprawdzić: **czy IndexedDB ma wymagane tabele?** i **czy zapis faktycznie się powiódł?**
+
+## Środki zapobiegawcze (aby się nie powtarzało)
+
+1. **Sync tylko gdy zalogowany** — DexieProvider uruchamia `initialSync` wyłącznie gdy `currentUser` jest ustawiony.
+2. **401 → automatyczne wylogowanie** — jeśli sync zwraca błędy 401, DexieProvider wywołuje `logout()`.
+3. **Sync po logowaniu** — efekt zależy od `[currentUser]`; po zalogowaniu sync uruchamia się ponownie.
+4. **Auto-repair bazy** — wykrywanie bazy v20 z 0 tabel i automatyczny reset.
