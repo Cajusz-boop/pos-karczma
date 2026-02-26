@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { BarChart3, Table2, TrendingUp, Download } from "lucide-react";
+import { BarChart3, Table2, TrendingUp } from "lucide-react";
 
 export default function ExtendedReportsPage() {
   const [activeTab, setActiveTab] = useState<"tables" | "shift">("tables");

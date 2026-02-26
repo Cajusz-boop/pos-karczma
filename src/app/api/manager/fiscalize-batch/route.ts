@@ -63,16 +63,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Brak zamĂłwieĹ„ do fiskalizacji" }, { status: 400 });
     }
 
-    const now = new Date();
     const results = {
       success: 0,
       failed: 0,
       errors: [] as string[],
     };
 
-    for (const orderId of orderIds) {
-      results.success++;
-    }
+    results.success = orderIds.length;
 
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "BATCH_FISCALIZATION", "Order", undefined, undefined, {

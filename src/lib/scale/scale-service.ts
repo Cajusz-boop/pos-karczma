@@ -24,14 +24,6 @@ export interface ScaleConfig {
   pollIntervalMs?: number;
 }
 
-const DEFAULT_CONFIG: ScaleConfig = {
-  connectionType: "COM",
-  port: "COM1",
-  baudRate: 9600,
-  protocol: "GENERIC",
-  pollIntervalMs: 200,
-};
-
 let currentWeight: ScaleReading | null = null;
 let lastReadTime: Date | null = null;
 

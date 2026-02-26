@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutGrid,
   Save,
-  RefreshCw,
   ArrowLeft,
   Merge,
   Unlink,
@@ -39,7 +38,7 @@ function snapToGrid(val: number): number {
 
 export default function TableLayoutPage() {
   const [rooms, setRooms] = useState<RoomData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<string>("");
   const [positions, setPositions] = useState<Map<string, { x: number; y: number }>>(new Map());
   const [dirty, setDirty] = useState(false);

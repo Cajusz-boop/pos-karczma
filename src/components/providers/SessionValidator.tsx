@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 
 const REFETCH_INTERVAL_MS = 4 * 60 * 1000; // 4 minuty
@@ -16,7 +16,7 @@ export function SessionValidator() {
   const logout = useAuthStore((s) => s.logout);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const checkSession = async () => {
+  const checkSession = useCallback(async () => {
     if (!currentUser) return;
     if (!navigator.onLine) return;
 
@@ -29,7 +29,7 @@ export function SessionValidator() {
     } catch {
       // Offline lub błąd sieci — nie wylogowuj
     }
-  };
+  }, [currentUser, logout]);
 
   useEffect(() => {
     if (!currentUser) return;
@@ -50,7 +50,7 @@ export function SessionValidator() {
       if (intervalRef.current) clearInterval(intervalRef.current);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [currentUser, logout]);
+  }, [currentUser, logout, checkSession]);
 
   return null;
 }

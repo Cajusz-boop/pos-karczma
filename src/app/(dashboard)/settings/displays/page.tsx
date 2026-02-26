@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Monitor, Plus, Trash2, ExternalLink, Volume2, VolumeX, Eye, EyeOff } from "lucide-react";
+import { Monitor, Trash2, ExternalLink, Volume2, VolumeX, Eye, EyeOff } from "lucide-react";
 
 interface CustomerDisplay {
   id: string;
@@ -213,7 +213,7 @@ export default function DisplaysSettingsPage() {
               checked={form.showPreparingSection ?? true}
               onChange={(e) => setForm({ ...form, showPreparingSection: e.target.checked })}
             />
-            Sekcja "W przygotowaniu"
+            Sekcja &quot;W przygotowaniu&quot;
           </label>
           <label className="flex items-center gap-2">
             <input
@@ -221,7 +221,7 @@ export default function DisplaysSettingsPage() {
               checked={form.showReadySection ?? true}
               onChange={(e) => setForm({ ...form, showReadySection: e.target.checked })}
             />
-            Sekcja "Gotowe"
+            Sekcja &quot;Gotowe&quot;
           </label>
           <label className="flex items-center gap-2">
             <input

@@ -120,12 +120,14 @@ export async function GET(request: NextRequest) {
       color: p.color,
       imageUrl: p.imageUrl ?? null,
       sortOrder: p.sortOrder,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       modifierGroups: (p.modifierGroups ?? []).map((pm: any) => ({
         modifierGroupId: pm.modifierGroupId,
         name: pm.modifierGroup.name,
         minSelect: pm.modifierGroup.minSelect,
         maxSelect: pm.modifierGroup.maxSelect,
         isRequired: pm.modifierGroup.isRequired,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         modifiers: pm.modifierGroup.modifiers.map((m: any) => ({
           id: m.id,
           name: m.name,
@@ -133,6 +135,7 @@ export async function GET(request: NextRequest) {
           sortOrder: m.sortOrder,
         })),
       })),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       allergens: (p.allergens ?? []).map((pa: any) => ({
         code: pa.allergen.code,
         name: pa.allergen.name,

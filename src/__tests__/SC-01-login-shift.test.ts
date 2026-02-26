@@ -3,7 +3,7 @@
  * Testy: PIN, kapsułka Dallas, NFC, otwarcie zmiany
  */
 import { describe, it, expect, beforeAll } from "vitest";
-import { findUser, login, authFetch, url } from "./helpers/auth";
+import { findUser, authFetch, url } from "./helpers/auth";
 
 let authCookie: string | null = null;
 let testUserId: string | null = null;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CreditCard, Plus, Trash2, Settings, Usb, Radio } from "lucide-react";
+import { CreditCard, Trash2, Settings, Usb, Radio } from "lucide-react";
 
 interface CardReader {
   id: string;

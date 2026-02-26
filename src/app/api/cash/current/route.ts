@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId");
-    const workstationId = searchParams.get("workstationId");
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);

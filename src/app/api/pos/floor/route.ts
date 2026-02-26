@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const roomId = searchParams.get("roomId");
-    const userId = searchParams.get("userId");
     
     const now = new Date();
     const today = new Date(now.toISOString().slice(0, 10));

@@ -10,12 +10,10 @@ let testUserId: string | null = null;
 let testProductId: string | null = null;
 let testItemId: string | null = null;
 let testCategoryId: string | null = null;
-let authCookie: string;
 
 describe("SC-03: Dodawanie produktów", () => {
   beforeAll(async () => {
     const auth = await getAuth();
-    authCookie = auth.cookie;
     testUserId = auth.user.id;
 
     const productsRes = await authFetch(url("/api/products"));

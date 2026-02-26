@@ -49,8 +49,6 @@ export default function SetupPage() {
   const [adminName, setAdminName] = useState("");
   const [adminPin, setAdminPin] = useState("");
 
-  const currentStep = STEPS[step];
-
   const handleFinish = async () => {
     setSaving(true);
     try {

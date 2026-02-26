@@ -155,7 +155,6 @@ export async function postRoomCharge(params: {
     });
 
     if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
       return {
         id: "",
         roomNumber: params.roomNumber,

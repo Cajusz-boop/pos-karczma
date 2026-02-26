@@ -2,7 +2,7 @@
  * T1: Logowanie PIN, otwarcie zmiany, wylogowanie
  */
 import { describe, it, expect, beforeAll } from "vitest";
-import { findUser, login, url } from "./helpers/auth";
+import { findUser, url } from "./helpers/auth";
 
 describe("T1: Auth & Login", () => {
   let adminUserId: string;

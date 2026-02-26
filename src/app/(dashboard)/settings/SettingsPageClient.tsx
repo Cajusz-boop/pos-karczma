@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAllRooms } from "@/hooks/useRooms";
 import { db } from "@/lib/db/offline-db";
 import { Button } from "@/components/ui/button";
@@ -327,7 +327,6 @@ function KsefAndFiscalSection() {
 type TabId = "general" | "rooms" | "printers" | "shifts";
 
 export default function SettingsPageClient() {
-  const queryClient = useQueryClient();
   const [tab, setTab] = useState<TabId>("general");
 
   const { data: config = {}, refetch: refetchConfig } = useQuery({

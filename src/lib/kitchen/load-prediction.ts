@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { subWeeks, startOfDay, endOfDay, getDay, getHours, format } from "date-fns";
+import { subWeeks, startOfDay, endOfDay, getHours } from "date-fns";
 
 /**
  * Predict kitchen load for the next few hours based on historical data.
@@ -19,7 +19,6 @@ export async function predictKitchenLoad(): Promise<{
   historicalAvgByHour: Record<number, number>;
 }> {
   const now = new Date();
-  const currentDayOfWeek = getDay(now);
   const currentHour = getHours(now);
 
   // Get historical data from same day of week, last 4 weeks

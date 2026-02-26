@@ -7,7 +7,6 @@ const MAIN_SERVER = process.env.NEXT_PUBLIC_MAIN_SERVER_URL ?? "https://pos.karc
 const LOCAL_SERVER = process.env.NEXT_PUBLIC_LOCAL_SERVER_URL ?? "http://10.119.169.20:3001";
 const CHECK_INTERVAL = Number(process.env.NEXT_PUBLIC_CONNECTION_CHECK_INTERVAL) || 30000;
 const REDIRECT_DELAY = Number(process.env.NEXT_PUBLIC_REDIRECT_DELAY) || 5000;
-const PREFERRED_SERVER_KEY = "pos-preferred-server";
 
 /** W APK (Capacitor) NIGDY nie przekierowuj — UI jest z bundla, LOCAL_SERVER jest niedostępny poza siecią. */
 function isNativeApp(): boolean {
@@ -60,11 +59,6 @@ export function ConnectionMonitor() {
     }
   }, []);
 
-  const checkServer = useCallback(async (url: string): Promise<boolean> => {
-    const result = await checkServerWithLatency(url);
-    return result.available;
-  }, [checkServerWithLatency]);
-
   const checkBothServers = useCallback(async (): Promise<{ main: ServerCheckResult; local: ServerCheckResult }> => {
     // Na HTTPS nie możemy pingować http:// (mixed content) — pomijamy local
     const onHttps = typeof window !== "undefined" && window.location.protocol === "https:";
@@ -76,7 +70,6 @@ export function ConnectionMonitor() {
   }, [checkServerWithLatency]);
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | undefined;
     let countdownInterval: NodeJS.Timeout | undefined;
 
     const checkConnection = async () => {
@@ -160,7 +153,7 @@ export function ConnectionMonitor() {
     };
 
     const initialCheck = setTimeout(checkConnection, 1000);
-    intervalId = setInterval(checkConnection, CHECK_INTERVAL);
+    const intervalId = setInterval(checkConnection, CHECK_INTERVAL);
 
     const handleOnline = () => checkConnection();
     const handleOffline = () => checkConnection();

@@ -1,23 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   Settings,
   Archive,
   Hash,
   Trash2,
   Download,
-  Upload,
   AlertTriangle,
   CheckCircle,
-  RefreshCw,
   Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ManagerPage() {
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"counter" | "cleanup" | "backup" | "fiscalize" | "cache">("counter");
 
   return (
@@ -287,7 +284,6 @@ function CleanupSection() {
 
 function BackupSection() {
   const [backupName, setBackupName] = useState("");
-  const queryClient = useQueryClient();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["config-backups"],

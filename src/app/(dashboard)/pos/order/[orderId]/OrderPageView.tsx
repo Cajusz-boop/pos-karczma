@@ -18,7 +18,6 @@ import {
   Split,
   Merge,
   Ban,
-  ChefHat,
   ShoppingCart,
   Star,
 } from "lucide-react";
@@ -176,11 +175,6 @@ export function OrderPageView(props: OrderPageViewProps) {
       ))
       .slice(0, 8);
   }, [searchQuery, allProducts]);
-
-  // Favorite products
-  const favoriteProducts = useMemo(() => {
-    return allProducts.filter(p => favoriteProductIds.includes(p.id) && p.isAvailable);
-  }, [allProducts, favoriteProductIds]);
 
   const highlightMatch = (text: string, query: string) => {
     if (!query) return text;

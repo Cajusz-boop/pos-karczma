@@ -33,10 +33,6 @@ function center(text: string, width = LINE_WIDTH): string {
   return " ".repeat(pad) + text;
 }
 
-function padRight(text: string, width: number): string {
-  return text.length >= width ? text.slice(0, width) : text + " ".repeat(width - text.length);
-}
-
 /**
  * Format kitchen ticket for 80mm thermal printer.
  * Research-based layout:

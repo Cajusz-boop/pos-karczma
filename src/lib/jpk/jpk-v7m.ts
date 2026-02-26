@@ -161,12 +161,10 @@ export async function generateJpkV7M(
   }
 
   // Calculate control sums
-  const totalNet = salesRows.reduce((s, r) => s + r.netAmount, 0);
   const totalVat = salesRows.reduce((s, r) => s + r.vatAmount, 0);
   const rowCount = salesRows.length;
 
   // Build XML
-  const periodStr = format(periodStart, "yyyy-MM");
   const now = new Date();
   const creationDate = format(now, "yyyy-MM-dd'T'HH:mm:ss");
 

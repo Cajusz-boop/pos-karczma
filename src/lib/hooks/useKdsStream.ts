@@ -205,7 +205,8 @@ export function useKdsStream(options: UseKdsStreamOptions): UseKdsStreamResult {
         connect();
       }, backoffDelay);
     };
-  }, [enabled, stationId, cleanup, fetchFallback, fallbackPollingMs, startFallbackPolling]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, stationId, cleanup, startFallbackPolling]);
 
   useEffect(() => {
     connect();

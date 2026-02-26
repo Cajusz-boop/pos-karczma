@@ -56,7 +56,7 @@ export default function TerminalSettingsPage() {
       const res = await fetch("/api/payment/terminal");
       const data = await res.json();
       setStatus(data);
-    } catch (e) {
+    } catch {
       setStatus({ connected: false, provider: "UNKNOWN", message: "Błąd połączenia" });
     } finally {
       setLoading(false);

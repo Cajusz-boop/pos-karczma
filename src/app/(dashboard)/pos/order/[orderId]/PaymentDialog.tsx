@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -122,7 +122,7 @@ export function PaymentDialog({
   const [error, setError] = useState<string | null>(null);
   const [cardOrBlikConfirmed, setCardOrBlikConfirmed] = useState(false);
   // E-receipt state
-  const [eReceiptToken, setEReceiptToken] = useState<string | null>(null);
+  const [, setEReceiptToken] = useState<string | null>(null);
   const [eReceiptQrUrl, setEReceiptQrUrl] = useState<string | null>(null);
   const [smsPhone, setSmsPhone] = useState("");
   const [smsSending, setSmsSending] = useState(false);
@@ -150,7 +150,7 @@ export function PaymentDialog({
   const [foreignSymbol, setForeignSymbol] = useState("€");
   const [currencyRates, setCurrencyRates] = useState<{ code: string; rate: number; symbol: string; name: string }[]>([]);
   // PolCard Go (SoftPOS) state
-  const [polcardIntentId, setPolcardIntentId] = useState<string | null>(null);
+  const [, setPolcardIntentId] = useState<string | null>(null);
   const [polcardMode, setPolcardMode] = useState<"softpos" | "external" | "manual">("manual");
 
   const bill = useMemo(() => (order ? computeBill(order) : null), [order]);
@@ -179,7 +179,6 @@ export function PaymentDialog({
   });
 
   const rawCashInput = parseFloat(cashReceived) || 0;
-  const paidByCash = step === "cash" ? rawCashInput : 0;
   const paidByMix = step === "mix" ? payments.reduce((s, p) => s + (parseFloat(p.amount) || 0), 0) : 0;
   const effectiveCashPln = step === "cash" && foreignCurrency && foreignRate > 0
     ? rawCashInput * foreignRate
@@ -322,9 +321,6 @@ export function PaymentDialog({
   };
 
   const foreignAmountNeeded = foreignRate > 0 ? Math.ceil((totalToPay / foreignRate) * 100) / 100 : 0;
-  const foreignCashPln = foreignCurrency && foreignRate > 0
-    ? (parseFloat(cashReceived) || 0) * foreignRate
-    : parseFloat(cashReceived) || 0;
 
   const checkVoucher = async () => {
     if (!voucherCode.trim()) return;

@@ -98,6 +98,7 @@ export default function DisplayPageClient({ displayId }: { displayId: string }) 
     >
       {display.showLogo && display.logoUrl && (
         <div className="text-center mb-8">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={display.logoUrl} alt="Logo" className="h-24 mx-auto" />
         </div>
       )}

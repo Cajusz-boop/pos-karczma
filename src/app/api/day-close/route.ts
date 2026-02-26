@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       where: { status: "CANCELLED", createdAt: { gte: today, lte: dayEnd } },
       include: { items: true },
     });
-    let cancelCount = cancelledOrders.length;
+    const cancelCount = cancelledOrders.length;
     let cancelAmount = 0;
     for (const o of cancelledOrders) {
       cancelAmount += o.items.reduce((s, i) => s + Number(i.quantity) * Number(i.unitPrice), 0);

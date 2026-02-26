@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 
 ﻿import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { subHours, startOfDay, endOfDay } from "date-fns";
+import { subHours } from "date-fns";
 
 
 /**

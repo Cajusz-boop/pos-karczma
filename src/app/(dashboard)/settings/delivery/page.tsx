@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1149,7 +1149,7 @@ export default function DeliverySettingsPage() {
             <p className="text-sm text-muted-foreground">
               Wklej listę ulic, każda w osobnej linii.
               <br />
-              Format: <code>Nazwa ulicy;od;do</code> (np. "Główna;1;100")
+              Format: <code>Nazwa ulicy;od;do</code> (np. &quot;Główna;1;100&quot;)
             </p>
             <textarea
               className="h-48 w-full rounded border p-3 font-mono text-sm"

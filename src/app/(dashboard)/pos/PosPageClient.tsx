@@ -34,7 +34,6 @@ import {
   X,
 } from "lucide-react";
 
-type TableShape = "RECTANGLE" | "ROUND" | "LONG";
 type TableStatus = "FREE" | "OCCUPIED" | "BILL_REQUESTED" | "RESERVED" | "BANQUET_MODE" | "INACTIVE";
 
 interface PosAlert {
@@ -380,6 +379,7 @@ export function PosPageClient() {
   const selectedRoom = rooms.find((r) => r.id === selectedRoomId) ?? rooms[0];
 
   // Data comes from Dexie — no prefetch needed
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const prefetchOrder = useCallback((_orderId: string) => {}, []);
 
   const handleTableHover = useCallback(

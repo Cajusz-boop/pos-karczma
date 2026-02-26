@@ -6,7 +6,6 @@ import { getAuth, authFetch, url } from "./helpers/auth";
 
 let testUserId: string | null = null;
 let testTableId: string | null = null;
-let testProductId: string | null = null;
 
 describe("SC-09: Złożone przepływy E2E", () => {
   beforeAll(async () => {
@@ -22,13 +21,6 @@ describe("SC-09: Złożone przepływy E2E", () => {
       }
     }
 
-    const productsRes = await authFetch(url("/api/products"));
-    if (productsRes.ok) {
-      const products = await productsRes.json();
-      if (Array.isArray(products) && products.length > 0) {
-        testProductId = products[0].id;
-      }
-    }
   });
 
   describe("SC-09-01: Pełny flow na miejscu", () => {

@@ -74,18 +74,18 @@ export default function SchedulePage() {
   const baseDate = new Date();
   baseDate.setDate(baseDate.getDate() + weekOffset * 7);
   const weekDates = getWeekDates(baseDate);
+  const weekStart = weekDates[0];
+  const weekEnd = weekDates[6];
 
   const fetchSchedule = useCallback(async () => {
     setLoading(true);
     try {
-      const from = weekDates[0];
-      const to = weekDates[6];
-      const res = await fetch(`/api/schedule?from=${from}&to=${to}`);
+      const res = await fetch(`/api/schedule?from=${weekStart}&to=${weekEnd}`);
       const data = await res.json();
       setSchedules(data.schedules ?? []);
       setUsers(data.users ?? []);
     } catch { /* ignore */ } finally { setLoading(false); }
-  }, [weekDates[0], weekDates[6]]);
+  }, [weekStart, weekEnd]);
 
   useEffect(() => { fetchSchedule(); }, [fetchSchedule]);
 

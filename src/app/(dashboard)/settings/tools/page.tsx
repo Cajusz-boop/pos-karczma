@@ -376,14 +376,6 @@ export default function ToolsPage() {
   const queryClient = useQueryClient();
   const [downloading, setDownloading] = useState(false);
   const [downloadError, setDownloadError] = useState<string | null>(null);
-  const [serverUrl, setServerUrl] = useState("");
-
-  // Pobierz URL serwera
-  useState(() => {
-    if (typeof window !== "undefined") {
-      setServerUrl(window.location.origin);
-    }
-  });
 
   // Pobierz raporty
   const { data: reports = [], isLoading: reportsLoading, refetch: refetchReports } = useQuery<ScannerReport[]>({
@@ -426,7 +418,7 @@ export default function ToolsPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error) {
+    } catch {
       setDownloadError("Nie udało się pobrać skanera. Spróbuj ponownie.");
     } finally {
       setDownloading(false);

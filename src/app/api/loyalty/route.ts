@@ -8,10 +8,6 @@ import { auditLog } from "@/lib/audit";
 
 const POINTS_PER_ZL = 1;
 
-const lookupSchema = z.object({
-  phone: z.string().min(1, "Wymagany numer telefonu"),
-});
-
 const earnSchema = z.object({
   customerId: z.string().min(1),
   orderId: z.string().min(1),

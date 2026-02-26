@@ -281,8 +281,6 @@ export default function ProductsPage() {
 
   const isFormValid = formName.trim().length > 0 && formCategoryId && formTaxRateId && formPriceGross;
 
-  const getCategoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? "—";
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">

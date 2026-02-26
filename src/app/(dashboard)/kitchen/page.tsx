@@ -126,7 +126,6 @@ function KDSOrderCard({
   const allReady = card.items.every((i) => i.status === "READY" || i.status === "CANCELLED");
   const hasInProgress = card.items.some((i) => i.status === "IN_PROGRESS");
   const hasStarted = hasInProgress || allReady;
-  const activeItems = card.items.filter((i) => i.status !== "CANCELLED");
   const f = FONT_CLASSES[fontSize];
 
   const headerColor =

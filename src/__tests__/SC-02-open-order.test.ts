@@ -9,7 +9,6 @@ const BASE_URL = process.env.TEST_BASE_URL || "http://localhost:3000";
 let testTableId: string | null = null;
 let testUserId: string | null = null;
 let testOrderId: string | null = null;
-let testRoomId: string | null = null;
 
 describe("SC-02: Otwieranie zamówień", () => {
   beforeAll(async () => {
@@ -19,7 +18,6 @@ describe("SC-02: Otwieranie zamówień", () => {
       const freeTable = data.tables?.find((t: { status: string }) => t.status === "FREE");
       if (freeTable) {
         testTableId = freeTable.id;
-        testRoomId = freeTable.roomId;
       }
     }
 

@@ -230,7 +230,10 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     enabled: !!currentUser?.id,
     staleTime: 60 * 1000,
   });
-  const favoriteProductIds = userPrefs?.preferences?.favoriteProducts ?? [];
+  const favoriteProductIds = useMemo(
+    () => userPrefs?.preferences?.favoriteProducts ?? [],
+    [userPrefs?.preferences?.favoriteProducts]
+  );
 
   const toggleFavoriteMutation = useMutation({
     mutationFn: async (productId: string) => {

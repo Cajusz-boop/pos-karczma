@@ -58,19 +58,18 @@ export async function GET(request: NextRequest) {
     });
 
     const categoryStats = new Map<string, { name: string; quantity: number; total: number }>();
-    const printerStats = new Map<string, { name: string; quantity: number; total: number }>();
     const productStats = new Map<string, { name: string; category: string; quantity: number; total: number }>();
     const discountStats = { count: 0, total: 0, byType: new Map<string, number>() };
     const paymentStats = new Map<string, { count: number; total: number }>();
 
     let totalSales = 0;
-    let totalOrders = orders.length;
+    const totalOrders = orders.length;
     let totalGuests = 0;
     let receiptCount = 0;
-    let invoiceCount = 0;
+    const invoiceCount = 0;
     let emptyOrderCount = 0;
     let cancelledItemCount = 0;
-    let notFiscalized = 0;
+    const notFiscalized = 0;
 
     for (const order of orders) {
       totalGuests += order.guestCount;

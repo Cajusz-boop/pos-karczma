@@ -424,8 +424,6 @@ export function generatePolcardGoDeepLink(params: PolcardGoDeepLinkParams): stri
  * Fallback when deep link scheme doesn't work.
  */
 export function generatePolcardGoIntentUrl(params: PolcardGoDeepLinkParams): string {
-  const deepLink = generatePolcardGoDeepLink(params);
-  
   return `intent://payment?${new URLSearchParams({
     amount: String(Math.round(params.amount * 100)),
     currency: params.currency,

@@ -463,7 +463,6 @@ function MenusSection({
   const [eventType, setEventType] = useState("");
   const [pricePerPerson, setPricePerPerson] = useState("");
   const [menuItems, setMenuItems] = useState<Array<{ productId: string; name: string; quantity: number; courseNumber: number }>>([]);
-  const [_saving, _setSaving] = useState(false);
 
   const addItem = () => setMenuItems((prev) => [...prev, { productId: "", name: "", quantity: 1, courseNumber: 1 }]);
   const removeItem = (idx: number) => setMenuItems((prev) => prev.filter((_, i) => i !== idx));

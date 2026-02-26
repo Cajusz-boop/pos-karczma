@@ -64,6 +64,7 @@ export default function InvoicesPage() {
 
   useEffect(() => {
     fetchInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [typeFilter, dateFrom, dateTo, ksefFilter]);
 
   const retryKsef = async (invoiceId: string) => {

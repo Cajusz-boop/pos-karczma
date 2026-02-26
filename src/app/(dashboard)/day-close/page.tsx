@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,6 @@ import {
   AlertTriangle,
   Clock,
   Banknote,
-  CreditCard,
   Receipt,
   Users,
   TrendingUp,
@@ -82,7 +81,6 @@ const PAYMENT_LABELS: Record<string, string> = {
 type TabId = "day-close" | "cash-drawer";
 
 export default function DayClosePage() {
-  const queryClient = useQueryClient();
   const [tab, setTab] = useState<TabId>("day-close");
   const [cashEnds, setCashEnds] = useState<Record<string, string>>({});
   const [confirmOpen, setConfirmOpen] = useState(false);
