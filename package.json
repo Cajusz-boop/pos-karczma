@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prepare": "husky",
     "predev": "npx tsx scripts/setup-env.ts && prisma generate && prisma db push && npx tsx scripts/sync-config-on-start.ts",
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
@@ -15,7 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "db:config:export": "npx tsx prisma/config-export.ts",
-    "db:config:import": "npx tsx prisma/config-import.ts"
+    "db:config:import": "npx tsx prisma/config-import.ts",
+    "prepare": "husky"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -38,6 +40,7 @@
     "date-fns": "^4.1.0",
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",
+    "dotenv": "^17.3.1",
     "exceljs": "^4.4.0",
     "ioredis": "^5.9.3",
     "jose": "^6.1.3",
@@ -54,8 +57,7 @@
     "tailwindcss-animate": "^1.0.7",
     "web-push": "^3.6.7",
     "zod": "^4.3.6",
-    "zustand": "^5.0.11",
-    "dotenv": "^17.3.1"
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -68,6 +70,7 @@
     "effect": "^3.19.19",
     "eslint": "^8",
     "eslint-config-next": "14.2.35",
+    "husky": "^9.1.7",
     "postcss": "^8",
     "prisma": "^7.4.0",
     "sharp": "^0.34.5",
