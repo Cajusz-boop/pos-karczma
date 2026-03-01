@@ -439,6 +439,7 @@ enum OrderType {
   BANQUET
   PHONE
   DELIVERY
+  HOTEL_ROOM
 }
 
 enum DeliveryStatus {

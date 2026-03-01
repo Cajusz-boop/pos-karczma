@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo, lazy, Suspense, useDeferredValue } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useOrderStore, type OrderItemLine } from "@/store/useOrderStore";
 import { useProductsForPos } from "@/hooks/useProductsForPos";
@@ -159,12 +159,63 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const prevOrderStatusRef = useRef<string | null>(null);
   const currentUser = useAuthStore((s) => s.currentUser);
 
+  // Hotel order params from URL
+  const searchParams = useSearchParams();
+  const isHotelOrder = searchParams.get("hotel") === "true";
+  const hotelRoomNumber = searchParams.get("roomNumber") ?? "";
+  const hotelGuestName = searchParams.get("guestName") ?? "";
+  const hotelGuestId = searchParams.get("guestId") ?? "";
+  const hotelCheckOut = searchParams.get("checkOut") ?? "";
+  const [hotelChargeLoading, setHotelChargeLoading] = useState(false);
+  const [hotelChargeResult, setHotelChargeResult] = useState<{
+    success: boolean;
+    message: string;
+    unassigned?: boolean;
+  } | null>(null);
+
   // Dexie — products, categories, rooms, orders (offline-first)
   const { categories, products, isLoading: productsLoading } = useProductsForPos();
   const { rooms } = useRoomsWithTables();
   const { orders: openOrdersRaw } = useOpenOrders();
   const localOrder = useOrder(orderId);
   const { items: localOrderItems } = useOrderItems(localOrder?._localId);
+
+  // Fallback: jeśli Dexie nie ma zamówienia po 2s, pobierz z API i hydruj
+  const [dexieChecked, setDexieChecked] = useState(false);
+  useEffect(() => {
+    if (localOrder !== undefined) return;
+    const timer = setTimeout(() => setDexieChecked(true), 2000);
+    return () => clearTimeout(timer);
+  }, [localOrder]);
+
+  const { data: apiFallbackOrder } = useQuery({
+    queryKey: ["order-fallback", orderId],
+    queryFn: async () => {
+      const res = await fetch(`/api/orders/${orderId}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.error) return null;
+      return data;
+    },
+    enabled: dexieChecked && localOrder === undefined && !!orderId,
+    staleTime: Infinity,
+  });
+
+  // Hydruj do Dexie gdy API zwróci zamówienie
+  useEffect(() => {
+    if (!apiFallbackOrder || localOrder) return;
+    import("@/lib/orders/order-actions").then(({ hydrateOrderFromApiCreate }) => {
+      hydrateOrderFromApiCreate({
+        serverId: apiFallbackOrder.id,
+        orderNumber: apiFallbackOrder.orderNumber,
+        type: apiFallbackOrder.type ?? "TAKEAWAY",
+        tableId: apiFallbackOrder.tableId,
+        userId: apiFallbackOrder.userId,
+        userName: apiFallbackOrder.user?.name ?? "",
+        guestCount: apiFallbackOrder.guestCount ?? 1,
+      });
+    });
+  }, [apiFallbackOrder, localOrder]);
 
   // Map open orders to OpenOrderRow format (for merge dialog)
   const openOrders: OpenOrderRow[] = useMemo(
@@ -216,7 +267,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     };
   }, [localOrder, localOrderItems]);
 
-  const orderLoading = productsLoading || (!!orderId && localOrder === undefined);
+  const orderLoading = productsLoading || (!!orderId && localOrder === undefined && !dexieChecked);
   const popularProducts: Array<{ id: string; name: string; priceGross: number; taxRateId: string; color: string | null; categoryName: string; orderCount: number }> = [];
 
   // Favorites
@@ -550,6 +601,84 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     queryClient.invalidateQueries({ queryKey: ["rooms"] });
   };
 
+  const handleSendToRoom = async () => {
+    if (!hotelRoomNumber || !orderId) return;
+    setHotelChargeLoading(true);
+    setHotelChargeResult(null);
+    setOpError(null);
+
+    try {
+      // First send items to kitchen if there are new items
+      const newItems = items.filter((i) => i.status === "ORDERED");
+      if (newItems.length > 0) {
+        await sendMutation.mutateAsync();
+      }
+
+      // Then charge to hotel room
+      const res = await fetch("/api/hotel/charge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomNumber: hotelRoomNumber,
+          orderId,
+          guestName: hotelGuestName || undefined,
+          guestId: hotelGuestId || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setHotelChargeResult({
+          success: false,
+          message: data.error ?? "Błąd obciążenia pokoju",
+        });
+        return;
+      }
+
+      // Close order after successful charge
+      const closeRes = await fetch(`/api/orders/${orderId}/close`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receipt: false }),
+      });
+
+      if (!closeRes.ok) {
+        setHotelChargeResult({
+          success: true,
+          message: "Pokój obciążony, ale nie udało się zamknąć zamówienia",
+          unassigned: data.unassigned,
+        });
+        return;
+      }
+
+      const activeItems = items.filter((i) => i.status !== "CANCELLED");
+      const total = activeItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+
+      setHotelChargeResult({
+        success: true,
+        message: data.unassigned
+          ? `Obciążono pokój ${hotelRoomNumber} — ${total.toFixed(2)} zł (brak aktywnej rezerwacji — zapisano do przypisania)`
+          : `✓ Obciążono pokój ${hotelRoomNumber} — ${total.toFixed(2)} zł`,
+        unassigned: data.unassigned,
+      });
+
+      invalidateOrder();
+
+      // Redirect after success
+      setTimeout(() => {
+        router.push("/hotel-orders");
+      }, 2000);
+    } catch (e) {
+      setHotelChargeResult({
+        success: false,
+        message: e instanceof Error ? e.message : "Błąd połączenia",
+      });
+    } finally {
+      setHotelChargeLoading(false);
+    }
+  };
+
   const handleCloseBill = async () => {
     const activeItems = items.filter((i) => i.status !== "CANCELLED");
     const total = activeItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
@@ -718,6 +847,16 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
 
   const orderReady = orderData && orderData.id === orderId;
   if (!orderReady) {
+    if (dexieChecked && apiFallbackOrder === null) {
+      return (
+        <div className="flex flex-col items-center justify-center gap-4 p-8">
+          <p className="text-destructive font-medium">Zamówienie nie istnieje</p>
+          <Button variant="outline" onClick={() => router.push("/pos")}>
+            Powrót do POS
+          </Button>
+        </div>
+      );
+    }
     return (
       <div className="flex items-center justify-center p-8">
         <p className="text-muted-foreground">Ładowanie zamówienia…</p>
@@ -785,6 +924,13 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         onSplitOrder={() => { setSplitDialogOpen(true); setSplitSelectedIds([]); setOpError(null); }}
         onMergeOrder={() => { setMergeDialogOpen(true); setMergeTargetOrderId(null); setOpError(null); }}
         onMessageToKitchen={() => { setMessageToKitchenOpen(true); setMessageToKitchenText(""); }}
+        isHotelOrder={isHotelOrder}
+        hotelRoomNumber={hotelRoomNumber}
+        hotelGuestName={hotelGuestName}
+        hotelCheckOut={hotelCheckOut}
+        onSendToRoom={handleSendToRoom}
+        hotelChargeLoading={hotelChargeLoading}
+        hotelChargeResult={hotelChargeResult}
         orderType={orderData?.type}
         courseReleasedUpTo={orderData?.courseReleasedUpTo ?? 1}
         onReleaseCourse={async (courseNumber) => {

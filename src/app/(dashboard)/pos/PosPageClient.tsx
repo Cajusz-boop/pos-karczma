@@ -32,6 +32,7 @@ import {
   AlertTriangle,
   CalendarClock,
   X,
+  Hotel,
 } from "lucide-react";
 
 type TableStatus = "FREE" | "OCCUPIED" | "BILL_REQUESTED" | "RESERVED" | "BANQUET_MODE" | "INACTIVE";
@@ -723,6 +724,15 @@ export function PosPageClient() {
         >
           <Receipt className="h-4 w-4" />
           <span className="hidden sm:inline">Szybki paragon</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs sm:text-sm bg-brand-brown/10 border-brand-brown/30 hover:bg-brand-brown/20"
+          onClick={() => router.push("/hotel-orders")}
+        >
+          <Hotel className="h-4 w-4" />
+          <span className="hidden sm:inline">Hotel</span>
         </Button>
         <Button
           variant="outline"

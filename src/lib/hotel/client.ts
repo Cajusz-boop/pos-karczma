@@ -3,8 +3,8 @@
  * Integrates with C:\HotelSystem (same stack: Next.js + Prisma + MariaDB)
  *
  * Endpoints:
- * - GET /api/rooms/occupied — list occupied hotel rooms with guest info
- * - POST /api/room-charges — post a restaurant charge to a hotel room
+ * - GET /api/v1/external/occupied-rooms — list occupied hotel rooms with guest info
+ * - POST /api/v1/external/posting — post a restaurant charge to a hotel room
  * - GET /api/breakfast/guests — list guests with breakfast included
  */
 
@@ -12,11 +12,14 @@ import { prisma } from "@/lib/prisma";
 
 export interface HotelRoom {
   roomNumber: string;
+  roomType?: string;
   guestName: string;
   guestId: string;
   checkIn: string;
   checkOut: string;
   reservationId: string;
+  pax?: number;
+  status?: string;
 }
 
 export interface BreakfastGuest {
@@ -32,6 +35,13 @@ export interface BreakfastGuest {
   servedAt?: string;
 }
 
+export interface RoomChargeItem {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  category?: string;
+}
+
 export interface RoomCharge {
   id: string;
   roomNumber: string;
@@ -39,6 +49,9 @@ export interface RoomCharge {
   description: string;
   orderId: string;
   status: "PENDING" | "POSTED" | "FAILED";
+  unassigned?: boolean;
+  unassignedChargeId?: string;
+  reason?: string;
 }
 
 export interface HotelConfig {
@@ -80,8 +93,9 @@ export async function getOccupiedRooms(): Promise<{
   }
 
   try {
-    const response = await fetch(`${config.baseUrl}/api/rooms/occupied`, {
+    const response = await fetch(`${config.baseUrl}/api/v1/external/occupied-rooms`, {
       headers: {
+        "X-API-Key": config.apiKey,
         Authorization: `Bearer ${config.apiKey}`,
         Accept: "application/json",
       },
@@ -98,11 +112,14 @@ export async function getOccupiedRooms(): Promise<{
         const guest = r.guest as Record<string, unknown> | undefined;
         return {
           roomNumber: String(r.roomNumber ?? r.number ?? ""),
+          roomType: r.roomType ? String(r.roomType) : undefined,
           guestName: String(r.guestName ?? guest?.name ?? ""),
           guestId: String(r.guestId ?? guest?.id ?? ""),
           checkIn: String(r.checkIn ?? ""),
           checkOut: String(r.checkOut ?? ""),
           reservationId: String(r.reservationId ?? r.id ?? ""),
+          pax: typeof r.pax === "number" ? r.pax : undefined,
+          status: r.status ? String(r.status) : undefined,
         };
       }),
     };
@@ -123,6 +140,8 @@ export async function postRoomCharge(params: {
   description: string;
   orderId: string;
   orderNumber: number;
+  items?: RoomChargeItem[];
+  cashierName?: string;
 }): Promise<RoomCharge> {
   const config = await getConfig();
   if (!config.enabled) {
@@ -137,20 +156,22 @@ export async function postRoomCharge(params: {
   }
 
   try {
-    const response = await fetch(`${config.baseUrl}/api/room-charges`, {
+    const response = await fetch(`${config.baseUrl}/api/v1/external/posting`, {
       method: "POST",
       headers: {
+        "X-API-Key": config.apiKey,
         Authorization: `Bearer ${config.apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         roomNumber: params.roomNumber,
         amount: params.amount,
-        currency: "PLN",
+        type: "RESTAURANT",
         description: params.description,
-        source: "POS_RESTAURANT",
-        sourceRef: params.orderId,
-        sourceOrderNumber: params.orderNumber,
+        posSystem: "POS-Karczma",
+        receiptNumber: `ZAM/${params.orderNumber}`,
+        items: params.items,
+        cashierName: params.cashierName,
       }),
     });
 
@@ -166,8 +187,24 @@ export async function postRoomCharge(params: {
     }
 
     const data = await response.json();
+    
+    // Handle unassigned charge response
+    if (data.unassigned) {
+      return {
+        id: data.unassignedChargeId ?? "",
+        roomNumber: params.roomNumber,
+        amount: params.amount,
+        description: params.description,
+        orderId: params.orderId,
+        status: "POSTED",
+        unassigned: true,
+        unassignedChargeId: data.unassignedChargeId,
+        reason: data.reason,
+      };
+    }
+
     return {
-      id: data.id ?? "",
+      id: data.transactionId ?? data.id ?? "",
       roomNumber: params.roomNumber,
       amount: params.amount,
       description: params.description,
@@ -203,6 +240,7 @@ export async function getBreakfastGuests(): Promise<{
     // Try dedicated breakfast endpoint first
     const response = await fetch(`${config.baseUrl}/api/breakfast/guests`, {
       headers: {
+        "X-API-Key": config.apiKey,
         Authorization: `Bearer ${config.apiKey}`,
         Accept: "application/json",
       },

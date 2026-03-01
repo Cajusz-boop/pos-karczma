@@ -98,7 +98,8 @@ export async function POST(request: NextRequest) {
     const nextOrderNumber = (maxOrder._max.orderNumber ?? 0) + 1;
 
     // Takeaway order â€” no table required
-    if (orderType === "TAKEAWAY" || !tableId) {
+    if (orderType === "TAKEAWAY" || orderType === "HOTEL_ROOM" || !tableId) {
+      const finalType = orderType === "HOTEL_ROOM" ? "HOTEL_ROOM" : "TAKEAWAY";
       const order = await prisma.order.create({
         data: {
           tableId: null,
@@ -107,10 +108,10 @@ export async function POST(request: NextRequest) {
           guestCount: Math.floor(guestCount),
           orderNumber: nextOrderNumber,
           status: "OPEN",
-          type: "TAKEAWAY",
+          type: finalType,
         },
       });
-      return NextResponse.json({ order: { id: order.id, orderNumber: order.orderNumber, type: "TAKEAWAY" } });
+      return NextResponse.json({ order: { id: order.id, orderNumber: order.orderNumber, type: finalType } });
     }
 
     // Dine-in order â€” table required

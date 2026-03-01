@@ -149,7 +149,7 @@ export interface LocalOrder extends SyncableRecord {
   userId: string;
   userName?: string;
   status: "OPEN" | "SENT_TO_KITCHEN" | "IN_PROGRESS" | "READY" | "SERVED" | "BILL_REQUESTED" | "CLOSED" | "CANCELLED";
-  type: "DINE_IN" | "TAKEAWAY" | "BANQUET" | "PHONE" | "DELIVERY";
+  type: "DINE_IN" | "TAKEAWAY" | "BANQUET" | "PHONE" | "DELIVERY" | "HOTEL_ROOM";
   guestCount: number;
   note?: string;
   discountJson?: {

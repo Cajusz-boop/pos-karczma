@@ -90,7 +90,7 @@ export const createOrderSchema = z.object({
   roomId: z.string().min(1).optional(),
   userId: z.string().min(1, "Wymagany userId"),
   guestCount: z.number().int().min(1, "Minimalna liczba gości: 1"),
-  type: z.enum(["DINE_IN", "TAKEAWAY", "BANQUET"]).optional(),
+  type: z.enum(["DINE_IN", "TAKEAWAY", "BANQUET", "HOTEL_ROOM"]).optional(),
 });
 
 export const sendItemSchema = z.object({

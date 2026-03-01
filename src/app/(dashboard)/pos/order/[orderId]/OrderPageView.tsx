@@ -20,6 +20,10 @@ import {
   Ban,
   ShoppingCart,
   Star,
+  Hotel,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -89,6 +93,13 @@ export interface OrderPageViewProps {
   orderType?: string;
   courseReleasedUpTo?: number;
   onReleaseCourse?: (courseNumber: number) => void;
+  isHotelOrder?: boolean;
+  hotelRoomNumber?: string;
+  hotelGuestName?: string;
+  hotelCheckOut?: string;
+  onSendToRoom?: () => void;
+  hotelChargeLoading?: boolean;
+  hotelChargeResult?: { success: boolean; message: string; unassigned?: boolean } | null;
 }
 
 const CATEGORY_COLORS = [
@@ -155,6 +166,13 @@ export function OrderPageView(props: OrderPageViewProps) {
     orderType,
     courseReleasedUpTo = 1,
     onReleaseCourse,
+    isHotelOrder = false,
+    hotelRoomNumber,
+    hotelGuestName,
+    hotelCheckOut,
+    onSendToRoom,
+    hotelChargeLoading = false,
+    hotelChargeResult,
   } = props;
 
   const [mobileReceiptOpen, setMobileReceiptOpen] = useState(false);
@@ -266,21 +284,32 @@ export function OrderPageView(props: OrderPageViewProps) {
 
         {/* Receipt header */}
         <div className="flex items-center gap-2 border-b px-3 py-2">
-          <Link href="/pos" className="shrink-0">
+          <Link href={isHotelOrder ? "/hotel-orders" : "/pos"} className="shrink-0">
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-sm font-semibold">
-              {tableNumber != null && (
+              {isHotelOrder && hotelRoomNumber ? (
+                <span className="rounded bg-emerald-600 px-1.5 py-0.5 text-xs text-white flex items-center gap-1">
+                  <Hotel className="h-3 w-3" />
+                  Pokój {hotelRoomNumber}
+                </span>
+              ) : tableNumber != null ? (
                 <span className="rounded bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
                   Stolik {tableNumber}
                 </span>
-              )}
+              ) : null}
               <OrderSyncBadge syncStatus={syncStatus ?? "synced"} className="shrink-0" />
               <span className="text-muted-foreground">#{orderNumberLabel ?? orderNumber ?? "-"}</span>
             </div>
+            {isHotelOrder && hotelGuestName && (
+              <div className="text-xs text-muted-foreground mt-0.5">
+                {hotelGuestName}
+                {hotelCheckOut && ` • wym. ${new Date(hotelCheckOut).toLocaleDateString("pl-PL", { day: "2-digit", month: "2-digit" })}`}
+              </div>
+            )}
           </div>
           {/* Mobile: show total as tap target */}
           <button
@@ -456,14 +485,60 @@ export function OrderPageView(props: OrderPageViewProps) {
               </Button>
             )}
 
-            <Button
-              variant="outline"
-              className="w-full gap-2"
-              onClick={onCloseBill}
-            >
-              <CreditCard className="h-4 w-4" />
-              Zamknij rachunek
-            </Button>
+            {isHotelOrder && onSendToRoom ? (
+              <Button
+                className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700"
+                size="lg"
+                onClick={onSendToRoom}
+                disabled={hotelChargeLoading || activeItems.length === 0}
+              >
+                {hotelChargeLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Wysyłanie…
+                  </>
+                ) : (
+                  <>
+                    <Hotel className="h-4 w-4" />
+                    Wyślij na pokój {hotelRoomNumber}
+                  </>
+                )}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full gap-2"
+                onClick={onCloseBill}
+              >
+                <CreditCard className="h-4 w-4" />
+                Zamknij rachunek
+              </Button>
+            )}
+
+            {/* Hotel charge result */}
+            {hotelChargeResult && (
+              <div className={cn(
+                "rounded-lg p-3 text-sm",
+                hotelChargeResult.success
+                  ? hotelChargeResult.unassigned
+                    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200"
+                    : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-200"
+                  : "bg-destructive/10 text-destructive"
+              )}>
+                <div className="flex items-center gap-2">
+                  {hotelChargeResult.success ? (
+                    hotelChargeResult.unassigned ? (
+                      <AlertTriangle className="h-4 w-4 shrink-0" />
+                    ) : (
+                      <CheckCircle2 className="h-4 w-4 shrink-0" />
+                    )
+                  ) : (
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                  )}
+                  {hotelChargeResult.message}
+                </div>
+              </div>
+            )}
 
             {/* Operations row */}
             <div className="flex flex-wrap gap-1">
@@ -473,9 +548,11 @@ export function OrderPageView(props: OrderPageViewProps) {
                   Kuchnia
                 </Button>
               )}
-              <Button variant="ghost" size="sm" className="h-7 gap-1 text-[11px]" onClick={() => setActionsOpen(true)}>
-                Więcej…
-              </Button>
+              {!isHotelOrder && (
+                <Button variant="ghost" size="sm" className="h-7 gap-1 text-[11px]" onClick={() => setActionsOpen(true)}>
+                  Więcej…
+                </Button>
+              )}
             </div>
           </div>
 

@@ -106,7 +106,8 @@ export const OrderType = {
   TAKEAWAY: 'TAKEAWAY',
   BANQUET: 'BANQUET',
   PHONE: 'PHONE',
-  DELIVERY: 'DELIVERY'
+  DELIVERY: 'DELIVERY',
+  HOTEL_ROOM: 'HOTEL_ROOM'
 } as const
 
 export type OrderType = (typeof OrderType)[keyof typeof OrderType]

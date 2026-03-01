@@ -37,8 +37,16 @@ export async function POST(request: NextRequest) {
       include: {
         items: {
           where: { status: { not: "CANCELLED" } },
-          select: { quantity: true, unitPrice: true, discountAmount: true },
+          include: {
+            product: {
+              select: {
+                name: true,
+                category: { select: { name: true } },
+              },
+            },
+          },
         },
+        user: { select: { name: true } },
       },
     });
 
@@ -71,12 +79,22 @@ export async function POST(request: NextRequest) {
       ? `Restauracja — zam. #${order.orderNumber} (${guestName})`
       : `Restauracja — zamówienie #${order.orderNumber}`;
 
+    // Build items list for HotelSystem
+    const hotelItems = order.items.map((item) => ({
+      name: item.product.name,
+      quantity: Number(item.quantity),
+      unitPrice: Number(item.unitPrice),
+      category: item.product.category?.name,
+    }));
+
     const result = await postRoomCharge({
       roomNumber,
       amount: finalTotal,
       description,
       orderId: order.id,
       orderNumber: order.orderNumber,
+      items: hotelItems,
+      cashierName: order.user?.name,
     });
 
     const userId = request.headers.get("x-user-id");
@@ -93,6 +111,11 @@ export async function POST(request: NextRequest) {
         { status: 502 }
       );
     }
+
+    // Handle unassigned charge warning (charge was saved but no active reservation)
+    const unassignedWarning = result.unassigned
+      ? { unassigned: true, reason: result.reason ?? "Brak aktywnej rezerwacji" }
+      : undefined;
 
     // Sync hotel guest to POS Customer
     let customerId: string | undefined;
@@ -117,7 +140,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ charge: result, customerId });
+    return NextResponse.json({ charge: result, customerId, ...unassignedWarning });
   } catch (e) {
     console.error("[Hotel Charge Proxy]", e);
     return NextResponse.json(

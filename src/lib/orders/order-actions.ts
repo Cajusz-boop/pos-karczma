@@ -114,6 +114,7 @@ export async function hydrateOrderFromApiCreate(params: {
       createdAt: now,
       totalGross: 0,
       itemCount: 0,
+      orderNumber: params.orderNumber,
       tableNumber,
       roomName,
     } as LocalOrder);
