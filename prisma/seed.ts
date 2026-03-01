@@ -629,7 +629,20 @@ async function main() {
       create: { key: c.key, value: c.value as unknown as object },
     });
   }
-  console.log("  ✓ SystemConfig: nazwa firmy, timeout 5 min, próg rabatu 10%, KDS retencja 30 min, alarm 20 min");
+
+  // Hotel integration config (HotelSystem on port 3000)
+  const hotelConfig = {
+    enabled: true,
+    baseUrl: "http://127.0.0.1:3000",
+    apiKey: "karczma-pos-2026-hXk9mP4wQz",
+  };
+  await prisma.systemConfig.upsert({
+    where: { key: "hotel_integration" },
+    update: { value: hotelConfig as unknown as object },
+    create: { key: "hotel_integration", value: hotelConfig as unknown as object },
+  });
+
+  console.log("  ✓ SystemConfig: nazwa firmy, timeout 5 min, próg rabatu 10%, KDS retencja 30 min, alarm 20 min, hotel integration");
 
   // 12. Promocje / Happy Hour
   const now = new Date();
