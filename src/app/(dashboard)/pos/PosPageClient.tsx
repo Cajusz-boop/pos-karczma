@@ -33,7 +33,9 @@ import {
   CalendarClock,
   X,
   Hotel,
+  RefreshCw,
 } from "lucide-react";
+import { db } from "@/lib/db/offline-db";
 
 type TableStatus = "FREE" | "OCCUPIED" | "BILL_REQUESTED" | "RESERVED" | "BANQUET_MODE" | "INACTIVE";
 
@@ -338,6 +340,7 @@ export function PosPageClient() {
   const [createError, setCreateError] = useState("");
   const [time, setTime] = useState("");
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
+  const [isResetting, setIsResetting] = useState(false);
 
   useEffect(() => {
     const tick = () =>
@@ -550,6 +553,23 @@ export function PosPageClient() {
     router.replace("/login");
   };
 
+  const handleResetLocalData = async () => {
+    if (!confirm("Wyczyścić lokalne dane zamówień?\n\nUżyj tego jeśli stoliki wyświetlają się nieprawidłowo (ghost orders).\n\nDane na serwerze NIE zostaną usunięte.")) {
+      return;
+    }
+    setIsResetting(true);
+    try {
+      await db.clearAllLocalOrders();
+      await db.forceRefresh();
+      alert("Dane lokalne wyczyszczone. Strona zostanie odświeżona.");
+      window.location.reload();
+    } catch (e) {
+      alert("Błąd: " + (e instanceof Error ? e.message : "Nieznany błąd"));
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   // Kitchen alerts count for bottom bar badge
   const kitchenAlertsCount = alerts.filter(a => a.type === "KITCHEN_READY").length;
 
@@ -746,6 +766,16 @@ export function PosPageClient() {
 
         <div className="flex-1" />
 
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5 text-xs text-muted-foreground sm:text-sm"
+          onClick={handleResetLocalData}
+          disabled={isResetting}
+        >
+          <RefreshCw className={cn("h-4 w-4", isResetting && "animate-spin")} />
+          <span className="hidden sm:inline">{isResetting ? "Reset..." : "Reset"}</span>
+        </Button>
         {currentUser?.isOwner && (
           <Button
             variant="ghost"

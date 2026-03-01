@@ -1,5 +1,6 @@
 import { db, type SyncQueueItem } from "@/lib/db/offline-db";
 import { safeFetch } from "@/lib/utils/safe-fetch";
+import { getApiBaseUrl } from "@/lib/utils/get-api-base";
 
 // ============================================================
 // CONFIGURATION
@@ -128,7 +129,7 @@ class SyncEngine {
         );
 
         // Send batch
-        const base = typeof window !== "undefined" ? window.location.origin : "";
+        const base = await getApiBaseUrl();
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000);
         const { data: results, error, offline } = await safeFetch<BatchResult[]>(

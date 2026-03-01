@@ -7,7 +7,7 @@ import { db } from "@/lib/db/offline-db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import "@/components/ui/dialog";
-import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone, Truck, Package, Tv, CreditCard, BarChart3, Archive, Wrench, HardDrive } from "lucide-react";
+import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone, Truck, Package, Tv, CreditCard, BarChart3, Archive, Wrench, HardDrive, RefreshCw, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
@@ -324,6 +324,79 @@ function KsefAndFiscalSection() {
   );
 }
 
+function OfflineDataResetSection() {
+  const [isClearing, setIsClearing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [result, setResult] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const clearLocalOrders = async () => {
+    if (!confirm("Czy na pewno wyczyścić wszystkie lokalne zamówienia? Ta operacja usunie wszystkie niesynchronizowane dane!")) {
+      return;
+    }
+    setIsClearing(true);
+    setResult(null);
+    try {
+      const count = await db.clearAllLocalOrders();
+      setResult({ type: "success", message: `Usunięto ${count} lokalnych zamówień. Odśwież stronę.` });
+    } catch (e) {
+      setResult({ type: "error", message: `Błąd: ${e instanceof Error ? e.message : "Nieznany błąd"}` });
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  const refreshAllData = async () => {
+    setIsRefreshing(true);
+    setResult(null);
+    try {
+      await db.forceRefresh();
+      setResult({ type: "success", message: "Dane odświeżone z serwera." });
+    } catch (e) {
+      setResult({ type: "error", message: `Błąd: ${e instanceof Error ? e.message : "Nieznany błąd"}` });
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  return (
+    <section className="rounded-lg border border-orange-200 bg-orange-50 p-4 dark:border-orange-800 dark:bg-orange-950">
+      <h2 className="mb-3 flex items-center gap-2 text-lg font-medium">
+        <RefreshCw className="h-5 w-5 text-orange-600" />
+        Dane offline (IndexedDB)
+      </h2>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Narzędzia do naprawy problemów z synchronizacją. Użyj jeśli stoliki lub zamówienia 
+        wyświetlają się nieprawidłowo (np. &quot;ghost orders&quot; - zamówienia które nie istnieją na serwerze).
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <Button 
+          variant="outline" 
+          onClick={refreshAllData} 
+          disabled={isRefreshing}
+          className="gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          {isRefreshing ? "Odświeżanie..." : "Odśwież produkty/stoliki"}
+        </Button>
+        <Button 
+          variant="destructive" 
+          onClick={clearLocalOrders} 
+          disabled={isClearing}
+          className="gap-2"
+        >
+          <Trash2 className="h-4 w-4" />
+          {isClearing ? "Czyszczenie..." : "Wyczyść lokalne zamówienia"}
+        </Button>
+      </div>
+      {result && (
+        <p className={`mt-3 text-sm ${result.type === "success" ? "text-green-600" : "text-red-600"}`}>
+          {result.message}
+        </p>
+      )}
+    </section>
+  );
+}
+
 type TabId = "general" | "rooms" | "printers" | "shifts";
 
 export default function SettingsPageClient() {
@@ -587,6 +660,9 @@ export default function SettingsPageClient() {
           {openShifts.length === 0 && <p className="mt-2 text-sm text-muted-foreground">Brak otwartych zmian.</p>}
         </section>
       )}
+
+      {/* Offline data reset section */}
+      <OfflineDataResetSection />
 
       {/* Quick links to other settings pages */}
       <section className="rounded-lg border p-4">

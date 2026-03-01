@@ -7,6 +7,7 @@ import { ServiceWorkerRegister } from "@/components/providers/ServiceWorkerRegis
 import { ConnectionMonitor } from "@/components/ConnectionMonitor";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { SessionValidator } from "@/components/providers/SessionValidator";
+import { CapacitorLifecycle } from "@/components/CapacitorLifecycle";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -67,6 +68,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ConnectionMonitor />
+        <CapacitorLifecycle />
         <QueryProvider>
           <SessionValidator />
           <DexieProvider>{children}</DexieProvider>

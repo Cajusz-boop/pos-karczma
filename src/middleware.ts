@@ -1,36 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifySession, COOKIE_NAME } from "@/lib/jwt";
-import { checkRateLimit, getConfigForRoute } from "@/lib/rate-limit";
 
-const PUBLIC_API_ROUTES = [
-  "/api/auth/login",
-  "/api/auth/token-login",
-  "/api/auth/users",
-  "/api/users",
-  "/api/health",
-  "/api/ping",
-];
-
-const PUBLIC_API_PREFIXES = [
-  "/api/e-receipt/",
-  "/api/tools/",
-];
-
-function isPublicApiRoute(pathname: string): boolean {
-  if (PUBLIC_API_ROUTES.includes(pathname)) return true;
-  return PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
-
-function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    request.headers.get("cf-connecting-ip") ??
-    "unknown"
-  );
-}
+// Capacitor static builds don't use middleware (API runs on remote server)
+const isCapacitorBuild = process.env.CAPACITOR_BUILD === "1";
 
 export async function middleware(request: NextRequest) {
+  // No-op for Capacitor builds
+  if (isCapacitorBuild) {
+    return NextResponse.next();
+  }
+
+  // Dynamic imports to avoid loading dependencies in static builds
+  const { verifySession, COOKIE_NAME } = await import("@/lib/jwt");
+  const { checkRateLimit, getConfigForRoute } = await import("@/lib/rate-limit");
+
+  const PUBLIC_API_ROUTES = [
+    "/api/auth/login",
+    "/api/auth/token-login",
+    "/api/auth/users",
+    "/api/users",
+    "/api/health",
+    "/api/ping",
+  ];
+
+  const PUBLIC_API_PREFIXES = [
+    "/api/e-receipt/",
+    "/api/tools/",
+  ];
+
+  function isPublicApiRoute(pathname: string): boolean {
+    if (PUBLIC_API_ROUTES.includes(pathname)) return true;
+    return PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  }
+
+  function getClientIp(req: NextRequest): string {
+    return (
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      req.headers.get("x-real-ip") ??
+      req.headers.get("cf-connecting-ip") ??
+      "unknown"
+    );
+  }
+
   const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith("/api/")) {

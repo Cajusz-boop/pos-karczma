@@ -1,5 +1,6 @@
 import { db } from "./offline-db";
 import { safeFetch } from "@/lib/utils/safe-fetch";
+import { getApiBaseUrl } from "@/lib/utils/get-api-base";
 
 const SYNC_TABLES = [
   "products",
@@ -21,7 +22,8 @@ interface SyncPullResponse<T> {
 
 async function fetchTable<T>(table: SyncTable, since?: string): Promise<SyncPullResponse<T>> {
   if (typeof window === "undefined") throw new Error("fetchTable is client-only");
-  const url = new URL(`/api/sync/pull`, window.location.origin);
+  const base = await getApiBaseUrl();
+  const url = new URL(`/api/sync/pull`, base);
   url.searchParams.set("table", table);
   if (since) url.searchParams.set("since", since);
 

@@ -436,6 +436,23 @@ export class PosOfflineDB extends Dexie {
     const { initialSync } = await import("./initial-sync");
     await initialSync();
   }
+
+  // P21-FIX: Clear all local orders and re-sync from server
+  async clearAllLocalOrders(): Promise<number> {
+    return await this.transaction("rw", 
+      [this.orders, this.orderItems, this.payments, this.syncQueue, this.paymentLocks],
+      async () => {
+        const count = await this.orders.count();
+        await this.orders.clear();
+        await this.orderItems.clear();
+        await this.payments.clear();
+        await this.paymentLocks.clear();
+        // Clear sync queue for orders/items/payments
+        await this.syncQueue.where("table").anyOf(["orders", "orderItems", "payments"]).delete();
+        return count;
+      }
+    );
+  }
 }
 
 // Lazy init — Dexie/IndexedDB only in browser; avoids "reading 'call'" during SSR

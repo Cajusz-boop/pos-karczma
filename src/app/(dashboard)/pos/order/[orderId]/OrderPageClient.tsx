@@ -156,6 +156,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const [messageToKitchenOpen, setMessageToKitchenOpen] = useState(false);
   const [messageToKitchenText, setMessageToKitchenText] = useState("");
   const [messageToKitchenSending, setMessageToKitchenSending] = useState(false);
+  const [closeZeroDialogOpen, setCloseZeroDialogOpen] = useState(false);
   const prevOrderStatusRef = useRef<string | null>(null);
   const currentUser = useAuthStore((s) => s.currentUser);
 
@@ -684,25 +685,38 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     const total = activeItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
     
     if (total === 0) {
-      // Zero balance - close immediately without payment dialog
-      setOpLoading(true);
-      try {
-        const res = await fetch(`/api/orders/${orderId}/close`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ receipt: false }),
-        });
-        if (!res.ok) throw new Error((await res.json()).error || "Błąd zamykania");
-        invalidateOrder();
-        router.push("/pos");
-      } catch (e) {
-        setOpError(e instanceof Error ? e.message : "Błąd zamykania");
-      } finally {
-        setOpLoading(false);
-      }
+      // Zero balance - show confirmation dialog
+      setOpError(null);
+      setCloseZeroDialogOpen(true);
     } else {
       // Has balance - show payment dialog
       setPaymentDialogOpen(true);
+    }
+  };
+
+  const handleCloseZeroOrder = async () => {
+    // Check if order is synced to server
+    if (!localOrder?._serverId) {
+      setOpError("Zamówienie nie zostało jeszcze zsynchronizowane z serwerem. Poczekaj na synchronizację.");
+      return;
+    }
+
+    setOpLoading(true);
+    setOpError(null);
+    try {
+      const res = await fetch(`/api/orders/${localOrder._serverId}/close`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ receipt: false }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "Błąd zamykania");
+      invalidateOrder();
+      setCloseZeroDialogOpen(false);
+      router.push("/pos");
+    } catch (e) {
+      setOpError(e instanceof Error ? e.message : "Błąd zamykania");
+    } finally {
+      setOpLoading(false);
     }
   };
 
@@ -1010,6 +1024,30 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelOrderConfirm(false)}>Nie</Button>
             <Button variant="destructive" onClick={handleCancelOrder} disabled={opLoading}>{opLoading ? "…" : "Anuluj zamówienie"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={closeZeroDialogOpen} onOpenChange={(open) => { setCloseZeroDialogOpen(open); if (!open) setOpError(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Zamknij pusty rachunek</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Zamówienie ma wartość 0 zł. Czy chcesz zamknąć rachunek bez paragonu?
+          </p>
+          {localOrder?._syncStatus === "pending" && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              ⚠️ Zamówienie czeka na synchronizację z serwerem...
+            </p>
+          )}
+          {opError && <p className="text-sm text-destructive">{opError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCloseZeroDialogOpen(false)}>Anuluj</Button>
+            <Button 
+              onClick={handleCloseZeroOrder} 
+              disabled={opLoading || localOrder?._syncStatus === "pending"}
+            >
+              {opLoading ? "Zamykanie…" : "Zamknij rachunek"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

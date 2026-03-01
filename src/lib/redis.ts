@@ -2,6 +2,7 @@ import Redis from "ioredis";
 
 const globalForRedis = globalThis as unknown as {
   redis: Redis | undefined;
+  keepAliveInterval: ReturnType<typeof setInterval> | undefined;
 };
 
 function createRedisClient(): Redis | null {
@@ -14,16 +15,26 @@ function createRedisClient(): Redis | null {
 
   try {
     const client = new Redis(redisUrl, {
-      maxRetriesPerRequest: 1,
+      maxRetriesPerRequest: 3,
       retryStrategy(times) {
-        if (times > 2) return null;
-        return Math.min(times * 200, 1000);
+        if (times > 10) {
+          console.warn("[Redis] Max retries reached, giving up");
+          return null;
+        }
+        const delay = Math.min(times * 500, 5000);
+        console.log(`[Redis] Reconnecting in ${delay}ms (attempt ${times})`);
+        return delay;
       },
       enableReadyCheck: true,
-      lazyConnect: true,
-      connectTimeout: 2000,
-      commandTimeout: 1000,
-      enableOfflineQueue: false,
+      lazyConnect: false,
+      connectTimeout: 5000,
+      commandTimeout: 3000,
+      enableOfflineQueue: true,
+      reconnectOnError(err) {
+        const targetErrors = ["READONLY", "ECONNRESET", "ETIMEDOUT", "Connection is closed"];
+        return targetErrors.some(e => err.message.includes(e));
+      },
+      keepAlive: 30000,
     });
 
     client.on("error", (err) => {
@@ -35,6 +46,26 @@ function createRedisClient(): Redis | null {
     client.on("connect", () => {
       console.log("[Redis] Connected");
     });
+
+    client.on("reconnecting", () => {
+      console.log("[Redis] Reconnecting...");
+    });
+
+    client.on("close", () => {
+      console.log("[Redis] Connection closed");
+    });
+
+    if (!globalForRedis.keepAliveInterval) {
+      globalForRedis.keepAliveInterval = setInterval(async () => {
+        if (client.status === "ready") {
+          try {
+            await client.ping();
+          } catch {
+            // ping failed, ioredis will handle reconnection
+          }
+        }
+      }, 60000);
+    }
 
     return client;
   } catch (error) {

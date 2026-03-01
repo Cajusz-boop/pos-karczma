@@ -8,7 +8,7 @@
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
     "build": "next build",
-    "build:cap": "set CAPACITOR_BUILD=1&& next build",
+    "build:cap": "npx tsx scripts/build-capacitor.ts",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",

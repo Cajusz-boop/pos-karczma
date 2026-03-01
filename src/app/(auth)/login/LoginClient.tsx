@@ -21,6 +21,7 @@ import {
   verifyCachedPin,
 } from "@/lib/auth/cached-auth";
 import { safeFetch } from "@/lib/utils/safe-fetch";
+import { getApiBaseUrl } from "@/lib/utils/get-api-base";
 
 type UserItem = {
   id: string;
@@ -83,7 +84,8 @@ export function LoginClient() {
     }
 
     try {
-      const url = typeof window !== "undefined" ? `${window.location.origin}/api/auth/users` : "/api/auth/users";
+      const base = await getApiBaseUrl();
+      const url = `${base}/api/auth/users`;
       const { data, error, offline } = await safeFetch<UserItem[]>(url, { cache: "no-store" });
       if (offline) {
         setUsers([]);
@@ -121,7 +123,7 @@ export function LoginClient() {
         return;
       }
       try {
-        const base = typeof window !== "undefined" ? window.location.origin : "";
+        const base = await getApiBaseUrl();
         const { data, offline } = await safeFetch<unknown[]>(`${base}/api/shifts?userId=${user.id}&status=OPEN`);
         if (offline || !data) {
           router.replace("/pos");
@@ -147,7 +149,7 @@ export function LoginClient() {
     setShiftLoading(true);
     setShiftError("");
     try {
-      const base = typeof window !== "undefined" ? window.location.origin : "";
+      const base = await getApiBaseUrl();
       const { data, error, offline } = await safeFetch<{ error?: string }>(`${base}/api/shifts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -183,7 +185,7 @@ export function LoginClient() {
       setTokenLoading(true);
       setTokenSuccess(false);
       try {
-        const base = typeof window !== "undefined" ? window.location.origin : "";
+        const base = await getApiBaseUrl();
         const { data, error, offline } = await safeFetch<{ error?: string; user?: AuthUser }>(
           `${base}/api/auth/token-login`,
           {
@@ -300,7 +302,7 @@ export function LoginClient() {
         return;
       }
 
-      const base = typeof window !== "undefined" ? window.location.origin : "";
+      const base = await getApiBaseUrl();
       const { data, error, offline } = await safeFetch<{ error?: string; user?: AuthUser }>(
         `${base}/api/auth/login`,
         {

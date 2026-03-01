@@ -29,11 +29,14 @@ const nextConfig = {
   trailingSlash: isCapacitorBuild,
   images: isCapacitorBuild ? { unoptimized: true } : undefined,
   experimental: {
-    staticPageGenerationTimeout: 300, // 5 min - serwer produkcyjny ma wiele dynamicznych API
+    staticPageGenerationTimeout: 300,
     serverComponentsExternalPackages: ["@prisma/client"],
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: isCapacitorBuild,
   },
   env: {
     AUTH_DISABLED: process.env.AUTH_DISABLED || authDisabledFromSnapshot,
