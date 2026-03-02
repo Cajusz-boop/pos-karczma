@@ -651,7 +651,7 @@ async function main() {
   const hotelConfig = {
     enabled: true,
     baseUrl: "http://127.0.0.1:3000",
-    apiKey: "karczma-pos-2026-hXk9mP4wQz",
+    apiKey: "a89f3281-8ae4-4c06-a351-987b35caa4f",
   };
   await prisma.systemConfig.upsert({
     where: { key: "hotel_integration" },
