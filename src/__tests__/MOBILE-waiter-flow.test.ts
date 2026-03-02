@@ -86,6 +86,7 @@ describe("MOBILE WAITER FLOW - Pełny przepływ kelnerski", () => {
   // ═══════════════════════════════════════════════════════════════════
   describe("MW-01: Podstawowy flow - stolik → zamówienie → kuchnia → płatność → paragon", () => {
     let orderId: string;
+    let orderNumber: number;
 
     it("MW-01-01: Kelner loguje się PIN-em", async () => {
       const auth = await loginAs("Kelner 1", "1111");

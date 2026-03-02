@@ -31,6 +31,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { usePolcardGo } from "@/lib/hooks/usePolcardGo";
+import { db } from "@/lib/db/offline-db";
 
 type OrderItemBill = {
   id: string;
@@ -373,6 +374,7 @@ export function PaymentDialog({
             orderId: order.id,
             guestName: selectedRoom.guestName,
             guestId: selectedRoom.guestId,
+            reservationId: selectedRoom.reservationId,
           }),
         });
         const hotelData = await resHotel.json();
@@ -431,6 +433,25 @@ export function PaymentDialog({
         const appUrl = typeof window !== "undefined" ? window.location.origin : "";
         setEReceiptQrUrl(`${appUrl}/e-receipt/${closeData.receiptToken}`);
       }
+      
+      // Update Dexie to mark order as CLOSED and free the table
+      try {
+        await db.transaction("rw", [db.orders, db.posTables], async () => {
+          const localOrder = await db.orders.where("_serverId").equals(order.id).first();
+          if (localOrder) {
+            await db.orders.update(localOrder._localId, {
+              status: "CLOSED",
+              closedAt: new Date().toISOString(),
+            });
+            if (localOrder.tableId) {
+              await db.posTables.update(localOrder.tableId, { status: "FREE" });
+            }
+          }
+        });
+      } catch (dexieErr) {
+        console.warn("[PaymentDialog] Failed to update Dexie after close:", dexieErr);
+      }
+      
       // Go back to map immediately (e-receipt is optional)
       resetState();
       onOpenChange(false);
@@ -502,6 +523,25 @@ export function PaymentDialog({
         body: JSON.stringify({ receipt: false }),
       });
       if (!resClose.ok) throw new Error((await resClose.json()).error || "Błąd zamykania");
+      
+      // Update Dexie to mark order as CLOSED and free the table
+      try {
+        await db.transaction("rw", [db.orders, db.posTables], async () => {
+          const localOrder = await db.orders.where("_serverId").equals(order.id).first();
+          if (localOrder) {
+            await db.orders.update(localOrder._localId, {
+              status: "CLOSED",
+              closedAt: new Date().toISOString(),
+            });
+            if (localOrder.tableId) {
+              await db.posTables.update(localOrder.tableId, { status: "FREE" });
+            }
+          }
+        });
+      } catch (dexieErr) {
+        console.warn("[PaymentDialog] Failed to update Dexie after invoice close:", dexieErr);
+      }
+      
       setInvoiceOpen(false);
       resetState();
       onOpenChange(false);

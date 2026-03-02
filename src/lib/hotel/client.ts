@@ -66,6 +66,27 @@ const DEFAULT_CONFIG: HotelConfig = {
   apiKey: "",
 };
 
+const HOTEL_TIMEOUT_MS = 10000;
+
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs = HOTEL_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    return response;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function getConfig(): Promise<HotelConfig> {
   try {
     const config = await prisma.systemConfig.findUnique({
@@ -93,14 +114,17 @@ export async function getOccupiedRooms(): Promise<{
   }
 
   try {
-    const response = await fetch(`${config.baseUrl}/api/v1/external/occupied-rooms`, {
-      headers: {
-        "X-API-Key": config.apiKey,
-        Authorization: `Bearer ${config.apiKey}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
+    const response = await fetchWithTimeout(
+      `${config.baseUrl}/api/v1/external/occupied-rooms`,
+      {
+        headers: {
+          "X-API-Key": config.apiKey,
+          Authorization: `Bearer ${config.apiKey}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
+    );
 
     if (!response.ok) {
       return { rooms: [], error: `Błąd API hotelu: ${response.status}` };
@@ -124,6 +148,9 @@ export async function getOccupiedRooms(): Promise<{
       }),
     };
   } catch (e) {
+    if (e instanceof Error && e.name === "AbortError") {
+      return { rooms: [], error: "Przekroczono czas oczekiwania na hotel" };
+    }
     return {
       rooms: [],
       error: e instanceof Error ? e.message : "Błąd połączenia z hotelem",
@@ -142,6 +169,7 @@ export async function postRoomCharge(params: {
   orderNumber: number;
   items?: RoomChargeItem[];
   cashierName?: string;
+  reservationId?: string;
 }): Promise<RoomCharge> {
   const config = await getConfig();
   if (!config.enabled) {
@@ -156,24 +184,28 @@ export async function postRoomCharge(params: {
   }
 
   try {
-    const response = await fetch(`${config.baseUrl}/api/v1/external/posting`, {
-      method: "POST",
-      headers: {
-        "X-API-Key": config.apiKey,
-        Authorization: `Bearer ${config.apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        roomNumber: params.roomNumber,
-        amount: params.amount,
-        type: "RESTAURANT",
-        description: params.description,
-        posSystem: "POS-Karczma",
-        receiptNumber: `ZAM/${params.orderNumber}`,
-        items: params.items,
-        cashierName: params.cashierName,
-      }),
-    });
+    const response = await fetchWithTimeout(
+      `${config.baseUrl}/api/v1/external/posting`,
+      {
+        method: "POST",
+        headers: {
+          "X-API-Key": config.apiKey,
+          Authorization: `Bearer ${config.apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          roomNumber: params.roomNumber,
+          amount: params.amount,
+          type: "RESTAURANT",
+          description: params.description,
+          posSystem: "POS-Karczma",
+          receiptNumber: `ZAM/${params.orderNumber}`,
+          items: params.items,
+          cashierName: params.cashierName,
+          reservationId: params.reservationId,
+        }),
+      }
+    );
 
     if (!response.ok) {
       return {
@@ -238,14 +270,17 @@ export async function getBreakfastGuests(): Promise<{
 
   try {
     // Try dedicated breakfast endpoint first
-    const response = await fetch(`${config.baseUrl}/api/breakfast/guests`, {
-      headers: {
-        "X-API-Key": config.apiKey,
-        Authorization: `Bearer ${config.apiKey}`,
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
+    const response = await fetchWithTimeout(
+      `${config.baseUrl}/api/breakfast/guests`,
+      {
+        headers: {
+          "X-API-Key": config.apiKey,
+          Authorization: `Bearer ${config.apiKey}`,
+          Accept: "application/json",
+        },
+        cache: "no-store",
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
@@ -285,6 +320,9 @@ export async function getBreakfastGuests(): Promise<{
       })),
     };
   } catch (e) {
+    if (e instanceof Error && e.name === "AbortError") {
+      return { guests: [], error: "Przekroczono czas oczekiwania na hotel" };
+    }
     return {
       guests: [],
       error: e instanceof Error ? e.message : "Błąd połączenia z hotelem",

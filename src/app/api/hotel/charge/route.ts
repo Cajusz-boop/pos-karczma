@@ -14,6 +14,7 @@ const chargeSchema = z.object({
   guestId: z.string().optional(),
   guestPhone: z.string().optional(),
   guestEmail: z.string().optional(),
+  reservationId: z.string().optional(),
 });
 
 /**
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const { roomNumber, orderId, guestName, guestId, guestPhone, guestEmail } = parsed.data;
+    const { roomNumber, orderId, guestName, guestId, guestPhone, guestEmail, reservationId } = parsed.data;
 
     const order = await prisma.order.findUnique({
       where: { id: orderId },
@@ -95,6 +96,7 @@ export async function POST(request: NextRequest) {
       orderNumber: order.orderNumber,
       items: hotelItems,
       cashierName: order.user?.name,
+      reservationId,
     });
 
     const userId = request.headers.get("x-user-id");
