@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useFloorFromDexie, type TableView } from "@/hooks/useFloorFromDexie";
 import { hydrateOrderFromApiCreate } from "@/lib/orders/order-actions";
-import { backgroundRefresh } from "@/lib/db/initial-sync";
+import { backgroundRefresh, syncOpenOrders } from "@/lib/db/initial-sync";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -355,6 +355,11 @@ export function PosPageClient() {
     return () => clearInterval(id);
   }, []);
 
+  // P24-FIX: Sync open orders from server on mount to prevent "table occupied" errors
+  useEffect(() => {
+    syncOpenOrders().catch((e) => console.warn("[POS] Failed to sync open orders:", e));
+  }, []);
+
   // Dexie — floor (rooms + tables + orders) — offline-first
   const { rooms: dexieRooms, isLoading } = useFloorFromDexie();
 
@@ -448,9 +453,9 @@ export function PosPageClient() {
       if (!res.ok) {
         setCreateError(data.error ?? "Błąd tworzenia zamówienia");
         setCreating(false);
-        // P23-FIX: Refresh Dexie when server says table is occupied (stale local data)
+        // P24-FIX: Sync open orders when server says table is occupied (stale local data)
         if (data.error?.includes("zajęty") || data.error?.includes("occupied")) {
-          backgroundRefresh().catch(() => {});
+          syncOpenOrders().catch(() => {});
         }
         return;
       }

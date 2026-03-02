@@ -1,4 +1,4 @@
-import { db } from "./offline-db";
+import { db, type LocalOrder, type LocalOrderItem } from "./offline-db";
 import { safeFetch } from "@/lib/utils/safe-fetch";
 import { getApiBaseUrl } from "@/lib/utils/get-api-base";
 
@@ -113,5 +113,85 @@ export async function backgroundRefresh(): Promise<void> {
     await initialSync();
   } catch (e) {
     console.warn("[BackgroundRefresh] Failed:", e);
+  }
+}
+
+interface OpenOrdersSyncResponse {
+  orders: LocalOrder[];
+  items: LocalOrderItem[];
+  serverTimestamp: string;
+}
+
+/**
+ * Sync open orders from server to Dexie.
+ * Call on POS page load to ensure local DB has all active orders.
+ * This prevents "table occupied" errors when orders exist on server but not locally.
+ */
+export async function syncOpenOrders(): Promise<{ orders: number; items: number }> {
+  if (typeof window === "undefined") {
+    return { orders: 0, items: 0 };
+  }
+
+  try {
+    const base = await getApiBaseUrl();
+    const url = `${base}/api/sync/open-orders`;
+
+    const { data, error, offline } = await safeFetch<OpenOrdersSyncResponse>(url);
+    
+    if (offline) {
+      console.warn("[SyncOpenOrders] Offline, skipping sync");
+      return { orders: 0, items: 0 };
+    }
+    
+    if (error || !data) {
+      console.error("[SyncOpenOrders] Failed:", error);
+      return { orders: 0, items: 0 };
+    }
+
+    const { orders, items } = data;
+
+    await db.transaction("rw", [db.orders, db.orderItems, db.posTables], async () => {
+      // Upsert orders - check by _serverId to avoid duplicates
+      for (const order of orders) {
+        const existing = await db.orders.where("_serverId").equals(order._serverId!).first();
+        if (existing) {
+          // Update existing order (server is source of truth for synced orders)
+          await db.orders.update(existing._localId, {
+            ...order,
+            _localId: existing._localId, // Keep original localId
+            _syncStatus: "synced",
+          });
+        } else {
+          // Add new order from server
+          await db.orders.add(order);
+        }
+
+        // Update table status if order has a table
+        if (order.tableId && order.status !== "CLOSED" && order.status !== "CANCELLED") {
+          const tableStatus = order.status === "BILL_REQUESTED" ? "BILL_REQUESTED" : "OCCUPIED";
+          await db.posTables.update(order.tableId, { status: tableStatus }).catch(() => {});
+        }
+      }
+
+      // Upsert items
+      for (const item of items) {
+        const existing = await db.orderItems.where("_serverId").equals(item._serverId!).first();
+        if (existing) {
+          await db.orderItems.update(existing._localId, {
+            ...item,
+            _localId: existing._localId,
+            _syncStatus: "synced",
+          });
+        } else {
+          await db.orderItems.add(item);
+        }
+      }
+    });
+
+    console.log(`[SyncOpenOrders] Synced ${orders.length} orders, ${items.length} items`);
+    return { orders: orders.length, items: items.length };
+  } catch (e) {
+    console.error("[SyncOpenOrders] Error:", e);
+    return { orders: 0, items: 0 };
   }
 }

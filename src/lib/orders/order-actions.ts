@@ -667,6 +667,29 @@ export async function transferTableOffline(
 }
 
 /**
+ * Cancel order offline — updates Dexie order status to CANCELLED and frees table.
+ */
+export async function cancelOrderOffline(orderLocalId: string): Promise<void> {
+  const now = new Date().toISOString();
+
+  await db.transaction("rw", [db.orders, db.posTables], async () => {
+    const order = await db.orders.get(orderLocalId);
+    if (!order) return;
+
+    if (order.tableId) {
+      await db.posTables.update(order.tableId, { status: "FREE" });
+    }
+
+    await db.orders.update(orderLocalId, {
+      status: "CANCELLED",
+      closedAt: now,
+      _updatedAt: now,
+      _localVersion: order._localVersion + 1,
+    });
+  });
+}
+
+/**
  * Get order total with calculations.
  */
 export async function getOrderTotal(orderLocalId: string): Promise<{

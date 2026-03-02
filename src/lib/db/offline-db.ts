@@ -360,23 +360,60 @@ export class PosOfflineDB extends Dexie {
 
   // Czyszczenie starych zamówień — wywoływać co 24h
   // P20-FIX: timestamp purge zapisany w syncCheckpoints (Dexie), nie localStorage
+  // P21-FIX: Usuwa też stare OTWARTE zamówienia (sieroty) starsze niż 3 dni
   async purgeOldOrders(olderThanDays = 7): Promise<number> {
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - olderThanDays);
     const cutoffStr = cutoff.toISOString();
 
-    return await this.transaction("rw", [this.orders, this.orderItems, this.payments, this.syncQueue, this.syncCheckpoints], async () => {
-      const oldOrders = await this.orders
+    // Orphan cutoff: 3 days for open orders
+    const orphanCutoff = new Date();
+    orphanCutoff.setDate(orphanCutoff.getDate() - 3);
+    const orphanCutoffStr = orphanCutoff.toISOString();
+
+    return await this.transaction("rw", [this.orders, this.orderItems, this.payments, this.syncQueue, this.syncCheckpoints, this.posTables], async () => {
+      // 1. Delete old CLOSED orders (original logic)
+      const oldClosedOrders = await this.orders
         .where("status").equals("CLOSED")
         .filter(o => o._syncStatus === "synced" && !!o.closedAt && o.closedAt < cutoffStr)
         .toArray();
 
       let deleted = 0;
-      for (const order of oldOrders) {
+      for (const order of oldClosedOrders) {
         await this.orderItems.where("orderId").equals(order._localId).delete();
         await this.payments.where("orderId").equals(order._localId).delete();
         await this.orders.delete(order._localId);
         deleted++;
+      }
+
+      // 2. Delete orphan OPEN orders older than 3 days where table doesn't exist or is FREE
+      const openStatuses = ["OPEN", "SENT_TO_KITCHEN", "IN_PROGRESS", "READY", "SERVED", "BILL_REQUESTED"];
+      const oldOpenOrders = await this.orders
+        .filter(o => openStatuses.includes(o.status) && o.createdAt < orphanCutoffStr)
+        .toArray();
+
+      for (const order of oldOpenOrders) {
+        let shouldDelete = false;
+
+        if (!order.tableId) {
+          // Takeaway/delivery order older than 3 days - likely orphan
+          shouldDelete = true;
+        } else {
+          // Check if table exists and its status
+          const table = await this.posTables.get(order.tableId);
+          if (!table || table.status === "FREE") {
+            // Table doesn't exist or is free - order is orphan
+            shouldDelete = true;
+          }
+        }
+
+        if (shouldDelete) {
+          await this.orderItems.where("orderId").equals(order._localId).delete();
+          await this.payments.where("orderId").equals(order._localId).delete();
+          await this.syncQueue.where("localId").equals(order._localId).delete();
+          await this.orders.delete(order._localId);
+          deleted++;
+        }
       }
 
       // P20-FIX: Zapisz timestamp purge w Dexie, nie localStorage

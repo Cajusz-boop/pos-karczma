@@ -74,6 +74,8 @@ export interface OrderPageViewProps {
   onProductClick: (p: ProductRow) => void;
   onProductLongPress?: (p: ProductRow, quantity: number) => void;
   onSend: () => void;
+  sendPending?: boolean;
+  sendSuccess?: boolean;
   sendError: string | null;
   onModifierSelectChange: (groupId: string, selected: string[]) => void;
   onModifierConfirm: () => void;
@@ -147,6 +149,8 @@ export function OrderPageView(props: OrderPageViewProps) {
     onProductClick,
     onProductLongPress,
     onSend,
+    sendPending = false,
+    sendSuccess = false,
     sendError,
     onModifierSelectChange,
     onModifierConfirm,
@@ -461,17 +465,34 @@ export function OrderPageView(props: OrderPageViewProps) {
 
           <div className="flex flex-col gap-1.5">
             <Button
-              className="w-full gap-2"
+              className={cn(
+                "w-full gap-2",
+                sendSuccess && "bg-emerald-600 hover:bg-emerald-700"
+              )}
               size="lg"
-              disabled={newItemsCount === 0}
+              disabled={newItemsCount === 0 || sendPending}
               onClick={onSend}
             >
-              <Send className="h-4 w-4" />
-              Wyślij do kuchni
-              {newItemsCount > 0 && (
-                <span className="ml-1 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs">
-                  {newItemsCount}
-                </span>
+              {sendPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Wysyłanie…
+                </>
+              ) : sendSuccess ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4" />
+                  Wysłano do kuchni
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  Wyślij do kuchni
+                  {newItemsCount > 0 && (
+                    <span className="ml-1 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-xs">
+                      {newItemsCount}
+                    </span>
+                  )}
+                </>
               )}
             </Button>
 

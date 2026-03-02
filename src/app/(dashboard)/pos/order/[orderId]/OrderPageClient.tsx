@@ -157,6 +157,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const [messageToKitchenText, setMessageToKitchenText] = useState("");
   const [messageToKitchenSending, setMessageToKitchenSending] = useState(false);
   const [closeZeroDialogOpen, setCloseZeroDialogOpen] = useState(false);
+  const [sendSuccessShown, setSendSuccessShown] = useState(false);
   const prevOrderStatusRef = useRef<string | null>(null);
   const currentUser = useAuthStore((s) => s.currentUser);
 
@@ -441,6 +442,8 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ orderId }),
       }).catch(() => {});
+      setSendSuccessShown(true);
+      setTimeout(() => setSendSuccessShown(false), 2500);
     },
   });
 
@@ -710,6 +713,21 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         body: JSON.stringify({ receipt: false }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Błąd zamykania");
+      
+      // Update Dexie to mark order as CLOSED and free the table
+      if (localOrder._localId) {
+        const { db } = await import("@/lib/db/offline-db");
+        await db.transaction("rw", [db.orders, db.posTables], async () => {
+          await db.orders.update(localOrder._localId, {
+            status: "CLOSED",
+            closedAt: new Date().toISOString(),
+          });
+          if (localOrder.tableId) {
+            await db.posTables.update(localOrder.tableId, { status: "FREE" });
+          }
+        });
+      }
+      
       invalidateOrder();
       setCloseZeroDialogOpen(false);
       router.push("/pos");
@@ -726,6 +744,13 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     try {
       const res = await fetch(`/api/orders/${orderId}/cancel`, { method: "POST" });
       if (!res.ok) throw new Error((await res.json()).error || "Błąd");
+      
+      // Update Dexie to mark order as cancelled and free the table
+      if (localOrder?._localId) {
+        const { cancelOrderOffline } = await import("@/lib/orders/order-actions");
+        await cancelOrderOffline(localOrder._localId);
+      }
+      
       setCancelOrderConfirm(false);
       invalidateOrder();
       router.push("/pos");
@@ -918,6 +943,8 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         allProducts={products}
         onProductClick={tryAddProduct}
         onSend={() => sendMutation.mutate()}
+        sendPending={sendMutation.isPending}
+        sendSuccess={sendSuccessShown}
         sendError={sendMutation.isError ? String(sendMutation.error?.message) : null}
         onModifierSelectChange={(groupId, selected) =>
           setModifierProduct((prev) =>
