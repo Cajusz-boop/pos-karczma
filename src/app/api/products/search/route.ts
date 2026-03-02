@@ -1,18 +1,18 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 
 const T9_MAP: Record<string, string[]> = {
-  "2": ["a", "Ä…", "b", "c", "Ä‡"],
-  "3": ["d", "e", "Ä™", "f"],
+  "2": ["a", "ą", "b", "c", "ć"],
+  "3": ["d", "e", "ę", "f"],
   "4": ["g", "h", "i"],
-  "5": ["j", "k", "l", "Ĺ‚"],
-  "6": ["m", "n", "Ĺ„", "o", "Ăł"],
-  "7": ["p", "q", "r", "s", "Ĺ›"],
+  "5": ["j", "k", "l", "ł"],
+  "6": ["m", "n", "ń", "o", "ó"],
+  "7": ["p", "q", "r", "s", "ś"],
   "8": ["t", "u", "v"],
-  "9": ["w", "x", "y", "z", "Ĺş", "ĹĽ"],
+  "9": ["w", "x", "y", "z", "ź", "ż"],
 };
 
 function t9ToRegex(t9Code: string): RegExp {
@@ -31,15 +31,15 @@ function t9ToRegex(t9Code: string): RegExp {
 function normalizePolish(text: string): string {
   return text
     .toLowerCase()
-    .replace(/Ä…/g, "a")
-    .replace(/Ä‡/g, "c")
-    .replace(/Ä™/g, "e")
-    .replace(/Ĺ‚/g, "l")
-    .replace(/Ĺ„/g, "n")
-    .replace(/Ăł/g, "o")
-    .replace(/Ĺ›/g, "s")
-    .replace(/Ĺş/g, "z")
-    .replace(/ĹĽ/g, "z");
+    .replace(/ą/g, "a")
+    .replace(/ć/g, "c")
+    .replace(/ę/g, "e")
+    .replace(/ł/g, "l")
+    .replace(/ń/g, "n")
+    .replace(/ó/g, "o")
+    .replace(/ś/g, "s")
+    .replace(/ź/g, "z")
+    .replace(/ż/g, "z");
 }
 
 /**
@@ -161,6 +161,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[ProductSearch GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d wyszukiwania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd wyszukiwania" }, { status: 500 });
   }
 }

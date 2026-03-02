@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
   startOfWeek,
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "BĹ‚Ä…d pobierania rejestru czasu" },
+      { error: "Błąd pobierania rejestru czasu" },
       { status: 500 }
     );
   }
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     });
     if (!user || !user.isActive) {
       return NextResponse.json(
-        { error: "UĹĽytkownik nie istnieje lub jest nieaktywny" },
+        { error: "Użytkownik nie istnieje lub jest nieaktywny" },
         { status: 404 }
       );
     }
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
       });
       if (openEntry) {
         return NextResponse.json(
-          { error: "Masz juĹĽ otwarty wpis. Najpierw wyjdĹş z pracy." },
+          { error: "Masz już otwarty wpis. Najpierw wyjdź z pracy." },
           { status: 400 }
         );
       }
@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
       });
       if (!openEntry) {
         return NextResponse.json(
-          { error: "Brak otwartego wpisu. Najpierw rozpocznij pracÄ™." },
+          { error: "Brak otwartego wpisu. Najpierw rozpocznij pracę." },
           { status: 400 }
         );
       }
@@ -171,13 +171,13 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Nieznana akcja. UĹĽyj clock-in lub clock-out." },
+      { error: "Nieznana akcja. Użyj clock-in lub clock-out." },
       { status: 400 }
     );
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "BĹ‚Ä…d rejestracji czasu" },
+      { error: "Błąd rejestracji czasu" },
       { status: 500 }
     );
   }

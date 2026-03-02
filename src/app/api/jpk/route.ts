@@ -1,13 +1,13 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateJpkV7M } from "@/lib/jpk/jpk-v7m";
 import { auditLog } from "@/lib/audit";
 
 
 /**
- * GET /api/jpk?year=2026&month=2 â€” generate JPK_V7M XML
+ * GET /api/jpk?year=2026&month=2 "” generate JPK_V7M XML
  * Returns XML file as download.
  */
 export async function GET(request: NextRequest) {
@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
       return NextResponse.json(
-        { error: "NieprawidĹ‚owy rok lub miesiÄ…c" },
+        { error: "Nieprawidłowy rok lub miesiąc" },
         { status: 400 }
       );
     }
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     const jpkConfig = {
       nip: configMap.companyNip || "0000000000",
-      companyName: configMap.companyName || "Karczma ĹabÄ™dĹş",
+      companyName: configMap.companyName || "Karczma Łabędź",
       companyAddress: configMap.companyAddress || "",
       email: configMap.companyEmail || undefined,
       phone: configMap.companyPhone || undefined,
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
   } catch (e) {
     console.error(e);
     return NextResponse.json(
-      { error: "BĹ‚Ä…d generowania JPK_V7M" },
+      { error: "Błąd generowania JPK_V7M" },
       { status: 500 }
     );
   }

@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
 
 
-/** GET /api/reports/daily?date=YYYY-MM-DD â€” raport dobowy (obrĂłt, pĹ‚atnoĹ›ci, VAT, paragony, faktury, goĹ›cie, Ĺ›redni rachunek, storna) */
+/** GET /api/reports/daily?date=YYYY-MM-DD "” raport dobowy (obrót, płatności, VAT, paragony, faktury, goście, średni rachunek, storna) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     }
     const date = new Date(dateStr);
     if (Number.isNaN(date.getTime())) {
-      return NextResponse.json({ error: "NieprawidĹ‚owa data" }, { status: 400 });
+      return NextResponse.json({ error: "Nieprawidłowa data" }, { status: 400 });
     }
     const dayStart = startOfDay(date);
     const dayEnd = endOfDay(date);
@@ -107,6 +107,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(report);
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d generowania raportu dobowego" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd generowania raportu dobowego" }, { status: 500 });
   }
 }

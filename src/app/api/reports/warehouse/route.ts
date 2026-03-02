@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { endOfDay } from "date-fns";
 
 
-/** GET /api/reports/warehouse?date= â€” raport magazynowy (stany per magazyn, wartoĹ›Ä‡, straty RW) */
+/** GET /api/reports/warehouse?date= "” raport magazynowy (stany per magazyn, wartość, straty RW) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -65,6 +65,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d raportu magazynowego" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd raportu magazynowego" }, { status: 500 });
   }
 }

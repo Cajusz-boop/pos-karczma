@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[ConfigBackup GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania" }, { status: 500 });
   }
 }
 
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (e) {
     console.error("[ConfigBackup POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia kopii" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia kopii" }, { status: 500 });
   }
 }
 
@@ -138,9 +138,9 @@ export async function DELETE(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "CONFIG_BACKUP_DELETED", "SystemConfig", backupId);
 
-    return NextResponse.json({ message: "Kopia usuniÄ™ta" });
+    return NextResponse.json({ message: "Kopia usunięta" });
   } catch (e) {
     console.error("[ConfigBackup DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania" }, { status: 500 });
   }
 }

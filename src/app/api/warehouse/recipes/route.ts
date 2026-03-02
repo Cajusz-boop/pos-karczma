@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     );
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania receptur" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania receptur" }, { status: 500 });
   }
 }
 
@@ -104,6 +104,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d zapisu receptury" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd zapisu receptury" }, { status: 500 });
   }
 }

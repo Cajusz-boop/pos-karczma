@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 
@@ -21,7 +21,7 @@ interface FoodCostItem {
 }
 
 /**
- * GET /api/reports/food-cost â€” food cost report
+ * GET /api/reports/food-cost "” food cost report
  * Query: ?from=YYYY-MM-DD&to=YYYY-MM-DD&threshold=35
  */
 export async function GET(request: NextRequest) {
@@ -144,6 +144,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Food Cost Report]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d raportu food cost" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd raportu food cost" }, { status: 500 });
   }
 }

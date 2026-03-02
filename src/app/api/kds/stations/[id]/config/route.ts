@@ -23,11 +23,6 @@ const configSchema = z.object({
 /**
  * GET /api/kds/stations/[id]/config - get station config
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function GET(
   request: NextRequest,

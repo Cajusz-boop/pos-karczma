@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
 
 
-/** GET /api/reports/audit?dateFrom=&dateTo=&userId=&action=&entityType= â€” log audytowy */
+/** GET /api/reports/audit?dateFrom=&dateTo=&userId=&action=&entityType= "” log audytowy */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -48,6 +48,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ logs: list });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d logu audytowego" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd logu audytowego" }, { status: 500 });
   }
 }

@@ -7,11 +7,6 @@ import { auditLog } from "@/lib/audit";
 /**
  * POST /api/products/[id]/copy - copy product with all flags and set components
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

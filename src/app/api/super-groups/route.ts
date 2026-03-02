@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[SuperGroups GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania nadgrup" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania nadgrup" }, { status: 500 });
   }
 }
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     if (existing) {
       return NextResponse.json(
-        { error: `Nadgrupa o numerze ${number} juĹĽ istnieje` },
+        { error: `Nadgrupa o numerze ${number} już istnieje` },
         { status: 400 }
       );
     }
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ superGroup }, { status: 201 });
   } catch (e) {
     console.error("[SuperGroups POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia nadgrupy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia nadgrupy" }, { status: 500 });
   }
 }
 
@@ -122,7 +122,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -135,7 +135,7 @@ export async function PATCH(request: NextRequest) {
       });
       if (existing) {
         return NextResponse.json(
-          { error: `Nadgrupa o numerze ${updateData.number} juĹĽ istnieje` },
+          { error: `Nadgrupa o numerze ${updateData.number} już istnieje` },
           { status: 400 }
         );
       }
@@ -152,7 +152,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ superGroup });
   } catch (e) {
     console.error("[SuperGroups PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji nadgrupy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji nadgrupy" }, { status: 500 });
   }
 }
 
@@ -180,9 +180,9 @@ export async function DELETE(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "SUPER_GROUP_DELETED", "SuperGroup", id);
 
-    return NextResponse.json({ message: "Nadgrupa usuniÄ™ta" });
+    return NextResponse.json({ message: "Nadgrupa usunięta" });
   } catch (e) {
     console.error("[SuperGroups DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania nadgrupy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania nadgrupy" }, { status: 500 });
   }
 }

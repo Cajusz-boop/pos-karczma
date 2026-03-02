@@ -42,11 +42,6 @@ const updateMacroSchema = createMacroSchema.partial().extend({
 /**
  * GET /api/users/[id]/macros - get user macros
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function GET(
   request: NextRequest,

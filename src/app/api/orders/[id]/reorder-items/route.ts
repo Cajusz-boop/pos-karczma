@@ -17,11 +17,6 @@ const moveItemSchema = z.object({
 /**
  * PUT /api/orders/[id]/reorder-items - reorder all items by provided order
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function PUT(
   request: NextRequest,

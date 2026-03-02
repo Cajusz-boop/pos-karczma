@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { startOfDay, endOfDay } from "date-fns";
 
 
-/** GET /api/reports/banquets?dateFrom=&dateTo= â€” raport bankietowy (lista imprez, typ, obrĂłt, zaliczki, rentownoĹ›Ä‡) */
+/** GET /api/reports/banquets?dateFrom=&dateTo= "” raport bankietowy (lista imprez, typ, obrót, zaliczki, rentowność) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -64,6 +64,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d raportu bankietowego" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd raportu bankietowego" }, { status: 500 });
   }
 }

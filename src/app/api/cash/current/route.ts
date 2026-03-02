@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 
@@ -124,6 +124,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[CashCurrent GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania stanu kasy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania stanu kasy" }, { status: 500 });
   }
 }

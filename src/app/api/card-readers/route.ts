@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[CardReaders GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania" }, { status: 500 });
   }
 }
 
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ reader }, { status: 201 });
   } catch (e) {
     console.error("[CardReaders POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia" }, { status: 500 });
   }
 }
 
@@ -117,7 +117,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -135,7 +135,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ reader });
   } catch (e) {
     console.error("[CardReaders PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji" }, { status: 500 });
   }
 }
 
@@ -158,9 +158,9 @@ export async function DELETE(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "CARD_READER_DELETED", "CardReaderConfig", id);
 
-    return NextResponse.json({ message: "Czytnik usuniÄ™ty" });
+    return NextResponse.json({ message: "Czytnik usunięty" });
   } catch (e) {
     console.error("[CardReaders DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania" }, { status: 500 });
   }
 }

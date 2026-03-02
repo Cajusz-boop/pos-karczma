@@ -1,20 +1,20 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 
 const createSchema = z.object({
-  title: z.string().min(1, "Wymagany tytuĹ‚").max(100),
-  content: z.string().min(1, "Wymagana treĹ›Ä‡"),
+  title: z.string().min(1, "Wymagany tytuł").max(100),
+  content: z.string().min(1, "Wymagana treść"),
   priority: z.enum(["LOW", "NORMAL", "HIGH"]).optional(),
   pinned: z.boolean().optional(),
   expiresAt: z.string().datetime().optional(),
 });
 
 /**
- * GET /api/announcements â€” list announcements (active, not expired)
+ * GET /api/announcements "” list announcements (active, not expired)
  */
 export async function GET() {
   try {
@@ -46,12 +46,12 @@ export async function GET() {
     });
   } catch (e) {
     console.error("[Announcements GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania ogĹ‚oszeĹ„" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania ogłoszeń" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/announcements â€” create a new announcement
+ * POST /api/announcements "” create a new announcement
  */
 export async function POST(request: NextRequest) {
   try {
@@ -80,12 +80,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ announcement }, { status: 201 });
   } catch (e) {
     console.error("[Announcements POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia ogĹ‚oszenia" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia ogłoszenia" }, { status: 500 });
   }
 }
 
 /**
- * DELETE /api/announcements â€” delete an announcement
+ * DELETE /api/announcements "” delete an announcement
  */
 export async function DELETE(request: NextRequest) {
   try {
@@ -97,6 +97,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[Announcements DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania" }, { status: 500 });
   }
 }

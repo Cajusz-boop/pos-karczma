@@ -86,42 +86,50 @@ export async function hydrateOrderFromApiCreate(params: {
   const now = new Date().toISOString();
   const localId = `hydration_${params.serverId}`;
 
-  let tableNumber: number | undefined;
-  let roomName: string | undefined;
-  if (params.tableId) {
-    const table = await db.posTables.get(params.tableId);
-    tableNumber = table?.number;
-    if (table?.roomId) {
-      const room = await db.rooms.get(table.roomId);
-      roomName = room?.name;
-    }
-  }
-
-  await db.transaction("rw", [db.orders, db.posTables], async () => {
-    await db.orders.put({
-      _localId: localId,
-      _serverId: params.serverId,
-      _syncStatus: "synced",
-      _localVersion: 1,
-      _updatedAt: now,
-      tableId: params.tableId,
-      roomId: params.roomId,
-      userId: params.userId,
-      userName: params.userName,
-      status: "OPEN",
-      type: params.type,
-      guestCount: params.guestCount,
-      createdAt: now,
-      totalGross: 0,
-      itemCount: 0,
-      orderNumber: params.orderNumber,
-      tableNumber,
-      roomName,
-    } as LocalOrder);
+  try {
+    let tableNumber: number | undefined;
+    let roomName: string | undefined;
     if (params.tableId) {
-      await db.posTables.update(params.tableId, { status: "OCCUPIED" });
+      const table = await db.posTables.get(params.tableId);
+      tableNumber = table?.number;
+      if (table?.roomId) {
+        const room = await db.rooms.get(table.roomId);
+        roomName = room?.name;
+      }
     }
-  });
+
+    await db.transaction("rw", [db.orders, db.posTables], async () => {
+      await db.orders.put({
+        _localId: localId,
+        _serverId: params.serverId,
+        _syncStatus: "synced",
+        _localVersion: 1,
+        _updatedAt: now,
+        tableId: params.tableId,
+        roomId: params.roomId,
+        userId: params.userId,
+        userName: params.userName,
+        status: "OPEN",
+        type: params.type,
+        guestCount: params.guestCount,
+        createdAt: now,
+        totalGross: 0,
+        itemCount: 0,
+        orderNumber: params.orderNumber,
+        tableNumber,
+        roomName,
+      } as LocalOrder);
+      if (params.tableId) {
+        await db.posTables.update(params.tableId, { status: "OCCUPIED" });
+      }
+    });
+    
+    console.log(`[hydrateOrder] Order #${params.orderNumber} hydrated to Dexie (table: ${tableNumber ?? "none"})`);
+  } catch (err) {
+    console.error("[hydrateOrder] Failed to hydrate order to Dexie:", err);
+    // Re-throw so caller knows hydration failed
+    throw err;
+  }
 }
 
 /**
@@ -409,8 +417,10 @@ export async function finalizeOrderOffline(
     }
 
     const now = new Date().toISOString();
+    const tableIdToFree = order.tableId;
 
-    await db.transaction("rw", [db.orders, db.syncQueue], async () => {
+    // P22-FIX: Include posTables in transaction for atomic update
+    await db.transaction("rw", [db.orders, db.posTables, db.syncQueue], async () => {
       // P9-FIX: Atomic modify
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await db.orders.where("_localId").equals(orderLocalId).modify((o: any) => {
@@ -424,12 +434,12 @@ export async function finalizeOrderOffline(
       await queueOperation("UPDATE", "orders", orderLocalId, {
         action: "CLOSE",
       }, [orderLocalId]);
-    });
 
-    // Free table locally
-    if (order.tableId) {
-      await db.posTables.update(order.tableId, { status: "FREE" });
-    }
+      // Free table locally - now inside transaction for atomicity
+      if (tableIdToFree) {
+        await db.posTables.update(tableIdToFree, { status: "FREE" });
+      }
+    });
 
     if (navigator.onLine) syncEngine.pushNow();
     return { success: true };

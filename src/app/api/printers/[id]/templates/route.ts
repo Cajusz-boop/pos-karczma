@@ -44,11 +44,6 @@ $[Ilosc,3,1]$x $[Nazwa,30,0]$`,
 /**
  * GET /api/printers/[id]/templates - get printer templates
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function GET(
   request: NextRequest,

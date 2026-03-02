@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[FiscalizeBatch GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania" }, { status: 500 });
   }
 }
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const { orderIds } = body as { orderIds: string[] };
 
     if (!Array.isArray(orderIds) || orderIds.length === 0) {
-      return NextResponse.json({ error: "Brak zamĂłwieĹ„ do fiskalizacji" }, { status: 400 });
+      return NextResponse.json({ error: "Brak zamówień do fiskalizacji" }, { status: 400 });
     }
 
     const results = {
@@ -79,11 +79,11 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: `Zafiskalizowano ${results.success} z ${orderIds.length} zamĂłwieĹ„`,
+      message: `Zafiskalizowano ${results.success} z ${orderIds.length} zamówień`,
       results,
     });
   } catch (e) {
     console.error("[FiscalizeBatch POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d fiskalizacji" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd fiskalizacji" }, { status: 500 });
   }
 }

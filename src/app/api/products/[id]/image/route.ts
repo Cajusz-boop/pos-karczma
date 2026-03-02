@@ -6,12 +6,6 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 type RouteContext = { params: Promise<{ id: string }> };
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
-
 
 export async function POST(
   request: NextRequest,

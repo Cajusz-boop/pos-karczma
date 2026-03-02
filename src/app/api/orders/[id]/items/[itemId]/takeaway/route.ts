@@ -7,11 +7,6 @@ import { auditLog } from "@/lib/audit";
 /**
  * POST /api/orders/[id]/items/[itemId]/takeaway - mark item as takeaway
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_","itemId":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

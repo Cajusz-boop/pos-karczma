@@ -109,7 +109,24 @@ export function HotelOrdersClient() {
         }),
       });
 
-      const resData = await res.json();
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        console.error("[HotelOrders] Server returned non-JSON response:", res.status, contentType);
+        setCreateError("Błąd serwera - spróbuj ponownie");
+        setCreating(false);
+        return;
+      }
+
+      let resData;
+      try {
+        resData = await res.json();
+      } catch (parseErr) {
+        console.error("[HotelOrders] JSON parse error:", parseErr);
+        setCreateError("Błąd odpowiedzi serwera");
+        setCreating(false);
+        return;
+      }
+
       if (!res.ok) {
         setCreateError(resData.error ?? "Błąd tworzenia zamówienia");
         setCreating(false);
@@ -128,7 +145,8 @@ export function HotelOrdersClient() {
       router.push(
         `/pos/order/${resData.order.id}?hotel=true&roomNumber=${encodeURIComponent(selectedRoom.roomNumber)}&guestName=${encodeURIComponent(selectedRoom.guestName)}&guestId=${encodeURIComponent(selectedRoom.guestId)}&checkOut=${encodeURIComponent(selectedRoom.checkOut)}`
       );
-    } catch {
+    } catch (err) {
+      console.error("[HotelOrders] Error creating order:", err);
       setCreateError("Błąd połączenia");
       setCreating(false);
     }

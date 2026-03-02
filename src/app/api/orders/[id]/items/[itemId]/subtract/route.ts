@@ -14,11 +14,6 @@ import { auditLog } from "@/lib/audit";
  * 
  * Double-click functionality: first click adds item, second click makes it "BRAK"
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_","itemId":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

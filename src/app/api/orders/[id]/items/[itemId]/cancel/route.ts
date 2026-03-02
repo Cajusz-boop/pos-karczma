@@ -4,12 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 import { recalculateOrderCache } from "@/lib/pos/order-cache";
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_","itemId":"_"} ];
-}
-
-
 
 export async function POST(
   request: NextRequest,

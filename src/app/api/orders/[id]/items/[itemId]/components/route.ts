@@ -20,11 +20,6 @@ type AddedComponent = { productId: string; name: string; price: number };
 /**
  * GET /api/orders/[id]/items/[itemId]/components - get item's set components
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_","itemId":"_"} ];
-}
-
 
 export async function GET(
   request: NextRequest,

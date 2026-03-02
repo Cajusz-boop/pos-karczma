@@ -18,11 +18,6 @@ type AddedComponent = { productId: string; name: string; price: number };
  * 
  * Example: swap "ziemniaki" for "ryż" in a set meal
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_","itemId":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

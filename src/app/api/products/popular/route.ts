@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { subDays } from "date-fns";
 
 
 /**
- * GET /api/products/popular?limit=8&days=7 â€” top products by order frequency
+ * GET /api/products/popular?limit=8&days=7 "” top products by order frequency
  */
 export async function GET(request: NextRequest) {
   try {

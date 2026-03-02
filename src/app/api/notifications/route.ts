@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 
 /**
- * GET /api/notifications?unread=true&limit=20 â€” list notifications for current user
+ * GET /api/notifications?unread=true&limit=20 "” list notifications for current user
  */
 export async function GET(request: NextRequest) {
   try {
@@ -45,12 +45,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania powiadomieĹ„" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania powiadomień" }, { status: 500 });
   }
 }
 
 /**
- * PATCH /api/notifications â€” mark notifications as read
+ * PATCH /api/notifications "” mark notifications as read
  * Body: { ids: string[] } or { all: true }
  */
 export async function PATCH(request: NextRequest) {
@@ -79,6 +79,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d oznaczania powiadomieĹ„" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd oznaczania powiadomień" }, { status: 500 });
   }
 }

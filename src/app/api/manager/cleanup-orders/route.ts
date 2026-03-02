@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 
@@ -50,11 +50,11 @@ export async function GET(request: NextRequest) {
       },
       count,
       sample,
-      warning: count > 0 ? `Uwaga: ${count} zamĂłwieĹ„ zostanie trwale usuniÄ™tych!` : null,
+      warning: count > 0 ? `Uwaga: ${count} zamówień zostanie trwale usuniętych!` : null,
     });
   } catch (e) {
     console.error("[CleanupOrders GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania" }, { status: 500 });
   }
 }
 
@@ -80,7 +80,7 @@ export async function DELETE(request: NextRequest) {
 
     if (!olderThanDays || olderThanDays < 30) {
       return NextResponse.json(
-        { error: "Minimalna wartoĹ›Ä‡ olderThanDays to 30" },
+        { error: "Minimalna wartość olderThanDays to 30" },
         { status: 400 }
       );
     }
@@ -110,7 +110,7 @@ export async function DELETE(request: NextRequest) {
     const ids = orderIds.map((o) => o.id);
 
     if (ids.length === 0) {
-      return NextResponse.json({ message: "Brak zamĂłwieĹ„ do usuniÄ™cia", deletedCount: 0 });
+      return NextResponse.json({ message: "Brak zamówień do usunięcia", deletedCount: 0 });
     }
 
     await prisma.orderItem.deleteMany({
@@ -134,11 +134,11 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: `UsuniÄ™to ${result.count} zamĂłwieĹ„`,
+      message: `Usunięto ${result.count} zamówień`,
       deletedCount: result.count,
     });
   } catch (e) {
     console.error("[CleanupOrders DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania" }, { status: 500 });
   }
 }

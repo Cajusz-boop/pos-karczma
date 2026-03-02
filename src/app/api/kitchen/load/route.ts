@@ -1,12 +1,12 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { subHours } from "date-fns";
 
 
 /**
- * GET /api/kitchen/load?hours=24&stationId= â€” KDS load history
+ * GET /api/kitchen/load?hours=24&stationId= "” KDS load history
  * Returns load snapshots for the specified period.
  */
 export async function GET(request: NextRequest) {
@@ -39,12 +39,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d historii obĹ‚oĹĽenia" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd historii obłożenia" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/kitchen/load â€” record current KDS load snapshot
+ * POST /api/kitchen/load "” record current KDS load snapshot
  * Called periodically (e.g., every 5 minutes) by the KDS page or a cron job.
  */
 export async function POST(request: NextRequest) {
@@ -105,6 +105,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d zapisu obĹ‚oĹĽenia" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd zapisu obłożenia" }, { status: 500 });
   }
 }

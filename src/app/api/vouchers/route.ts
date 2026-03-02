@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
@@ -18,14 +18,14 @@ function generateVoucherCode(): string {
 }
 
 const createVoucherSchema = z.object({
-  initialValue: z.number().positive("WartoĹ›Ä‡ musi byÄ‡ > 0").max(10000, "Max 10 000 zĹ‚"),
+  initialValue: z.number().positive("Wartość musi być > 0").max(10000, "Max 10 000 zł"),
   expiresAt: z.string().datetime().optional(),
   customerName: z.string().max(100).optional(),
   note: z.string().max(200).optional(),
 });
 
 /**
- * GET /api/vouchers â€” list all vouchers (with optional filters)
+ * GET /api/vouchers "” list all vouchers (with optional filters)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -63,12 +63,12 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ vouchers });
   } catch (e) {
     console.error("[Vouchers GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania voucherĂłw" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania voucherów" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/vouchers â€” create (sell) a new voucher
+ * POST /api/vouchers "” create (sell) a new voucher
  */
 export async function POST(request: NextRequest) {
   try {
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     const parsed = createVoucherSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -116,12 +116,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ voucher }, { status: 201 });
   } catch (e) {
     console.error("[Vouchers POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia vouchera" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia vouchera" }, { status: 500 });
   }
 }
 
 /**
- * PATCH /api/vouchers â€” deactivate a voucher
+ * PATCH /api/vouchers "” deactivate a voucher
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -145,6 +145,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ voucher });
   } catch (e) {
     console.error("[Vouchers PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji vouchera" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji vouchera" }, { status: 500 });
   }
 }

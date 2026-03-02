@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[SelectUser GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania" }, { status: 500 });
   }
 }
 
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     const { userId } = body as { userId: string };
 
     if (!userId) {
-      return NextResponse.json({ error: "Brak ID uĹĽytkownika" }, { status: 400 });
+      return NextResponse.json({ error: "Brak ID użytkownika" }, { status: 400 });
     }
 
     const config = await prisma.systemConfig.findUnique({
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (!(config?.value as boolean)) {
       return NextResponse.json(
-        { error: "RÄ™czny wybĂłr uĹĽytkownika jest wyĹ‚Ä…czony" },
+        { error: "Ręczny wybór użytkownika jest wyłączony" },
         { status: 403 }
       );
     }
@@ -82,11 +82,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !user.isActive) {
-      return NextResponse.json({ error: "UĹĽytkownik nieaktywny" }, { status: 404 });
+      return NextResponse.json({ error: "Użytkownik nieaktywny" }, { status: 404 });
     }
 
     if (user.expiresAt && user.expiresAt < new Date()) {
-      return NextResponse.json({ error: "Konto wygasĹ‚o" }, { status: 401 });
+      return NextResponse.json({ error: "Konto wygasło" }, { status: 401 });
     }
 
     await auditLog(user.id, "AUTH_MANUAL_SELECT", "User", user.id);
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error("[SelectUser POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d logowania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd logowania" }, { status: 500 });
   }
 }
 
@@ -126,10 +126,10 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({
       allowManualSelect: allow,
-      message: allow ? "RÄ™czny wybĂłr wĹ‚Ä…czony" : "RÄ™czny wybĂłr wyĹ‚Ä…czony",
+      message: allow ? "Ręczny wybór włączony" : "Ręczny wybór wyłączony",
     });
   } catch (e) {
     console.error("[SelectUser PUT]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d ustawiania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd ustawiania" }, { status: 500 });
   }
 }

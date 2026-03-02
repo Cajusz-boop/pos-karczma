@@ -1,13 +1,13 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
 
 
 const createDriverSchema = z.object({
-  userId: z.string().min(1, "ID uĹĽytkownika jest wymagane"),
+  userId: z.string().min(1, "ID użytkownika jest wymagane"),
   vehicleType: z.string().nullable().optional(),
   vehiclePlate: z.string().nullable().optional(),
   phoneNumber: z.string().nullable().optional(),
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ drivers: result });
   } catch (e) {
     console.error("[DeliveryDrivers GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania kierowcĂłw" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania kierowców" }, { status: 500 });
   }
 }
 
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json({ error: "UĹĽytkownik nie istnieje" }, { status: 404 });
+      return NextResponse.json({ error: "Użytkownik nie istnieje" }, { status: 404 });
     }
 
     const existing = await prisma.deliveryDriver.findUnique({
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existing) {
-      return NextResponse.json({ error: "Ten uĹĽytkownik jest juĹĽ kierowcÄ…" }, { status: 400 });
+      return NextResponse.json({ error: "Ten użytkownik jest już kierowcą" }, { status: 400 });
     }
 
     const driver = await prisma.deliveryDriver.create({
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
   } catch (e) {
     console.error("[DeliveryDrivers POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d rejestracji kierowcy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd rejestracji kierowcy" }, { status: 500 });
   }
 }
 
@@ -182,7 +182,7 @@ export async function PATCH(request: NextRequest) {
     
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -214,7 +214,7 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (e) {
     console.error("[DeliveryDrivers PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji kierowcy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji kierowcy" }, { status: 500 });
   }
 }
 
@@ -259,9 +259,9 @@ export async function DELETE(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "DELIVERY_DRIVER_DELETED", "DeliveryDriver", id);
 
-    return NextResponse.json({ message: "Kierowca usuniÄ™ty", deleted: true });
+    return NextResponse.json({ message: "Kierowca usunięty", deleted: true });
   } catch (e) {
     console.error("[DeliveryDrivers DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania kierowcy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania kierowcy" }, { status: 500 });
   }
 }

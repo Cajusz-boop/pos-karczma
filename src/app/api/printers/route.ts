@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 
 
-/** GET /api/printers â€” lista drukarek (filtr: type, isActive) */
+/** GET /api/printers "” lista drukarek (filtr: type, isActive) */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -39,11 +39,11 @@ export async function GET(request: NextRequest) {
     );
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d listy drukarek" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd listy drukarek" }, { status: 500 });
   }
 }
 
-/** POST /api/printers â€” dodanie drukarki */
+/** POST /api/printers "” dodanie drukarki */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     const validTypes = ["FISCAL", "KITCHEN", "BAR", "SYSTEM"];
     if (!validTypes.includes(type)) {
-      return NextResponse.json({ error: "NieprawidĹ‚owy typ drukarki" }, { status: 400 });
+      return NextResponse.json({ error: "Nieprawidłowy typ drukarki" }, { status: 400 });
     }
 
     const printer = await prisma.printer.create({
@@ -82,11 +82,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ id: printer.id, name: printer.name, type: printer.type });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia drukarki" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia drukarki" }, { status: 500 });
   }
 }
 
-/** PATCH /api/printers â€” edycja drukarki i przypisanie kategorii */
+/** PATCH /api/printers "” edycja drukarki i przypisanie kategorii */
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
@@ -135,11 +135,11 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ printer });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji drukarki" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji drukarki" }, { status: 500 });
   }
 }
 
-/** DELETE /api/printers â€” usuniÄ™cie drukarki */
+/** DELETE /api/printers "” usunięcie drukarki */
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -157,6 +157,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania drukarki" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania drukarki" }, { status: 500 });
   }
 }

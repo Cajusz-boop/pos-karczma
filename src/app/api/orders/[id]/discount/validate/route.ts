@@ -19,11 +19,6 @@ type PermissionsJson = {
  * - Maximum discount percentage allowed
  * - Whether they can give free items
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

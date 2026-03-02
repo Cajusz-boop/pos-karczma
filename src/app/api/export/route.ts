@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 
 /**
- * GET /api/export â€” export sales data for accounting systems
+ * GET /api/export "” export sales data for accounting systems
  * Query: ?from=YYYY-MM-DD&to=YYYY-MM-DD&format=csv|optima|symfonia|wfirma
  */
 export async function GET(request: NextRequest) {
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     return generateGenericCSV(orders, dateFrom, dateTo);
   } catch (e) {
     console.error("[Export]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d eksportu" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd eksportu" }, { status: 500 });
   }
 }
 
@@ -74,7 +74,7 @@ type OrderWithRelations = Awaited<ReturnType<typeof prisma.order.findMany>>[numb
 
 function generateGenericCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo: Date) {
   const BOM = "\uFEFF";
-  const header = "Data;Nr zamĂłwienia;Kelner;Typ;Produkt;IloĹ›Ä‡;Cena jedn.;Stawka VAT;Netto;VAT;Brutto;Forma pĹ‚atnoĹ›ci;Nr paragonu;Nr faktury;NIP\n";
+  const header = "Data;Nr zamówienia;Kelner;Typ;Produkt;Ilość;Cena jedn.;Stawka VAT;Netto;VAT;Brutto;Forma płatności;Nr paragonu;Nr faktury;NIP\n";
 
   let csv = BOM + header;
 
@@ -124,7 +124,7 @@ function generateGenericCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo
 
 function generateOptimaCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo: Date) {
   const BOM = "\uFEFF";
-  const header = "Lp;Data sprzedaĹĽy;Numer dokumentu;Kontrahent;NIP;Nazwa towaru;IloĹ›Ä‡;Jm;Cena netto;WartoĹ›Ä‡ netto;Stawka VAT;Kwota VAT;WartoĹ›Ä‡ brutto;Forma pĹ‚atnoĹ›ci\n";
+  const header = "Lp;Data sprzedaży;Numer dokumentu;Kontrahent;NIP;Nazwa towaru;Ilość;Jm;Cena netto;Wartość netto;Stawka VAT;Kwota VAT;Wartość brutto;Forma płatności\n";
 
   let csv = BOM + header;
   let lp = 1;
@@ -132,11 +132,11 @@ function generateOptimaCSV(orders: OrderWithRelations[], dateFrom: Date, dateTo:
   for (const order of orders) {
     const date = order.closedAt ? new Date(order.closedAt).toLocaleDateString("pl-PL") : "";
     const docNum = order.invoices[0]?.invoiceNumber ?? order.receipts[0]?.fiscalNumber ?? `PAR/${order.orderNumber}`;
-    const buyer = order.invoices[0]?.buyerName ?? "SprzedaĹĽ detaliczna";
+    const buyer = order.invoices[0]?.buyerName ?? "Sprzedaż detaliczna";
     const nip = order.invoices[0]?.buyerNip ?? "";
-    const paymentMethod = order.payments[0]?.method === "CASH" ? "gotĂłwka" :
+    const paymentMethod = order.payments[0]?.method === "CASH" ? "gotówka" :
       order.payments[0]?.method === "CARD" ? "karta" :
-        order.payments[0]?.method === "BLIK" ? "przelew" : "gotĂłwka";
+        order.payments[0]?.method === "BLIK" ? "przelew" : "gotówka";
 
     for (const item of order.items) {
       const qty = Number(item.quantity);
@@ -182,7 +182,7 @@ function generateSymfoniaXML(orders: OrderWithRelations[], dateFrom: Date, dateT
     const date = order.closedAt ? new Date(order.closedAt).toISOString().slice(0, 10) : "";
     const docNum = order.invoices[0]?.invoiceNumber ?? `PAR/${order.orderNumber}`;
     const nip = order.invoices[0]?.buyerNip ?? "";
-    const buyer = order.invoices[0]?.buyerName ?? "SprzedaĹĽ detaliczna";
+    const buyer = order.invoices[0]?.buyerName ?? "Sprzedaż detaliczna";
 
     xml += `  <Dokument>\n`;
     xml += `    <DataSprzedazy>${date}</DataSprzedazy>\n`;

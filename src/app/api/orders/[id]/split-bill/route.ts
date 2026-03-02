@@ -14,11 +14,6 @@ const splitBillSchema = z.object({
  * Creates N-1 new orders (copies of original), each with proportional items.
  * Returns array of split order IDs with amounts.
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

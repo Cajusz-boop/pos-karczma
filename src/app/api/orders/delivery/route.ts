@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
@@ -24,7 +24,7 @@ const updateStatusSchema = z.object({
 });
 
 /**
- * GET /api/orders/delivery â€” list phone/delivery orders
+ * GET /api/orders/delivery "” list phone/delivery orders
  * Query: ?status=PENDING,PREPARING&date=YYYY-MM-DD
  */
 export async function GET(request: NextRequest) {
@@ -108,12 +108,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Delivery GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania zamĂłwieĹ„" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania zamówień" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/orders/delivery â€” create a phone/delivery order
+ * POST /api/orders/delivery "” create a phone/delivery order
  */
 export async function POST(request: NextRequest) {
   try {
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
     const parsed = createDeliverySchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
 
     if (type === "DELIVERY" && !zoneId && deliveryAddress) {
       const normalizedAddress = deliveryAddress.toLowerCase().trim();
-      const streetMatch = normalizedAddress.match(/^(ul\.?\s*)?([a-zÄ…Ä‡Ä™Ĺ‚Ĺ„ĂłĹ›ĹşĹĽ\s]+)/i);
+      const streetMatch = normalizedAddress.match(/^(ul\.?\s*)?([a-ząćęłńóśźż\s]+)/i);
       const streetName = streetMatch?.[2]?.trim() ?? normalizedAddress;
 
       const matchingStreet = await prisma.deliveryStreet.findFirst({
@@ -207,31 +207,31 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ order }, { status: 201 });
   } catch (e) {
     console.error("[Delivery POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia zamĂłwienia" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia zamówienia" }, { status: 500 });
   }
 }
 
 const STATUS_NOTIFICATIONS: Record<string, { title: string; body: (orderNum: number) => string }> = {
   PREPARING: {
-    title: "ZamĂłwienie w przygotowaniu",
-    body: (n) => `ZamĂłwienie #${n} jest przygotowywane`,
+    title: "Zamówienie w przygotowaniu",
+    body: (n) => `Zamówienie #${n} jest przygotowywane`,
   },
   READY_FOR_PICKUP: {
-    title: "ZamĂłwienie gotowe!",
-    body: (n) => `ZamĂłwienie #${n} czeka na kierowcÄ™`,
+    title: "Zamówienie gotowe!",
+    body: (n) => `Zamówienie #${n} czeka na kierowcę`,
   },
   OUT_FOR_DELIVERY: {
     title: "W drodze!",
-    body: (n) => `ZamĂłwienie #${n} jedzie do klienta`,
+    body: (n) => `Zamówienie #${n} jedzie do klienta`,
   },
   DELIVERED: {
     title: "Dostarczono",
-    body: (n) => `ZamĂłwienie #${n} zostaĹ‚o dostarczone`,
+    body: (n) => `Zamówienie #${n} zostało dostarczone`,
   },
 };
 
 /**
- * PATCH /api/orders/delivery â€” update delivery status
+ * PATCH /api/orders/delivery "” update delivery status
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -239,7 +239,7 @@ export async function PATCH(request: NextRequest) {
     const parsed = updateStatusSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -299,6 +299,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ order });
   } catch (e) {
     console.error("[Delivery PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji statusu" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji statusu" }, { status: 500 });
   }
 }

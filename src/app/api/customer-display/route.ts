@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ displays });
   } catch (e) {
     console.error("[CustomerDisplay GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania ekranĂłw" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania ekranów" }, { status: 500 });
   }
 }
 
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ display }, { status: 201 });
   } catch (e) {
     console.error("[CustomerDisplay POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia ekranu" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia ekranu" }, { status: 500 });
   }
 }
 
@@ -88,7 +88,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0]?.message ?? "NieprawidĹ‚owe dane" },
+        { error: parsed.error.issues[0]?.message ?? "Nieprawidłowe dane" },
         { status: 400 }
       );
     }
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ display });
   } catch (e) {
     console.error("[CustomerDisplay PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji ekranu" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji ekranu" }, { status: 500 });
   }
 }
 
@@ -129,9 +129,9 @@ export async function DELETE(request: NextRequest) {
     const userId = request.headers.get("x-user-id");
     await auditLog(userId, "CUSTOMER_DISPLAY_DELETED", "CustomerDisplay", id);
 
-    return NextResponse.json({ message: "Ekran usuniÄ™ty" });
+    return NextResponse.json({ message: "Ekran usunięty" });
   } catch (e) {
     console.error("[CustomerDisplay DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania ekranu" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania ekranu" }, { status: 500 });
   }
 }

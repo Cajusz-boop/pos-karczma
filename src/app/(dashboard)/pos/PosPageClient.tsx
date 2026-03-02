@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useFloorFromDexie, type TableView } from "@/hooks/useFloorFromDexie";
 import { hydrateOrderFromApiCreate } from "@/lib/orders/order-actions";
+import { backgroundRefresh } from "@/lib/db/initial-sync";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -396,7 +397,9 @@ export function PosPageClient() {
 
   const handleTableClick = useCallback(
     (table: TableView, roomId: string) => {
-      if (table.status === "FREE") {
+      if (table.status === "FREE" || !table.activeOrder) {
+        // P22-FIX: Also allow opening guest dialog if table has no active order
+        // (handles edge case where table.status is stale but no order exists)
         setGuestDialog({ tableId: table.id, roomId, tableNumber: table.number });
         setGuestCount("2");
         setCreateError("");
@@ -445,6 +448,10 @@ export function PosPageClient() {
       if (!res.ok) {
         setCreateError(data.error ?? "Błąd tworzenia zamówienia");
         setCreating(false);
+        // P23-FIX: Refresh Dexie when server says table is occupied (stale local data)
+        if (data.error?.includes("zajęty") || data.error?.includes("occupied")) {
+          backgroundRefresh().catch(() => {});
+        }
         return;
       }
       setGuestDialog(null);
@@ -558,16 +565,31 @@ export function PosPageClient() {
     }
     setIsResetting(true);
     try {
-      // Usuwamy całą bazę IndexedDB
+      // 1. Usuwamy całą bazę IndexedDB
       const dbName = "PosKarczma";
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         const req = indexedDB.deleteDatabase(dbName);
         req.onsuccess = () => resolve();
-        req.onerror = () => reject(new Error("Nie udało się usunąć bazy"));
+        req.onerror = () => resolve();
         req.onblocked = () => resolve();
       });
+
+      // 2. Czyścimy cache Service Workera (jeśli istnieje)
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      }
+
+      // 3. Wyrejestrowujemy Service Workery
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+      }
+
       alert("Baza lokalna usunięta. Strona zostanie odświeżona.");
-      window.location.reload();
+      
+      // 4. Pełne przeładowanie z ominięciem cache (cache-bust via timestamp)
+      window.location.href = window.location.pathname + "?reset=" + Date.now();
     } catch (e) {
       alert("Błąd: " + (e instanceof Error ? e.message : "Nieznany błąd"));
     } finally {

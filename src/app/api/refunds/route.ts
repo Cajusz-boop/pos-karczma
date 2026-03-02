@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 import { z } from "zod";
@@ -8,17 +8,17 @@ import { parseBody } from "@/lib/validation";
 
 
 const refundSchema = z.object({
-  orderId: z.string().min(1, "Wymagany ID zamĂłwienia"),
+  orderId: z.string().min(1, "Wymagany ID zamówienia"),
   items: z.array(z.object({
     orderItemId: z.string().min(1),
-    quantity: z.number().positive("IloĹ›Ä‡ musi byÄ‡ > 0"),
-    reason: z.string().min(1, "Wymagany powĂłd zwrotu").max(200),
+    quantity: z.number().positive("Ilość musi być > 0"),
+    reason: z.string().min(1, "Wymagany powód zwrotu").max(200),
   })).min(1, "Wymagana co najmniej 1 pozycja"),
   refundMethod: z.enum(["CASH", "CARD", "BLIK", "TRANSFER", "VOUCHER"]),
 });
 
 /**
- * GET /api/refunds â€” list recent refunds (cancelled items with reasons)
+ * GET /api/refunds "” list recent refunds (cancelled items with reasons)
  */
 export async function GET(request: NextRequest) {
   try {
@@ -60,12 +60,12 @@ export async function GET(request: NextRequest) {
     );
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania zwrotĂłw" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania zwrotów" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/refunds â€” process a refund (cancel items, record refund payment)
+ * POST /api/refunds "” process a refund (cancel items, record refund payment)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -81,12 +81,12 @@ export async function POST(request: NextRequest) {
     });
 
     if (!order) {
-      return NextResponse.json({ error: "ZamĂłwienie nie istnieje" }, { status: 404 });
+      return NextResponse.json({ error: "Zamówienie nie istnieje" }, { status: 404 });
     }
 
     if (order.status !== "CLOSED") {
       return NextResponse.json(
-        { error: "Zwrot moĹĽliwy tylko dla zamkniÄ™tych zamĂłwieĹ„" },
+        { error: "Zwrot możliwy tylko dla zamkniętych zamówień" },
         { status: 400 }
       );
     }
@@ -99,21 +99,21 @@ export async function POST(request: NextRequest) {
       const orderItem = order.items.find((i) => i.id === refundItem.orderItemId);
       if (!orderItem) {
         return NextResponse.json(
-          { error: `Pozycja ${refundItem.orderItemId} nie istnieje w zamĂłwieniu` },
+          { error: `Pozycja ${refundItem.orderItemId} nie istnieje w zamówieniu` },
           { status: 404 }
         );
       }
 
       if (orderItem.status === "CANCELLED") {
         return NextResponse.json(
-          { error: `Pozycja ${refundItem.orderItemId} jest juĹĽ anulowana` },
+          { error: `Pozycja ${refundItem.orderItemId} jest już anulowana` },
           { status: 400 }
         );
       }
 
       if (refundItem.quantity > Number(orderItem.quantity)) {
         return NextResponse.json(
-          { error: `IloĹ›Ä‡ zwrotu (${refundItem.quantity}) przekracza iloĹ›Ä‡ zamĂłwionÄ… (${orderItem.quantity})` },
+          { error: `Ilość zwrotu (${refundItem.quantity}) przekracza ilość zamówioną (${orderItem.quantity})` },
           { status: 400 }
         );
       }
@@ -165,6 +165,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d przetwarzania zwrotu" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd przetwarzania zwrotu" }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (user.expiresAt && user.expiresAt < new Date()) {
-      return NextResponse.json({ error: "Konto wygasĹ‚o" }, { status: 401 });
+      return NextResponse.json({ error: "Konto wygasło" }, { status: 401 });
     }
 
     await auditLog(user.id, "AUTH_TOKEN_SUCCESS", "User", user.id, undefined, {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error("[AuthToken POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d autoryzacji" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd autoryzacji" }, { status: 500 });
   }
 }
 
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
     };
 
     if (!userId || !tokenId) {
-      return NextResponse.json({ error: "Brak wymaganych pĂłl" }, { status: 400 });
+      return NextResponse.json({ error: "Brak wymaganych pól" }, { status: 400 });
     }
 
     const normalizedToken = tokenId.trim().toUpperCase();
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { error: `Token juĹĽ przypisany do: ${existingUser.name}` },
+        { error: `Token już przypisany do: ${existingUser.name}` },
         { status: 400 }
       );
     }
@@ -118,7 +118,7 @@ export async function PUT(request: NextRequest) {
     });
   } catch (e) {
     console.error("[AuthToken PUT]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d przypisywania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd przypisywania" }, { status: 500 });
   }
 }
 
@@ -131,7 +131,7 @@ export async function DELETE(request: NextRequest) {
     const userId = searchParams.get("userId");
 
     if (!userId) {
-      return NextResponse.json({ error: "Brak ID uĹĽytkownika" }, { status: 400 });
+      return NextResponse.json({ error: "Brak ID użytkownika" }, { status: 400 });
     }
 
     const user = await prisma.user.update({
@@ -146,10 +146,10 @@ export async function DELETE(request: NextRequest) {
     await auditLog(requestUserId, "USER_TOKEN_REMOVED", "User", userId);
 
     return NextResponse.json({
-      message: `Token usuniÄ™ty dla: ${user.name}`,
+      message: `Token usunięty dla: ${user.name}`,
     });
   } catch (e) {
     console.error("[AuthToken DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania" }, { status: 500 });
   }
 }

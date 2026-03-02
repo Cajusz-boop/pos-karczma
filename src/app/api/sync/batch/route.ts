@@ -214,11 +214,19 @@ async function processOrderOp(op: BatchOperation, userId: string): Promise<Omit<
           data: { status: "CLOSED", closedAt: new Date() },
         });
 
+        // P22-FIX: Log errors instead of silently catching
         if (order?.tableId) {
-          await tx.table.update({
-            where: { id: order.tableId },
-            data: { status: "FREE" },
-          }).catch(() => {});
+          try {
+            await tx.table.update({
+              where: { id: order.tableId },
+              data: { status: "FREE" },
+            });
+          } catch (tableError) {
+            console.error(
+              `[sync/batch] Failed to free table ${order.tableId} after closing order ${serverId}:`,
+              tableError
+            );
+          }
         }
 
         await tx.syncLog.create({

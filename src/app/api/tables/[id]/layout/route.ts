@@ -21,11 +21,6 @@ const layoutSchema = z.object({
 /**
  * GET /api/tables/[id]/layout - get table layout details
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function GET(
   request: NextRequest,

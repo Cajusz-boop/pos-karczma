@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma, Prisma } from "@/lib/prisma";
 import { parseBody, createBanquetSchema } from "@/lib/validation";
 
 
-/** GET /api/banquets â€” lista imprez bankietowych */
+/** GET /api/banquets "” lista imprez bankietowych */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -48,11 +48,11 @@ export async function GET(request: NextRequest) {
     );
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d listy bankietĂłw" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd listy bankietów" }, { status: 500 });
   }
 }
 
-/** POST /api/banquets â€” tworzenie imprezy (Reservation + BanquetEvent) */
+/** POST /api/banquets "” tworzenie imprezy (Reservation + BanquetEvent) */
 export async function POST(request: NextRequest) {
   try {
     const { data, error: valError } = await parseBody(request, createBanquetSchema);
@@ -116,6 +116,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia imprezy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia imprezy" }, { status: 500 });
   }
 }

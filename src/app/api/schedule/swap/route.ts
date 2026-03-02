@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { auditLog } from "@/lib/audit";
@@ -19,7 +19,7 @@ const respondSchema = z.object({
 });
 
 /**
- * GET /api/schedule/swap â€” list swap requests
+ * GET /api/schedule/swap "” list swap requests
  */
 export async function GET(request: NextRequest) {
   try {
@@ -59,12 +59,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error("[Swap GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania zamian" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania zamian" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/schedule/swap â€” create a swap request
+ * POST /api/schedule/swap "” create a swap request
  */
 export async function POST(request: NextRequest) {
   try {
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     const { requesterId, targetId, date, reason } = parsed.data;
 
     if (requesterId === targetId) {
-      return NextResponse.json({ error: "Nie moĹĽna zamieniÄ‡ zmiany z samym sobÄ…" }, { status: 400 });
+      return NextResponse.json({ error: "Nie można zamienić zmiany z samym sobą" }, { status: 400 });
     }
 
     const swap = await prisma.shiftSwapRequest.create({
@@ -92,12 +92,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ swap }, { status: 201 });
   } catch (e) {
     console.error("[Swap POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia zamiany" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia zamiany" }, { status: 500 });
   }
 }
 
 /**
- * PATCH /api/schedule/swap â€” respond to a swap request
+ * PATCH /api/schedule/swap "” respond to a swap request
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -163,6 +163,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ swap });
   } catch (e) {
     console.error("[Swap PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d odpowiedzi na zamianÄ™" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd odpowiedzi na zamianę" }, { status: 500 });
   }
 }

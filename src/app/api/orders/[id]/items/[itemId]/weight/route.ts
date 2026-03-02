@@ -17,11 +17,6 @@ const barcodeWeightSchema = z.object({
 /**
  * POST /api/orders/[id]/items/[itemId]/weight - confirm weight after preparation
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_","itemId":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

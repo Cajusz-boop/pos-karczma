@@ -12,11 +12,6 @@ type ModifierJson = { modifierId: string; name: string; priceDelta: number };
  * Combines identical items (same product, modifiers, note, course, price)
  * into single lines with summed quantities.
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function POST(
   request: NextRequest,

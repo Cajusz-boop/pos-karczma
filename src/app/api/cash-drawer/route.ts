@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 import { z } from "zod";
@@ -9,12 +9,12 @@ import { parseBody } from "@/lib/validation";
 
 const cashOperationSchema = z.object({
   type: z.enum(["DEPOSIT", "WITHDRAWAL"]),
-  amount: z.number().positive("Kwota musi byÄ‡ > 0"),
-  reason: z.string().min(1, "Wymagany powĂłd operacji").max(200),
+  amount: z.number().positive("Kwota musi być > 0"),
+  reason: z.string().min(1, "Wymagany powód operacji").max(200),
 });
 
 /**
- * GET /api/cash-drawer â€” current cash drawer state + recent operations
+ * GET /api/cash-drawer "” current cash drawer state + recent operations
  */
 export async function GET(request: NextRequest) {
   try {
@@ -56,12 +56,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania stanu kasy" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania stanu kasy" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/cash-drawer â€” cash operation (deposit/withdrawal)
+ * POST /api/cash-drawer "” cash operation (deposit/withdrawal)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     if (newAmount < 0) {
       return NextResponse.json(
-        { error: `NiewystarczajÄ…ce Ĺ›rodki w kasie. Aktualnie: ${currentAmount.toFixed(2)} zĹ‚` },
+        { error: `Niewystarczające środki w kasie. Aktualnie: ${currentAmount.toFixed(2)} zł` },
         { status: 400 }
       );
     }
@@ -133,12 +133,12 @@ export async function POST(request: NextRequest) {
     });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d operacji kasowej" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd operacji kasowej" }, { status: 500 });
   }
 }
 
 /**
- * PATCH /api/cash-drawer â€” open drawer / update state
+ * PATCH /api/cash-drawer "” open drawer / update state
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -176,6 +176,6 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "Nieznana akcja" }, { status: 400 });
   } catch (e) {
     console.error(e);
-    return NextResponse.json({ error: "BĹ‚Ä…d operacji na szufladzie" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd operacji na szufladzie" }, { status: 500 });
   }
 }

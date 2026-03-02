@@ -26,11 +26,6 @@ const preferencesSchema = z.object({
 /**
  * GET /api/users/[id]/pos-preferences - get POS preferences
  */
-// Required for output: 'export' (Capacitor build) – API not used in static bundle
-export async function generateStaticParams() {
-  return [ {"id":"_"} ];
-}
-
 
 export async function GET(
   request: NextRequest,

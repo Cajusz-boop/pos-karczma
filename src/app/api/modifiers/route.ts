@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
@@ -41,7 +41,7 @@ const updateModifierSchema = z.object({
 });
 
 /**
- * GET /api/modifiers â€” list all modifier groups with modifiers
+ * GET /api/modifiers "” list all modifier groups with modifiers
  */
 export async function GET() {
   try {
@@ -56,12 +56,12 @@ export async function GET() {
     return NextResponse.json({ groups });
   } catch (e) {
     console.error("[Modifiers GET]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d pobierania modyfikatorĂłw" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd pobierania modyfikatorów" }, { status: 500 });
   }
 }
 
 /**
- * POST /api/modifiers â€” create a group (optionally with modifiers) or add a modifier to a group
+ * POST /api/modifiers "” create a group (optionally with modifiers) or add a modifier to a group
  */
 export async function POST(request: NextRequest) {
   try {
@@ -112,12 +112,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ group }, { status: 201 });
   } catch (e) {
     console.error("[Modifiers POST]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d tworzenia" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd tworzenia" }, { status: 500 });
   }
 }
 
 /**
- * PATCH /api/modifiers â€” update a group or modifier
+ * PATCH /api/modifiers "” update a group or modifier
  */
 export async function PATCH(request: NextRequest) {
   try {
@@ -161,12 +161,12 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ group });
   } catch (e) {
     console.error("[Modifiers PATCH]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d aktualizacji" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd aktualizacji" }, { status: 500 });
   }
 }
 
 /**
- * DELETE /api/modifiers â€” delete a group or modifier
+ * DELETE /api/modifiers "” delete a group or modifier
  */
 export async function DELETE(request: NextRequest) {
   try {
@@ -187,7 +187,7 @@ export async function DELETE(request: NextRequest) {
       });
       if (group && group._count.products > 0) {
         return NextResponse.json(
-          { error: `Grupa jest przypisana do ${group._count.products} produktĂłw` },
+          { error: `Grupa jest przypisana do ${group._count.products} produktów` },
           { status: 400 }
         );
       }
@@ -201,6 +201,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Wymagane groupId lub modifierId" }, { status: 400 });
   } catch (e) {
     console.error("[Modifiers DELETE]", e);
-    return NextResponse.json({ error: "BĹ‚Ä…d usuwania" }, { status: 500 });
+    return NextResponse.json({ error: "Błąd usuwania" }, { status: 500 });
   }
 }
