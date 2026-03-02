@@ -1,4 +1,4 @@
-const CACHE_NAME = "pos-karczma-v4";
+const CACHE_NAME = "pos-karczma-v5";
 const STATIC_ASSETS = [
   "/icon-192.png",
   "/icon-512.png",
@@ -175,6 +175,22 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => caches.match(request))
+    );
+    return;
+  }
+
+  // P22-FIX: Network-first for app chunks — ensures fresh code after deploy
+  if (url.pathname.startsWith("/_next/static/") && url.pathname.includes("/chunks/")) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(request).then((cached) => cached || fetch(request)))
     );
     return;
   }

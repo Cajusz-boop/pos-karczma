@@ -153,10 +153,22 @@ export function useFloorFromDexie(): { rooms: RoomView[]; isLoading: boolean } {
         const order = ordersByTable.get(t.id) ?? null;
         const items = order ? itemsByOrder.get(order._localId) ?? [] : [];
 
-        if (t.status === "FREE") free++;
-        else if (t.status === "OCCUPIED") occupied++;
-        else if (t.status === "BILL_REQUESTED") billRequested++;
-        else if (t.status === "RESERVED") reserved++;
+        // P22-FIX: Compute effective status from actual orders, not stored table.status
+        // This prevents stale data from server sync overwriting local changes
+        let effectiveStatus: TableStatus = t.status;
+        if (order) {
+          // If there's an active order, table is occupied (or bill_requested if order status matches)
+          effectiveStatus = order.status === "BILL_REQUESTED" ? "BILL_REQUESTED" : "OCCUPIED";
+        } else if (t.status === "OCCUPIED" || t.status === "BILL_REQUESTED") {
+          // No active order but table marked as occupied - it should be FREE
+          // (stale status from server sync before order close propagated)
+          effectiveStatus = "FREE";
+        }
+
+        if (effectiveStatus === "FREE") free++;
+        else if (effectiveStatus === "OCCUPIED") occupied++;
+        else if (effectiveStatus === "BILL_REQUESTED") billRequested++;
+        else if (effectiveStatus === "RESERVED") reserved++;
 
         let kitchenStatus: KitchenStatus | null = null;
         let hasKitchenAlert = false;
@@ -199,7 +211,7 @@ export function useFloorFromDexie(): { rooms: RoomView[]; isLoading: boolean } {
           number: t.number,
           seats: t.seats,
           shape: t.shape,
-          status: t.status,
+          status: effectiveStatus,
           positionX: t.positionX,
           positionY: t.positionY,
           assignedUserId: order?.userId ?? null,
