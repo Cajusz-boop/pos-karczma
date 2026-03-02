@@ -647,10 +647,10 @@ async function main() {
     });
   }
 
-  // Hotel integration config (HotelSystem on port 3011)
+  // Hotel integration config (HotelSystem on port 3000)
   const hotelConfig = {
     enabled: true,
-    baseUrl: "http://127.0.0.1:3011",
+    baseUrl: "http://127.0.0.1:3000",
     apiKey: "karczma-pos-2026-hXk9mP4wQz",
   };
   await prisma.systemConfig.upsert({
