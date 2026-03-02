@@ -112,6 +112,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Create Payment record for ROOM_CHARGE so order can be closed
+    await prisma.payment.create({
+      data: {
+        orderId,
+        method: "ROOM_CHARGE",
+        amount: finalTotal,
+        transactionRef: `ROOM-${roomNumber}`,
+      },
+    });
+
     // Handle unassigned charge warning (charge was saved but no active reservation)
     const unassignedWarning = result.unassigned
       ? { unassigned: true, reason: result.reason ?? "Brak aktywnej rezerwacji" }

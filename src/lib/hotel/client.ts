@@ -62,7 +62,7 @@ export interface HotelConfig {
 
 const DEFAULT_CONFIG: HotelConfig = {
   enabled: false,
-  baseUrl: "http://localhost:3001",
+  baseUrl: "http://localhost:3011",
   apiKey: "",
 };
 
