@@ -88,8 +88,15 @@ export function LoginClient() {
       const url = `${base}/api/auth/users`;
       const { data, error, offline } = await safeFetch<UserItem[]>(url, { cache: "no-store" });
       if (offline) {
-        setUsers([]);
-        setUsersError("Brak połączenia z serwerem — sprawdź sieć i spróbuj ponownie");
+        // Fallback do cached users gdy serwer niedostępny (Android może zgłaszać online mimo braku połączenia)
+        const cached = await getCachedUsers();
+        if (cached.length > 0) {
+          setUsers(cached);
+          setIsOfflineMode(true);
+        } else {
+          setUsers([]);
+          setUsersError("Zaloguj się online za pierwszym razem");
+        }
       } else if (error || !data) {
         setUsers([]);
         setUsersError(error ?? "Nie można załadować użytkowników");
@@ -101,8 +108,20 @@ export function LoginClient() {
         setUsersError("Nieprawidłowa odpowiedź serwera");
       }
     } catch {
-      setUsers([]);
-      setUsersError("Nie można załadować użytkowników");
+      // Fallback do cached users przy jakimkolwiek błędzie
+      try {
+        const cached = await getCachedUsers();
+        if (cached.length > 0) {
+          setUsers(cached);
+          setIsOfflineMode(true);
+        } else {
+          setUsers([]);
+          setUsersError("Nie można załadować użytkowników");
+        }
+      } catch {
+        setUsers([]);
+        setUsersError("Nie można załadować użytkowników");
+      }
     } finally {
       setUsersLoading(false);
     }

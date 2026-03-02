@@ -35,7 +35,6 @@ import {
   Hotel,
   RefreshCw,
 } from "lucide-react";
-import { db } from "@/lib/db/offline-db";
 
 type TableStatus = "FREE" | "OCCUPIED" | "BILL_REQUESTED" | "RESERVED" | "BANQUET_MODE" | "INACTIVE";
 
@@ -554,14 +553,20 @@ export function PosPageClient() {
   };
 
   const handleResetLocalData = async () => {
-    if (!confirm("Wyczyścić lokalne dane zamówień?\n\nUżyj tego jeśli stoliki wyświetlają się nieprawidłowo (ghost orders).\n\nDane na serwerze NIE zostaną usunięte.")) {
+    if (!confirm("Wyczyścić CAŁĄ lokalną bazę danych?\n\nUżyj tego jeśli stoliki wyświetlają się nieprawidłowo.\n\nDane na serwerze NIE zostaną usunięte.")) {
       return;
     }
     setIsResetting(true);
     try {
-      await db.clearAllLocalOrders();
-      await db.forceRefresh();
-      alert("Dane lokalne wyczyszczone. Strona zostanie odświeżona.");
+      // Usuwamy całą bazę IndexedDB
+      const dbName = "PosKarczma";
+      await new Promise<void>((resolve, reject) => {
+        const req = indexedDB.deleteDatabase(dbName);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(new Error("Nie udało się usunąć bazy"));
+        req.onblocked = () => resolve();
+      });
+      alert("Baza lokalna usunięta. Strona zostanie odświeżona.");
       window.location.reload();
     } catch (e) {
       alert("Błąd: " + (e instanceof Error ? e.message : "Nieznany błąd"));
