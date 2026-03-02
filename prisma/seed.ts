@@ -208,11 +208,9 @@ async function main() {
   const catRybne = await ensureCategory("Rybne", 5, "#06b6d4", catDaniaGlowne.id);
   const catWege = await ensureCategory("Wege", 6, "#84cc16", catDaniaGlowne.id);
   const catDesery = await ensureCategory("Desery", 7, "#ec4899");
-  const catNapojeGorace = await ensureCategory("Napoje gorące", 8, "#f59e0b");
-  const catNapojeZimne = await ensureCategory("Napoje zimne", 9, "#0ea5e9");
-  const catPiwa = await ensureCategory("Piwa", 10, "#eab308");
-  const catWina = await ensureCategory("Wina", 11, "#a855f7");
-  const catAlkohole = await ensureCategory("Alkohole mocne", 12, "#6366f1");
+  const catNapoje = await ensureCategory("Napoje", 8, "#0ea5e9");
+  const catPiwo = await ensureCategory("Piwo", 9, "#eab308");
+  const catAlkohol = await ensureCategory("Alkohol", 10, "#a855f7");
   console.log("  ✓ Kategorie z hierarchią i kolorami");
 
   // 8. Pełne menu restauracji "Karczma Łabędź"
@@ -311,89 +309,108 @@ async function main() {
     { name: "Makowiec", categoryId: catDesery.id, taxRateId: taxB.id, priceGross: 14, allergenCodes: ["GLUTEN", "JAJA", "ORZECHY"], sortOrder: 11, estimatedPrepMinutes: 5 },
     { name: "Deser lodowy", categoryId: catDesery.id, taxRateId: taxB.id, priceGross: 26, allergenCodes: ["MLEKO", "ORZECHY"], sortOrder: 12, estimatedPrepMinutes: 6 },
 
-    // ========== NAPOJE GORĄCE ==========
-    { name: "Kawa espresso", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 1, estimatedPrepMinutes: 3 },
-    { name: "Kawa espresso podwójne", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 12, sortOrder: 2, estimatedPrepMinutes: 3 },
-    { name: "Kawa americano", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 10, sortOrder: 3, estimatedPrepMinutes: 3 },
-    { name: "Kawa latte", nameShort: "Latte", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 14, allergenCodes: ["MLEKO"], sortOrder: 4, estimatedPrepMinutes: 4 },
-    { name: "Cappuccino", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 14, allergenCodes: ["MLEKO"], sortOrder: 5, estimatedPrepMinutes: 4 },
-    { name: "Flat white", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 14, allergenCodes: ["MLEKO"], sortOrder: 6, estimatedPrepMinutes: 4 },
-    { name: "Kawa po irlandzku", categoryId: catNapojeGorace.id, taxRateId: taxA.id, priceGross: 22, allergenCodes: ["MLEKO"], sortOrder: 7, estimatedPrepMinutes: 5 },
-    { name: "Herbata czarna", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 8, sortOrder: 8, estimatedPrepMinutes: 3 },
-    { name: "Herbata zielona", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 8, sortOrder: 9, estimatedPrepMinutes: 3 },
-    { name: "Herbata owocowa", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 8, sortOrder: 10, estimatedPrepMinutes: 3 },
-    { name: "Herbata z miodem", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 10, sortOrder: 11, estimatedPrepMinutes: 3 },
-    { name: "Gorąca czekolada", categoryId: catNapojeGorace.id, taxRateId: taxB.id, priceGross: 14, allergenCodes: ["MLEKO"], sortOrder: 12, estimatedPrepMinutes: 4 },
-    { name: "Grzaniec galicyjski", categoryId: catNapojeGorace.id, taxRateId: taxA.id, priceGross: 18, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 13, estimatedPrepMinutes: 5 },
+    // ========== NAPOJE (gorące, zimne, rozgrzewające, drinki 0%) ==========
+    // Napoje Rozgrzewające
+    { name: "Herbata Zimowa", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 17, sortOrder: 1, estimatedPrepMinutes: 3 },
+    { name: "Herbata z Rozmarynem", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 17, sortOrder: 2, estimatedPrepMinutes: 3 },
+    { name: "Herbata z Naszej Spiżarni", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 15, sortOrder: 3, estimatedPrepMinutes: 3 },
+    { name: "Grzaniec Czerwony", categoryId: catNapoje.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 4, estimatedPrepMinutes: 3 },
+    { name: "Grzaniec Biały", categoryId: catNapoje.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 5, estimatedPrepMinutes: 3 },
+    { name: "Dzbanek Ciepłego Kompotu 1.5L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 15, sortOrder: 6, estimatedPrepMinutes: 2 },
+    // Napoje Gorące
+    { name: "Herbata Eilles", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 10, sortOrder: 7, estimatedPrepMinutes: 3 },
+    { name: "Kawa z Ekspresu", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 12, sortOrder: 8, estimatedPrepMinutes: 3 },
+    { name: "Kawa Espresso", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 12, sortOrder: 9, estimatedPrepMinutes: 3 },
+    { name: "Kawa Cappuccino", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 14, allergenCodes: ["MLEKO"], sortOrder: 10, estimatedPrepMinutes: 4 },
+    { name: "Kawa Latte - Macchiato", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 14, allergenCodes: ["MLEKO"], sortOrder: 11, estimatedPrepMinutes: 4 },
+    { name: "Kawa Latte z Syropem", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 15, allergenCodes: ["MLEKO"], sortOrder: 12, estimatedPrepMinutes: 4 },
+    { name: "Kawa z Mlekiem", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 13, allergenCodes: ["MLEKO"], sortOrder: 13, estimatedPrepMinutes: 3 },
+    // Napoje Zimne
+    { name: "Sok 330ml", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 16, sortOrder: 14, estimatedPrepMinutes: 1 },
+    { name: "Woda Wysowianka 0.3L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 7, sortOrder: 15, estimatedPrepMinutes: 1 },
+    { name: "Karafka Wody 1L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 13, sortOrder: 16, estimatedPrepMinutes: 1 },
+    { name: "Coca Cola Zero 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 17, estimatedPrepMinutes: 1 },
+    { name: "Coca Cola 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 18, estimatedPrepMinutes: 1 },
+    { name: "Fanta 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 19, estimatedPrepMinutes: 1 },
+    { name: "Sprite 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 20, estimatedPrepMinutes: 1 },
+    { name: "Kinley 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 21, estimatedPrepMinutes: 1 },
+    { name: "Woda Kropla Beskidu 0.33L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 7, sortOrder: 22, estimatedPrepMinutes: 1 },
+    { name: "Woda Kropla Delice 0.33L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 7, sortOrder: 23, estimatedPrepMinutes: 1 },
+    { name: "Fuzetea 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 24, estimatedPrepMinutes: 1 },
+    { name: "Cappy 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 25, estimatedPrepMinutes: 1 },
+    { name: "Burn 0.25L", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 26, estimatedPrepMinutes: 1 },
+    // Drink Bar 0%
+    { name: "Blue Dream", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 19, sortOrder: 27, estimatedPrepMinutes: 4 },
+    { name: "Iced Coffee", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 21, allergenCodes: ["MLEKO"], sortOrder: 28, estimatedPrepMinutes: 4 },
+    { name: "Hugo Spritz", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 25, sortOrder: 29, estimatedPrepMinutes: 4 },
+    { name: "Pinacolada", categoryId: catNapoje.id, taxRateId: taxB.id, priceGross: 20, sortOrder: 30, estimatedPrepMinutes: 4 },
 
-    // ========== NAPOJE ZIMNE ==========
-    { name: "Coca-Cola 0.33l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 10, sortOrder: 1, estimatedPrepMinutes: 1 },
-    { name: "Coca-Cola Zero 0.33l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 10, sortOrder: 2, estimatedPrepMinutes: 1 },
-    { name: "Fanta 0.33l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 10, sortOrder: 3, estimatedPrepMinutes: 1 },
-    { name: "Sprite 0.33l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 10, sortOrder: 4, estimatedPrepMinutes: 1 },
-    { name: "Woda mineralna 0.33l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 7, sortOrder: 5, estimatedPrepMinutes: 1 },
-    { name: "Woda mineralna 0.5l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 6, estimatedPrepMinutes: 1 },
-    { name: "Woda gazowana 0.33l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 7, sortOrder: 7, estimatedPrepMinutes: 1 },
-    { name: "Woda gazowana 0.5l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 9, sortOrder: 8, estimatedPrepMinutes: 1 },
-    { name: "Sok pomarańczowy 0.3l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 12, sortOrder: 9, estimatedPrepMinutes: 1 },
-    { name: "Sok jabłkowy 0.3l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 12, sortOrder: 10, estimatedPrepMinutes: 1 },
-    { name: "Sok grejpfrutowy 0.3l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 12, sortOrder: 11, estimatedPrepMinutes: 1 },
-    { name: "Lemoniada domowa", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 14, sortOrder: 12, estimatedPrepMinutes: 3 },
-    { name: "Lemoniada malinowa", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 16, sortOrder: 13, estimatedPrepMinutes: 3 },
-    { name: "Lemoniada ogórkowa", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 16, sortOrder: 14, estimatedPrepMinutes: 3 },
-    { name: "Kompot domowy", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 8, sortOrder: 15, estimatedPrepMinutes: 1 },
-    { name: "Red Bull 0.25l", categoryId: catNapojeZimne.id, taxRateId: taxB.id, priceGross: 14, sortOrder: 16, estimatedPrepMinutes: 1 },
+    // ========== PIWO ==========
+    { name: "Żywiec z Nalewaka 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 10, allergenCodes: ["GLUTEN"], sortOrder: 1, estimatedPrepMinutes: 2 },
+    { name: "Żywiec z Nalewaka 0.3L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 8, allergenCodes: ["GLUTEN"], sortOrder: 2, estimatedPrepMinutes: 2 },
+    { name: "Heineken 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 13, allergenCodes: ["GLUTEN"], sortOrder: 3, estimatedPrepMinutes: 2 },
+    { name: "Heineken 0% 0.5L", categoryId: catPiwo.id, taxRateId: taxB.id, priceGross: 12, allergenCodes: ["GLUTEN"], sortOrder: 4, estimatedPrepMinutes: 2 },
+    { name: "Żywiec Białe 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 11, allergenCodes: ["GLUTEN"], sortOrder: 5, estimatedPrepMinutes: 2 },
+    { name: "Żywiec 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 11, allergenCodes: ["GLUTEN"], sortOrder: 6, estimatedPrepMinutes: 2 },
+    { name: "Żywiec 0% Smakowe 0.5L", categoryId: catPiwo.id, taxRateId: taxB.id, priceGross: 11, allergenCodes: ["GLUTEN"], sortOrder: 7, estimatedPrepMinutes: 2 },
+    { name: "Żywiec 0% 0.5L", categoryId: catPiwo.id, taxRateId: taxB.id, priceGross: 10, allergenCodes: ["GLUTEN"], sortOrder: 8, estimatedPrepMinutes: 2 },
+    { name: "Warka 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 11, allergenCodes: ["GLUTEN"], sortOrder: 9, estimatedPrepMinutes: 2 },
+    { name: "Warka Strong 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 11, allergenCodes: ["GLUTEN"], sortOrder: 10, estimatedPrepMinutes: 2 },
+    // Piwo Regionalne
+    { name: "Cydr Bursztynowy 330ml", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 12, sortOrder: 11, estimatedPrepMinutes: 2 },
+    { name: "Łabędzie 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 13, allergenCodes: ["GLUTEN"], sortOrder: 12, estimatedPrepMinutes: 2 },
+    { name: "Kormoran Jasny 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 15, allergenCodes: ["GLUTEN"], sortOrder: 13, estimatedPrepMinutes: 2 },
+    { name: "Kormoran Świeży 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["GLUTEN"], sortOrder: 14, estimatedPrepMinutes: 2 },
+    { name: "Śliwka w Piwie 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 15, allergenCodes: ["GLUTEN"], sortOrder: 15, estimatedPrepMinutes: 2 },
+    { name: "Rybak (Piwo Naturalne) 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["GLUTEN"], sortOrder: 16, estimatedPrepMinutes: 2 },
+    { name: "Surfer (Piwo Pszeniczne) 0.5L", categoryId: catPiwo.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["GLUTEN"], sortOrder: 17, estimatedPrepMinutes: 2 },
 
-    // ========== PIWA ==========
-    { name: "Tyskie 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["GLUTEN"], sortOrder: 1, estimatedPrepMinutes: 2 },
-    { name: "Żywiec 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["GLUTEN"], sortOrder: 2, estimatedPrepMinutes: 2 },
-    { name: "Lech Premium 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["GLUTEN"], sortOrder: 3, estimatedPrepMinutes: 2 },
-    { name: "Perła 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 13, allergenCodes: ["GLUTEN"], sortOrder: 4, estimatedPrepMinutes: 2 },
-    { name: "Kozel ciemny 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 16, allergenCodes: ["GLUTEN"], sortOrder: 5, estimatedPrepMinutes: 2 },
-    { name: "Książęce 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 15, allergenCodes: ["GLUTEN"], sortOrder: 6, estimatedPrepMinutes: 2 },
-    { name: "Pilsner Urquell 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 18, allergenCodes: ["GLUTEN"], sortOrder: 7, estimatedPrepMinutes: 2 },
-    { name: "Heineken 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 16, allergenCodes: ["GLUTEN"], sortOrder: 8, estimatedPrepMinutes: 2 },
-    { name: "Paulaner 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 18, allergenCodes: ["GLUTEN"], sortOrder: 9, estimatedPrepMinutes: 2 },
-    { name: "Piwo pszeniczne 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 16, allergenCodes: ["GLUTEN"], sortOrder: 10, estimatedPrepMinutes: 2 },
-    { name: "Piwo IPA 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 18, allergenCodes: ["GLUTEN"], sortOrder: 11, estimatedPrepMinutes: 2 },
-    { name: "Piwo bezalkoholowe 0.5l", categoryId: catPiwa.id, taxRateId: taxB.id, priceGross: 12, allergenCodes: ["GLUTEN"], sortOrder: 12, estimatedPrepMinutes: 2 },
-    { name: "Radler cytrynowy 0.5l", categoryId: catPiwa.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["GLUTEN"], sortOrder: 13, estimatedPrepMinutes: 2 },
-
-    // ========== WINA ==========
-    { name: "Wino czerwone wytrawne kiel", nameShort: "Wino czerw. wytrawne kiel", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 18, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 1, estimatedPrepMinutes: 2 },
-    { name: "Wino czerwone półwytrawne kiel", nameShort: "Wino czerw. półwytrawne kiel", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 18, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 2, estimatedPrepMinutes: 2 },
-    { name: "Wino białe wytrawne kiel", nameShort: "Wino białe wytrawne kiel", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 16, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 3, estimatedPrepMinutes: 2 },
-    { name: "Wino białe półwytrawne kiel", nameShort: "Wino białe półwytrawne kiel", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 16, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 4, estimatedPrepMinutes: 2 },
-    { name: "Wino różowe kiel", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 16, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 5, estimatedPrepMinutes: 2 },
-    { name: "Prosecco kiel", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 22, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 6, estimatedPrepMinutes: 2 },
-    { name: "Szampan kiel", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 38, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 7, estimatedPrepMinutes: 2 },
-    { name: "Wino czerwone but. 0.75l", nameShort: "Wino czerwone butelka", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 75, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 8, estimatedPrepMinutes: 3 },
-    { name: "Wino białe but. 0.75l", nameShort: "Wino białe butelka", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 68, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 9, estimatedPrepMinutes: 3 },
-    { name: "Prosecco but. 0.75l", nameShort: "Prosecco butelka", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 95, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 10, estimatedPrepMinutes: 3 },
-    { name: "Aperol Spritz", categoryId: catWina.id, taxRateId: taxA.id, priceGross: 26, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 11, estimatedPrepMinutes: 4 },
-
-    // ========== ALKOHOLE MOCNE ==========
-    { name: "Wódka Żubrówka 50ml", nameShort: "Żubrówka 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 12, sortOrder: 1, estimatedPrepMinutes: 1 },
-    { name: "Wódka Wyborowa 50ml", nameShort: "Wyborowa 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 12, sortOrder: 2, estimatedPrepMinutes: 1 },
-    { name: "Wódka Finlandia 50ml", nameShort: "Finlandia 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 14, sortOrder: 3, estimatedPrepMinutes: 1 },
-    { name: "Wódka Grey Goose 50ml", nameShort: "Grey Goose 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 28, sortOrder: 4, estimatedPrepMinutes: 1 },
-    { name: "Whisky Jameson 50ml", nameShort: "Jameson 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 18, sortOrder: 5, estimatedPrepMinutes: 1 },
-    { name: "Whisky Jack Daniel's 50ml", nameShort: "Jack Daniel's 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 22, sortOrder: 6, estimatedPrepMinutes: 1 },
-    { name: "Whisky Johnnie Walker 50ml", nameShort: "J. Walker 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 24, sortOrder: 7, estimatedPrepMinutes: 1 },
-    { name: "Whisky Glenfiddich 50ml", nameShort: "Glenfiddich 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 38, sortOrder: 8, estimatedPrepMinutes: 1 },
-    { name: "Rum Bacardi 50ml", nameShort: "Bacardi 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 16, sortOrder: 9, estimatedPrepMinutes: 1 },
-    { name: "Rum Havana Club 50ml", nameShort: "Havana Club 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 18, sortOrder: 10, estimatedPrepMinutes: 1 },
-    { name: "Gin Beefeater 50ml", nameShort: "Beefeater 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 18, sortOrder: 11, estimatedPrepMinutes: 1 },
-    { name: "Gin Bombay Sapphire 50ml", nameShort: "Bombay Sapphire 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 22, sortOrder: 12, estimatedPrepMinutes: 1 },
-    { name: "Koniak Hennessy 50ml", nameShort: "Hennessy 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 32, sortOrder: 13, estimatedPrepMinutes: 1 },
-    { name: "Tequila Sierra 50ml", nameShort: "Sierra 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 16, sortOrder: 14, estimatedPrepMinutes: 1 },
-    { name: "Jägermeister 50ml", nameShort: "Jäger 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 16, sortOrder: 15, estimatedPrepMinutes: 1 },
-    { name: "Likier Baileys 50ml", nameShort: "Baileys 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 16, allergenCodes: ["MLEKO"], sortOrder: 16, estimatedPrepMinutes: 1 },
-    { name: "Likier Amaretto 50ml", nameShort: "Amaretto 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 14, allergenCodes: ["ORZECHY"], sortOrder: 17, estimatedPrepMinutes: 1 },
-    { name: "Nalewka wiśniowa 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 14, sortOrder: 18, estimatedPrepMinutes: 1 },
-    { name: "Nalewka pigwowa 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 14, sortOrder: 19, estimatedPrepMinutes: 1 },
-    { name: "Śliwowica 50ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 18, sortOrder: 20, estimatedPrepMinutes: 1 },
-    { name: "Miód pitny 100ml", categoryId: catAlkohole.id, taxRateId: taxA.id, priceGross: 22, sortOrder: 21, estimatedPrepMinutes: 2 },
+    // ========== ALKOHOL (wina, wódki, whisky, drinki, shoty, likiery) ==========
+    // Likiery
+    { name: "Grand Marnier 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 19, sortOrder: 1, estimatedPrepMinutes: 1 },
+    // Wódka
+    { name: "Nemiroff 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 7, sortOrder: 2, estimatedPrepMinutes: 1 },
+    { name: "Gin Bulldog 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 15, sortOrder: 3, estimatedPrepMinutes: 1 },
+    { name: "Tequila Sierra Gold 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 15, sortOrder: 4, estimatedPrepMinutes: 1 },
+    { name: "Sierra Silver 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 6, sortOrder: 5, estimatedPrepMinutes: 1 },
+    { name: "Krupnik 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 7, sortOrder: 6, estimatedPrepMinutes: 1 },
+    { name: "Żubrówka 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 9, sortOrder: 7, estimatedPrepMinutes: 1 },
+    { name: "Finlandia Czysta 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 9, sortOrder: 8, estimatedPrepMinutes: 1 },
+    { name: "Wyborowa 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 9, sortOrder: 9, estimatedPrepMinutes: 1 },
+    // Deska Degustacyjna
+    { name: "Deska 4 Smaków Nemiroff Inked", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 25, sortOrder: 10, estimatedPrepMinutes: 2 },
+    // Whisky
+    { name: "Glendalough Pot Still 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 19, sortOrder: 11, estimatedPrepMinutes: 1 },
+    { name: "Bearface 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 18, sortOrder: 12, estimatedPrepMinutes: 1 },
+    { name: "Chivas Regal 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 18, sortOrder: 13, estimatedPrepMinutes: 1 },
+    { name: "Barcelo Gran Anejo 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 15, sortOrder: 14, estimatedPrepMinutes: 1 },
+    { name: "Johnnie Walker Black Label 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 18, sortOrder: 15, estimatedPrepMinutes: 1 },
+    { name: "Johnnie Walker Red Label 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 12, sortOrder: 16, estimatedPrepMinutes: 1 },
+    { name: "Jack Daniels 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 12, sortOrder: 17, estimatedPrepMinutes: 1 },
+    { name: "Ballantine's 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 10, sortOrder: 18, estimatedPrepMinutes: 1 },
+    { name: "Jagermeister 40ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 12, sortOrder: 19, estimatedPrepMinutes: 1 },
+    // Drinki
+    { name: "Mojito", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 21, sortOrder: 20, estimatedPrepMinutes: 4 },
+    { name: "Bearface Sour", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 22, sortOrder: 21, estimatedPrepMinutes: 4 },
+    { name: "Cuba Libre", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 21, sortOrder: 22, estimatedPrepMinutes: 4 },
+    { name: "Sex on the Beach 230ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 26, sortOrder: 23, estimatedPrepMinutes: 4 },
+    { name: "Tequila Sunrise 230ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 26, sortOrder: 24, estimatedPrepMinutes: 4 },
+    // Shoty
+    { name: "Wściekły Pies", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 12, sortOrder: 25, estimatedPrepMinutes: 1 },
+    // Wina
+    { name: "Storks Moscato Rose 250ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 19, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 26, estimatedPrepMinutes: 2 },
+    { name: "Gruner Veltliner 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 94, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 27, estimatedPrepMinutes: 2 },
+    { name: "Pinot Grigio 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 94, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 28, estimatedPrepMinutes: 2 },
+    { name: "Alice 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 90, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 29, estimatedPrepMinutes: 2 },
+    { name: "AKA Primitivo Rosato 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 96, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 30, estimatedPrepMinutes: 2 },
+    { name: "Lirica Primitivo di Manduria 750ml", nameShort: "Lirica Primitivo 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 98, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 31, estimatedPrepMinutes: 2 },
+    { name: "Wino Polskie 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 42, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 32, estimatedPrepMinutes: 2 },
+    { name: "Ozzi Chardonnay Białe 187ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 19, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 33, estimatedPrepMinutes: 2 },
+    { name: "Ozzi Shiraz Czerwone 187ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 19, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 34, estimatedPrepMinutes: 2 },
+    { name: "Prosecco 200ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 29, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 35, estimatedPrepMinutes: 2 },
+    { name: "Pecunia Bianco 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 47, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 36, estimatedPrepMinutes: 2 },
+    { name: "Pecunia Moscato 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 57, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 37, estimatedPrepMinutes: 2 },
+    { name: "Mołdawskie Storks 750ml", categoryId: catAlkohol.id, taxRateId: taxA.id, priceGross: 42, allergenCodes: ["DWUTLENEK_SIARKI"], sortOrder: 38, estimatedPrepMinutes: 2 },
   ];
 
   const allergenByCode = await prisma.allergen.findMany().then((list) => Object.fromEntries(list.map((a) => [a.code, a.id])));
@@ -540,7 +557,7 @@ async function main() {
   }
 
   // Kawy z wyborem mleka
-  const coffeeProducts = ["Kawa latte", "Cappuccino", "Flat white"];
+  const coffeeProducts = ["Kawa Cappuccino", "Kawa Latte - Macchiato", "Kawa Latte z Syropem", "Kawa z Mlekiem"];
   for (const name of coffeeProducts) {
     const pid = productsByName[name];
     if (pid) {
@@ -611,7 +628,7 @@ async function main() {
   };
   await ensureKDSStation("Kuchnia Ciepła", 1, [catZupy.id, catMiesne.id, catRybne.id, catWege.id]);
   await ensureKDSStation("Kuchnia Zimna", 2, [catPrzystawki.id, catDesery.id]);
-  await ensureKDSStation("Bar", 3, [catNapojeGorace.id, catNapojeZimne.id, catPiwa.id, catWina.id, catAlkohole.id]);
+  await ensureKDSStation("Bar", 3, [catNapoje.id, catPiwo.id, catAlkohol.id]);
   console.log("  ✓ Stacje KDS: Kuchnia Ciepła, Kuchnia Zimna, Bar");
 
   // 11. SystemConfig
@@ -656,7 +673,7 @@ async function main() {
         name: "Happy Hour Piwa",
         type: "happy_hour",
         rulesJson: {
-          categoryId: catPiwa.id,
+          categoryId: catPiwo.id,
           discountPercent: 20,
           timeFrom: "15:00",
           timeTo: "18:00",
