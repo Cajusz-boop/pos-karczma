@@ -1,0 +1,43 @@
+---
+description: Kontekst projektu POS Karczma - hosting, infrastruktura, deployment
+alwaysApply: true
+---
+
+# Kontekst projektu POS Karczma
+
+## Hosting i infrastruktura
+
+- **Hosting**: Hetzner VPS (NIE MyDevil)
+- **Produkcja URL**: https://pos.karczma-labedz.pl
+- **Port produkcyjny**: 3001 (hotel-pms na 3000)
+- **Ścieżka na serwerze**: /var/www/pos/
+
+## Baza danych
+
+- **Typ**: MySQL/MariaDB
+- **Credentials**: patrz `.env.deploy.hetzner` (gitignored)
+
+## SSH dostęp do Hetzner
+
+Credentials w `.env.deploy.hetzner` - klucz SSH: `~/.ssh/hetzner_key`
+
+## Jak wykonać migrację SQL na produkcji
+
+1. Odczytaj credentials z `.env.deploy.hetzner`
+2. Połącz się przez SSH: `ssh -i ~/.ssh/hetzner_key root@[IP]`
+3. Wykonaj SQL: `mysql -u [user] -p'[pass]' pos_karczma -e "SQL"`
+
+## Deployment
+
+- **Kod**: push do GitHub → webhook auto-deploy LUB `.\scripts\deploy-to-hetzner.ps1`
+- **Migracje bazy**: wymagają ręcznego wykonania przez SSH
+- **PM2**: `pm2 restart pos-karczma` / `pm2 logs pos-karczma`
+- **Konfiguracja**: `.env.deploy.hetzner` (gitignored, zawiera wszystkie credentials)
+
+## Stack technologiczny
+
+- Next.js 14 (App Router)
+- Prisma ORM
+- Dexie.js (offline-first IndexedDB)
+- TailwindCSS
+- TypeScript

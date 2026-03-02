@@ -223,6 +223,29 @@ Typowe przyczyny: błąd bazy danych, brak .env, port 3001 zajęty.
 mysql -u pos -p pos_karczma -e "SHOW TABLES;"
 ```
 
+### Ręczna migracja SQL (z Windows PowerShell)
+
+Gdy trzeba wykonać SQL na produkcyjnej bazie (np. dodać wartość do ENUM):
+
+```powershell
+# Credentials z .env.deploy.hetzner
+$keyPath = "$env:USERPROFILE\.ssh\hetzner_key"
+$cmd = @'
+echo "TWOJE_SQL_TUTAJ" | mysql -u $DB_USER -p'$DB_PASS' $DB_NAME && echo "MIGRATION_OK"
+'@
+$cmd | ssh -i $keyPath $SSH_USER@$SSH_HOST "bash -s"
+```
+
+Weryfikacja:
+```powershell
+$cmd = @'
+mysql -u $DB_USER -p'$DB_PASS' $DB_NAME -e "DESCRIBE NazwaTabeli;"
+'@
+$cmd | ssh -i $keyPath $SSH_USER@$SSH_HOST "bash -s"
+```
+
+**Uwaga:** Rzeczywiste wartości ($SSH_HOST, $DB_USER, $DB_PASS itp.) znajdują się w `.env.deploy.hetzner`
+
 ### Restart wszystkiego
 ```bash
 pm2 restart all
