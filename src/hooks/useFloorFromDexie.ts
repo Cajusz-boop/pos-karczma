@@ -36,6 +36,8 @@ export interface TableView {
   status: TableStatus;
   positionX: number;
   positionY: number;
+  width: number;
+  height: number;
   assignedUserId: string | null;
   assignedUserName: string | null;
   assignedUserInitials: string | null;
@@ -212,8 +214,10 @@ export function useFloorFromDexie(): { rooms: RoomView[]; isLoading: boolean } {
           seats: t.seats,
           shape: t.shape,
           status: effectiveStatus,
-          positionX: t.positionX,
-          positionY: t.positionY,
+          positionX: t.positionX ?? 0,
+          positionY: t.positionY ?? 0,
+          width: t.width ?? (t.shape === "ROUND" ? 56 : t.shape === "LONG" ? 120 : 80),
+          height: t.height ?? (t.shape === "ROUND" ? 56 : 60),
           assignedUserId: order?.userId ?? null,
           assignedUserName: order?.userName ?? null,
           assignedUserInitials: order?.userName

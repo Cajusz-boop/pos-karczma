@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, memo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -35,6 +35,7 @@ import {
   X,
   Hotel,
   RefreshCw,
+  LayoutGrid,
 } from "lucide-react";
 
 type TableStatus = "FREE" | "OCCUPIED" | "BILL_REQUESTED" | "RESERVED" | "BANQUET_MODE" | "INACTIVE";
@@ -329,8 +330,313 @@ const TableCard = memo(function TableCard({
 
 TableCard.displayName = "TableCard";
 
+const TABLE_W = 80;
+const TABLE_H = 60;
+const TABLE_GAP = 20;
+
+/** Kompaktowa karta stolika dla widoku planu sali */
+const FloorPlanTableCard = memo(function FloorPlanTableCard({
+  table,
+  displayShape,
+  displaySeats,
+  onClick,
+  onHover,
+  onContextAction,
+  style,
+}: {
+  table: TableView;
+  displayShape?: "rect" | "oval";
+  displaySeats?: number;
+  onClick: () => void;
+  onHover?: () => void;
+  onContextAction?: (action: "bill" | "move" | "open") => void;
+  style: React.CSSProperties;
+}) {
+  const cfg = STATUS_CONFIG[table.status];
+  const hasOrder = !!table.activeOrder;
+  const hasReservation = !hasOrder && !!table.nextReservation;
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const shapeClass =
+    displayShape === "oval"
+      ? "rounded-[9999px]"
+      : "rounded-lg";
+
+  return (
+    <>
+      <button
+        type="button"
+        className={cn(
+          "absolute flex flex-col items-center justify-center border-2 p-1 transition-all duration-150 active:scale-95 shadow-md",
+          shapeClass,
+          cfg.bg
+        )}
+        style={style}
+        onClick={() => { if (!contextMenu) onClick(); }}
+        onMouseEnter={onHover}
+        onTouchStart={onHover}
+        onContextMenu={(e) => {
+          if (hasOrder) {
+            e.preventDefault();
+            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            setContextMenu({ x: rect.left + rect.width / 2, y: rect.bottom });
+          }
+        }}
+        disabled={table.status === "INACTIVE"}
+      >
+        {hasOrder && table.assignedUserInitials && (
+          <span className="absolute left-0.5 top-0.5 rounded bg-black/30 px-1 text-[8px] font-bold">
+            {table.assignedUserInitials}
+          </span>
+        )}
+        {table.hasKitchenAlert && (
+          <span className="absolute right-0.5 top-0.5">
+            <BellRing className="h-3 w-3 animate-bounce" />
+          </span>
+        )}
+        <span className="font-mono text-sm font-black leading-none">{table.number}</span>
+        <span className="text-[9px] opacity-80">{displaySeats ?? table.seats} os.</span>
+        {hasOrder && (
+          <span className="text-[9px] font-bold tabular-nums">{table.activeOrder!.totalGross.toFixed(0)} zł</span>
+        )}
+        {!hasOrder && !hasReservation && table.status === "FREE" && (
+          <span className="text-[8px] uppercase opacity-70">{cfg.label}</span>
+        )}
+      </button>
+      {contextMenu && (
+        <>
+          <div className="fixed inset-0 z-50" onClick={() => setContextMenu(null)} />
+          <div
+            className="fixed z-50 animate-in fade-in-0 zoom-in-95 rounded-lg border bg-card p-1 shadow-xl"
+            style={{
+              left: Math.min(contextMenu.x - 70, window.innerWidth - 160),
+              top: Math.min(contextMenu.y + 4, window.innerHeight - 120),
+            }}
+          >
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-muted"
+              onClick={() => { setContextMenu(null); onContextAction?.("bill"); }}
+            >
+              <CreditCard className="h-3 w-3" /> Rachunek
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-muted"
+              onClick={() => { setContextMenu(null); onContextAction?.("move"); }}
+            >
+              <ArrowRightLeft className="h-3 w-3" /> Przenieś
+            </button>
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-muted"
+              onClick={() => { setContextMenu(null); onClick(); }}
+            >
+              <ShoppingBag className="h-3 w-3" /> Otwórz
+            </button>
+          </div>
+        </>
+      )}
+    </>
+  );
+});
+
+FloorPlanTableCard.displayName = "FloorPlanTableCard";
+
+/**
+ * Preset układu BistroMo: 4 kolumny, prostokąty 6-os. (1–8), owale 4-os. (9+).
+ * Kolumna 1: 5,6,7,8 | Kolumna 2: 9,10(,14,15) | Kolumna 3: 13,12,11 | Kolumna 4: 4,3,2,1
+ */
+const BISTROMO_PRESET: Record<
+  number,
+  { col: number; row: number; shape: "rect" | "oval" }
+> = {
+  5: { col: 0, row: 0, shape: "rect" },
+  6: { col: 0, row: 1, shape: "rect" },
+  7: { col: 0, row: 2, shape: "rect" },
+  8: { col: 0, row: 3, shape: "rect" },
+  9: { col: 1, row: 0, shape: "oval" },
+  10: { col: 1, row: 1, shape: "oval" },
+  14: { col: 1, row: 2, shape: "oval" },
+  15: { col: 1, row: 3, shape: "oval" },
+  13: { col: 2, row: 0, shape: "oval" },
+  12: { col: 2, row: 1, shape: "oval" },
+  11: { col: 2, row: 2, shape: "oval" },
+  4: { col: 3, row: 0, shape: "rect" },
+  3: { col: 3, row: 1, shape: "rect" },
+  2: { col: 3, row: 2, shape: "rect" },
+  1: { col: 3, row: 3, shape: "rect" },
+};
+
+const RECT_W = 92;
+const RECT_H = 52;
+const OVAL_W = 78;
+const OVAL_H = 44;
+const COL_GAP = 48;
+const ROW_GAP = 52;
+const PLAN_PAD = 24;
+
+function useFloorPlanLayout(tables: TableView[]) {
+  return useMemo(() => {
+    if (tables.length === 0) return { positions: new Map(), canvasW: 400, canvasH: 300 };
+    const tableNumbers = new Set(tables.map((t) => t.number));
+    const usePreset =
+      tables.length >= 13 &&
+      [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].every((n) => tableNumbers.has(n));
+
+    const positions = new Map<string, { x: number; y: number; w: number; h: number; displayShape: "rect" | "oval"; displaySeats: number }>();
+
+    if (usePreset) {
+      const colX = [
+        PLAN_PAD,
+        PLAN_PAD + RECT_W + COL_GAP,
+        PLAN_PAD + RECT_W + COL_GAP + OVAL_W + COL_GAP,
+        PLAN_PAD + RECT_W + COL_GAP + OVAL_W + COL_GAP + OVAL_W + COL_GAP,
+      ];
+      tables.forEach((t) => {
+        const preset = BISTROMO_PRESET[t.number];
+        if (!preset) return;
+        const w = preset.shape === "rect" ? RECT_W : OVAL_W;
+        const h = preset.shape === "rect" ? RECT_H : OVAL_H;
+        const x = colX[preset.col];
+        const y = PLAN_PAD + preset.row * (ROW_GAP + RECT_H);
+        const displaySeats = preset.shape === "rect" ? 6 : 4;
+        positions.set(t.id, { x, y, w, h, displayShape: preset.shape, displaySeats });
+      });
+      const canvasW = PLAN_PAD * 2 + 2 * RECT_W + 2 * OVAL_W + 3 * COL_GAP;
+      const canvasH = PLAN_PAD * 2 + 4 * RECT_H + 3 * ROW_GAP;
+      return { positions, canvasW, canvasH };
+    }
+
+    const hasAnyPosition = tables.some((t) => t.positionX !== 0 || t.positionY !== 0);
+
+    if (hasAnyPosition) {
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      const temp = new Map<string, { x: number; y: number; w: number; h: number }>();
+      for (const t of tables) {
+        const w = t.width ?? (t.shape === "ROUND" ? 56 : t.shape === "LONG" ? 120 : TABLE_W);
+        const h = t.height ?? (t.shape === "ROUND" ? 56 : TABLE_H);
+        temp.set(t.id, { x: t.positionX, y: t.positionY, w, h });
+        minX = Math.min(minX, t.positionX);
+        minY = Math.min(minY, t.positionY);
+        maxX = Math.max(maxX, t.positionX + w);
+        maxY = Math.max(maxY, t.positionY + h);
+      }
+      const pad = 24;
+      const canvasW = Math.max(400, maxX - minX + pad * 2);
+      const canvasH = Math.max(300, maxY - minY + pad * 2);
+      const displayShape = (t: TableView): "rect" | "oval" =>
+        t.shape === "ROUND" ? "oval" : "rect";
+      Array.from(temp.entries()).forEach(([id, p]) => {
+        const t = tables.find((x) => x.id === id);
+        positions.set(id, {
+          x: p.x - minX + pad,
+          y: p.y - minY + pad,
+          w: p.w,
+          h: p.h,
+          displayShape: t ? displayShape(t) : "rect",
+          displaySeats: t?.seats ?? 4,
+        });
+      });
+      return { positions, canvasW, canvasH };
+    }
+
+    const cols = Math.ceil(Math.sqrt(tables.length));
+    const sorted = [...tables].sort((a, b) => a.number - b.number);
+    let maxX = 0, maxY = 0;
+    const displayShape = (t: TableView): "rect" | "oval" =>
+      t.shape === "ROUND" ? "oval" : "rect";
+    sorted.forEach((t, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const w = t.width ?? (t.shape === "ROUND" ? 56 : t.shape === "LONG" ? 120 : TABLE_W);
+      const h = t.height ?? (t.shape === "ROUND" ? 56 : TABLE_H);
+      const x = col * (TABLE_W + TABLE_GAP) + TABLE_GAP;
+      const y = row * (TABLE_H + TABLE_GAP) + TABLE_GAP;
+      positions.set(t.id, { x, y, w, h, displayShape: displayShape(t), displaySeats: t.seats });
+      maxX = Math.max(maxX, x + w);
+      maxY = Math.max(maxY, y + h);
+    });
+    const pad = 24;
+    return { positions, canvasW: maxX + pad, canvasH: maxY + pad };
+  }, [tables]);
+}
+
+function FloorPlanView({
+  tables,
+  roomId,
+  onTableClick,
+  onTableHover,
+  onContextAction,
+}: {
+  tables: TableView[];
+  roomId: string;
+  onTableClick: (table: TableView, roomId: string) => void;
+  onTableHover: (table: TableView) => void;
+  onContextAction: (table: TableView, action: "bill" | "move" | "open") => void;
+}) {
+  const { positions, canvasW, canvasH } = useFloorPlanLayout(tables);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      const r = el.getBoundingClientRect();
+      const s = Math.min(r.width / canvasW, r.height / canvasH, 1);
+      setScale(Math.max(0.3, s));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [canvasW, canvasH]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="flex h-full min-h-0 w-full items-center justify-center overflow-hidden bg-muted/20 px-2 py-2"
+    >
+      <div
+        className="relative shrink-0"
+        style={{
+          width: canvasW * scale,
+          height: canvasH * scale,
+        }}
+      >
+        <div
+          className="absolute inset-0 origin-top-left"
+          style={{
+            width: canvasW,
+            height: canvasH,
+            transform: `scale(${scale})`,
+            backgroundImage: "radial-gradient(circle, hsl(var(--border)) 1px, transparent 1px)",
+            backgroundSize: "20px 20px",
+          }}
+        >
+        {tables.map((table) => {
+          const pos = positions.get(table.id);
+          if (!pos) return null;
+          return (
+            <FloorPlanTableCard
+              key={table.id}
+              table={table}
+              displayShape={pos.displayShape}
+              displaySeats={pos.displaySeats}
+              onClick={() => onTableClick(table, roomId)}
+              onHover={() => onTableHover(table)}
+              onContextAction={(action) => onContextAction(table, action)}
+              style={{ position: "absolute", left: pos.x, top: pos.y, width: pos.w, height: pos.h }}
+            />
+          );
+        })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function PosPageClient() {
   const router = useRouter();
+  const pathname = usePathname();
   const currentUser = useAuthStore((s) => s.currentUser);
   const logout = useAuthStore((s) => s.logout);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
@@ -341,6 +647,7 @@ export function PosPageClient() {
   const [time, setTime] = useState("");
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
   const [isResetting, setIsResetting] = useState(false);
+  const [tableViewMode, setTableViewMode] = useState<"grid" | "floorPlan">("grid");
 
   useEffect(() => {
     const tick = () =>
@@ -485,42 +792,6 @@ export function PosPageClient() {
       return;
     }
     await handleStartOrderWithCount(num);
-  };
-
-  const handleTakeaway = async () => {
-    if (!currentUser) return;
-    setCreating(true);
-    setCreateError("");
-    try {
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: currentUser.id,
-          guestCount: 1,
-          type: "TAKEAWAY",
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setCreateError(data.error ?? "Błąd tworzenia zamówienia na wynos");
-        setCreating(false);
-        return;
-      }
-      await hydrateOrderFromApiCreate({
-        serverId: data.order.id,
-        orderNumber: data.order.orderNumber,
-        type: "TAKEAWAY",
-        userId: currentUser.id,
-        userName: currentUser.name ?? "",
-        guestCount: 1,
-      });
-      router.push(`/pos/order/${data.order.id}`);
-    } catch {
-      setCreateError("Błąd połączenia");
-    } finally {
-      setCreating(false);
-    }
   };
 
   const handleQuickReceipt = async () => {
@@ -693,8 +964,8 @@ export function PosPageClient() {
         onDismiss={handleDismissAlert}
       />
 
-      {/* === TABLE GRID === */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
+      {/* === TABLE GRID lub PLAN SALI === */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {isLoading ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
             <p className="text-lg font-medium text-muted-foreground">Ładowanie sal i stolików…</p>
@@ -714,32 +985,101 @@ export function PosPageClient() {
             )}
           </div>
         ) : selectedRoom ? (
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-            {selectedRoom.tables.map((table) => (
-              <TableCard
-                key={table.id}
-                table={table}
-                onClick={() => handleTableClick(table, selectedRoom.id)}
-                onHover={() => handleTableHover(table)}
-                onContextAction={(action) => {
-                  if (!table.activeOrder) return;
-                  const orderId = table.activeOrder.id;
-                  if (action === "bill") {
-                    router.push(`/pos/order/${orderId}?action=bill`);
-                  } else if (action === "move") {
-                    router.push(`/pos/order/${orderId}?action=move`);
-                  } else if (action === "open") {
-                    router.push(`/pos/order/${orderId}`);
-                  }
-                }}
-              />
-            ))}
-          </div>
+          tableViewMode === "grid" ? (
+            <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                {selectedRoom.tables.map((table) => (
+                  <TableCard
+                    key={table.id}
+                    table={table}
+                    onClick={() => handleTableClick(table, selectedRoom.id)}
+                    onHover={() => handleTableHover(table)}
+                    onContextAction={(action) => {
+                      if (!table.activeOrder) return;
+                      const orderId = table.activeOrder.id;
+                      if (action === "bill") {
+                        router.push(`/pos/order/${orderId}?action=bill`);
+                      } else if (action === "move") {
+                        router.push(`/pos/order/${orderId}?action=move`);
+                      } else if (action === "open") {
+                        router.push(`/pos/order/${orderId}`);
+                      }
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <FloorPlanView
+              tables={selectedRoom.tables}
+              roomId={selectedRoom.id}
+              onTableClick={handleTableClick}
+              onTableHover={handleTableHover}
+              onContextAction={(table, action) => {
+                if (!table.activeOrder) return;
+                const orderId = table.activeOrder.id;
+                if (action === "bill") router.push(`/pos/order/${orderId}?action=bill`);
+                else if (action === "move") router.push(`/pos/order/${orderId}?action=move`);
+                else if (action === "open") router.push(`/pos/order/${orderId}`);
+              }}
+            />
+          )
         ) : null}
       </div>
 
       {/* === BOTTOM ACTION BAR === */}
       <div className="flex flex-wrap items-center gap-2 border-t bg-card px-3 py-2 sm:px-4 sm:py-3">
+        <Button
+          variant="outline"
+          size="sm"
+          className={cn(
+            "gap-1.5 text-xs sm:text-sm",
+            pathname === "/pos"
+              ? "bg-brand-brown/10 border-brand-brown/30 hover:bg-brand-brown/20"
+              : ""
+          )}
+          onClick={() => {
+            if (pathname === "/pos") {
+              setTableViewMode((prev) => (prev === "grid" ? "floorPlan" : "grid"));
+            } else {
+              router.push("/pos");
+            }
+          }}
+          title={tableViewMode === "grid" ? "Plan sali (układ stolików)" : "Siatka stolików"}
+        >
+          <LayoutGrid className="h-4 w-4" />
+          <span className="hidden sm:inline">
+            {tableViewMode === "grid" ? "Stoliki" : "Plan sali"}
+          </span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs sm:text-sm bg-brand-brown/10 border-brand-brown/30 hover:bg-brand-brown/20"
+          onClick={() => router.push("/hotel-orders")}
+        >
+          <Hotel className="h-4 w-4" />
+          <span className="hidden sm:inline">Hotel</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs sm:text-sm"
+          onClick={handleQuickReceipt}
+          disabled={creating}
+        >
+          <Receipt className="h-4 w-4" />
+          <span className="hidden sm:inline">Szybki paragon</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 text-xs sm:text-sm"
+          onClick={() => router.push("/orders")}
+        >
+          <ClipboardList className="h-4 w-4" />
+          <span className="hidden sm:inline">Zamówienia</span>
+        </Button>
         <Button
           variant="outline"
           size="sm"
@@ -756,44 +1096,6 @@ export function PosPageClient() {
               {kitchenAlertsCount}
             </span>
           )}
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs sm:text-sm"
-          onClick={handleTakeaway}
-          disabled={creating}
-        >
-          <ShoppingBag className="h-4 w-4" />
-          <span className="hidden sm:inline">Na wynos</span>
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs sm:text-sm"
-          onClick={handleQuickReceipt}
-          disabled={creating}
-        >
-          <Receipt className="h-4 w-4" />
-          <span className="hidden sm:inline">Szybki paragon</span>
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs sm:text-sm bg-brand-brown/10 border-brand-brown/30 hover:bg-brand-brown/20"
-          onClick={() => router.push("/hotel-orders")}
-        >
-          <Hotel className="h-4 w-4" />
-          <span className="hidden sm:inline">Hotel</span>
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs sm:text-sm"
-          onClick={() => router.push("/orders")}
-        >
-          <ClipboardList className="h-4 w-4" />
-          <span className="hidden sm:inline">Zamówienia</span>
         </Button>
 
         <div className="flex-1" />
