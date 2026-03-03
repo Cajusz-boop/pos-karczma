@@ -2,14 +2,15 @@ import { db, type LocalOrder, type LocalOrderItem } from "./offline-db";
 import { safeFetch } from "@/lib/utils/safe-fetch";
 import { getApiBaseUrl } from "@/lib/utils/get-api-base";
 
+// rooms + tables na początku — krytyczne dla POS, małe tabele; products (duża) na końcu
 const SYNC_TABLES = [
-  "products",
   "categories",
   "rooms",
   "tables",
   "modifiers",
   "tax-rates",
   "allergens",
+  "products",
 ] as const;
 
 type SyncTable = (typeof SYNC_TABLES)[number];
@@ -20,16 +21,39 @@ interface SyncPullResponse<T> {
   hasMore: boolean;
 }
 
-async function fetchTable<T>(table: SyncTable, since?: string): Promise<SyncPullResponse<T>> {
+const SYNC_TIMEOUT_MS = 30000; // 30s — na chmurze sync może trwać dłużej
+const SYNC_RETRY_TABLES = ["tables", "rooms"] as const; // Krytyczne dla POS — retry przy błędzie
+
+async function fetchTable<T>(
+  table: SyncTable,
+  since?: string,
+  attempt = 1
+): Promise<SyncPullResponse<T>> {
   if (typeof window === "undefined") throw new Error("fetchTable is client-only");
   const base = await getApiBaseUrl();
   const url = new URL(`/api/sync/pull`, base);
   url.searchParams.set("table", table);
   if (since) url.searchParams.set("since", since);
 
-  const { data, error, offline } = await safeFetch<SyncPullResponse<T>>(url.toString());
+  const { data, error, offline } = await safeFetch<SyncPullResponse<T>>(
+    url.toString(),
+    { credentials: "include" },
+    { timeoutMs: SYNC_TIMEOUT_MS }
+  );
+
   if (offline) throw new Error(`Sync pull failed for ${table}: offline`);
-  if (error || !data) throw new Error(`Sync pull failed for ${table}: ${error ?? "invalid response"}`);
+  if (error || !data) {
+    const errMsg = `Sync pull failed for ${table}: ${error ?? "invalid response"}`;
+    const shouldRetry =
+      attempt < 3 &&
+      (SYNC_RETRY_TABLES as readonly string[]).includes(table) &&
+      !error?.includes("401");
+    if (shouldRetry) {
+      await new Promise((r) => setTimeout(r, 2000));
+      return fetchTable<T>(table, since, attempt + 1);
+    }
+    throw new Error(errMsg);
+  }
   return data;
 }
 
@@ -136,7 +160,11 @@ export async function syncOpenOrders(): Promise<{ orders: number; items: number 
     const base = await getApiBaseUrl();
     const url = `${base}/api/sync/open-orders`;
 
-    const { data, error, offline } = await safeFetch<OpenOrdersSyncResponse>(url);
+    const { data, error, offline } = await safeFetch<OpenOrdersSyncResponse>(
+      url,
+      { credentials: "include" },
+      { timeoutMs: SYNC_TIMEOUT_MS }
+    );
     
     if (offline) {
       console.warn("[SyncOpenOrders] Offline, skipping sync");

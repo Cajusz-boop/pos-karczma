@@ -9,6 +9,8 @@
     "dev:turbo": "next dev --turbo",
     "build": "next build",
     "build:cap": "npx tsx scripts/build-capacitor.ts",
+    "build:cap:live": "npx tsx scripts/build-capacitor.ts --live",
+    "cap:open": "npx cap open android",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start",
     "lint": "next lint",

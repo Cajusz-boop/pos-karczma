@@ -3,6 +3,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 // Tryb live server TYLKO gdy jawnie ustawiono CAPACITOR_LIVE_SERVER=1
 // Domyślnie APK używa bundla z out/ — działa offline
 const useLiveServer = process.env.CAPACITOR_LIVE_SERVER === "1";
+const serverUrl = process.env.CAPACITOR_SERVER_URL || "https://pos.karczma-labedz.pl";
 
 const config: CapacitorConfig = {
   appId: "pl.karczmalabedz.pos",
@@ -10,8 +11,8 @@ const config: CapacitorConfig = {
   webDir: "out",
   server: useLiveServer
     ? {
-        url: "http://10.119.169.20:3001",
-        cleartext: true,
+        url: serverUrl,
+        cleartext: serverUrl.startsWith("http:"),
       }
     : undefined,
   android: {

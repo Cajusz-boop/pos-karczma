@@ -98,26 +98,39 @@ export function HotelOrdersClient() {
     setCreating(true);
     setCreateError("");
 
-    try {
+    const doFetch = async (retry = 0): Promise<Response> => {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           userId: currentUser.id,
           guestCount: selectedRoom.pax ?? 1,
           type: "HOTEL_ROOM",
         }),
       });
+      if (!res.ok && [502, 503, 504].includes(res.status) && retry < 1) {
+        await new Promise((r) => setTimeout(r, 2000));
+        return doFetch(retry + 1);
+      }
+      return res;
+    };
 
+    try {
+      const res = await doFetch();
       const contentType = res.headers.get("content-type") ?? "";
       if (!contentType.includes("application/json")) {
-        console.error("[HotelOrders] Server returned non-JSON response:", res.status, contentType);
-        setCreateError("Błąd serwera - spróbuj ponownie");
+        console.error("[HotelOrders] Server returned non-JSON:", res.status, contentType);
+        setCreateError(
+          res.status === 502 || res.status === 503 || res.status === 504
+            ? "Serwer przeciążony — spróbuj za chwilę"
+            : "Błąd serwera — spróbuj ponownie"
+        );
         setCreating(false);
         return;
       }
 
-      let resData;
+      let resData: { order?: { id: string; orderNumber: number }; error?: string };
       try {
         resData = await res.json();
       } catch (parseErr) {
@@ -128,14 +141,28 @@ export function HotelOrdersClient() {
       }
 
       if (!res.ok) {
-        setCreateError(resData.error ?? "Błąd tworzenia zamówienia");
+        const msg =
+          resData?.error ??
+          (res.status === 401
+            ? "Sesja wygasła — zaloguj się ponownie"
+            : res.status >= 500
+              ? "Błąd serwera — spróbuj za chwilę"
+              : "Błąd tworzenia zamówienia");
+        setCreateError(msg);
+        setCreating(false);
+        return;
+      }
+
+      const order = resData?.order;
+      if (!order?.id) {
+        setCreateError("Błąd odpowiedzi serwera");
         setCreating(false);
         return;
       }
 
       await hydrateOrderFromApiCreate({
-        serverId: resData.order.id,
-        orderNumber: resData.order.orderNumber,
+        serverId: order.id,
+        orderNumber: order.orderNumber,
         type: "HOTEL_ROOM",
         userId: currentUser.id,
         userName: currentUser.name ?? "",
@@ -143,7 +170,7 @@ export function HotelOrdersClient() {
       });
 
       router.push(
-        `/pos/order/${resData.order.id}?hotel=true&roomNumber=${encodeURIComponent(selectedRoom.roomNumber)}&guestName=${encodeURIComponent(selectedRoom.guestName)}&guestId=${encodeURIComponent(selectedRoom.guestId)}&checkOut=${encodeURIComponent(selectedRoom.checkOut)}`
+        `/pos/order/${order.id}?hotel=true&roomNumber=${encodeURIComponent(selectedRoom.roomNumber)}&guestName=${encodeURIComponent(selectedRoom.guestName)}&guestId=${encodeURIComponent(selectedRoom.guestId)}&checkOut=${encodeURIComponent(selectedRoom.checkOut)}`
       );
     } catch (err) {
       console.error("[HotelOrders] Error creating order:", err);

@@ -2,6 +2,12 @@ import { execSync } from "child_process";
 import { cpSync, existsSync, rmSync, mkdirSync, writeFileSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 
+const isLiveMode = process.argv.includes("--live");
+if (isLiveMode) {
+  process.env.CAPACITOR_LIVE_SERVER = "1";
+  console.log("🌐 Tryb LIVE: APK będzie ładować treść z serwera produkcyjnego\n");
+}
+
 const API_DIR = join(__dirname, "..", "src", "app", "api");
 const API_BACKUP = join(__dirname, "..", "src", "app", "_api_backup");
 const E_RECEIPT_DIR = join(__dirname, "..", "src", "app", "e-receipt");
@@ -110,6 +116,16 @@ if (buildFailed) {
   process.exit(1);
 }
 
-console.log("\n📱 Teraz uruchom:");
-console.log("   npx cap copy android");
-console.log("   npx cap open android");
+console.log("\n📱 Kopiowanie buildu do projektu Android...");
+try {
+  execSync("npx cap copy android", { stdio: "inherit", env: process.env });
+  execSync("npx cap sync android", { stdio: "inherit", env: process.env });
+  console.log("\n✅ Gotowe! Otwórz Android Studio:");
+  console.log("   npx cap open android");
+  if (isLiveMode) {
+    console.log("\n🌐 APK w trybie LIVE — wymaga internetu, paragony działają.");
+  }
+} catch (e) {
+  console.error("❌ cap copy/sync nie powiódł się:", e);
+  process.exit(1);
+}
