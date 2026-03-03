@@ -1,4 +1,5 @@
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -9,34 +10,54 @@ import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const productId = searchParams.get("productId");
-    if (!productId) {
+    const productIdParam = searchParams.get("productId");
+    const productIdsParam = searchParams.get("productIds");
+    const productIds: string[] = productIdsParam
+      ? productIdsParam.split(",").map((id) => id.trim()).filter(Boolean)
+      : productIdParam
+        ? [productIdParam]
+        : [];
+    if (productIds.length === 0) {
       return NextResponse.json(
-        { error: "Parametr productId jest wymagany" },
+        { error: "Parametr productId lub productIds jest wymagany" },
         { status: 400 }
       );
     }
 
-    const suggestions = await prisma.productSuggestion.findMany({
-      where: { productId, isActive: true },
-      include: {
-        suggested: {
-          select: { id: true, name: true, priceGross: true, taxRateId: true },
-        },
-      },
-      orderBy: { priority: "desc" },
-    });
+    const fetchGroup = async (productId: string) => {
+      const [product, suggestions] = await Promise.all([
+        prisma.product.findUnique({ where: { id: productId }, select: { id: true, name: true } }),
+        prisma.productSuggestion.findMany({
+          where: { productId, isActive: true },
+          include: {
+            suggested: {
+              select: { id: true, name: true, priceGross: true, taxRateId: true },
+            },
+          },
+          orderBy: { priority: "desc" },
+          take: 4,
+        }),
+      ]);
+      const list = suggestions.map((s) => ({
+        id: s.suggestedId,
+        name: s.suggested.name,
+        priceGross: Number(s.suggested.priceGross),
+        taxRateId: s.suggested.taxRateId,
+        type: s.type,
+        priority: s.priority,
+        ...(s.note && { note: s.note }),
+      }));
+      return { productId, productName: product?.name ?? "", suggestions: list };
+    };
 
-    const result = suggestions.map((s) => ({
-      id: s.suggestedId,
-      name: s.suggested.name,
-      priceGross: Number(s.suggested.priceGross),
-      taxRateId: s.suggested.taxRateId,
-      type: s.type,
-      priority: s.priority,
-    }));
+    if (productIds.length === 1) {
+      const group = await fetchGroup(productIds[0]);
+      return NextResponse.json(group.suggestions);
+    }
 
-    return NextResponse.json(result);
+    const groups = await Promise.all(productIds.map(fetchGroup));
+    const filtered = groups.filter((g) => g.suggestions.length > 0);
+    return NextResponse.json({ grouped: true, groups: filtered });
   } catch (e) {
     console.error(e);
     return NextResponse.json(

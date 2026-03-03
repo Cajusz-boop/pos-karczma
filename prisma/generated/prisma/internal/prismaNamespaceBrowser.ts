@@ -70,6 +70,7 @@ export const ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
+  OnlinePayment: 'OnlinePayment',
   Tip: 'Tip',
   Discount: 'Discount',
   Promotion: 'Promotion',
@@ -242,7 +243,8 @@ export const TableScalarFieldEnum = {
   description: 'description',
   isAvailable: 'isAvailable',
   allowMultipleOrders: 'allowMultipleOrders',
-  customColor: 'customColor'
+  customColor: 'customColor',
+  qrId: 'qrId'
 } as const
 
 export type TableScalarFieldEnum = (typeof TableScalarFieldEnum)[keyof typeof TableScalarFieldEnum]
@@ -425,7 +427,8 @@ export const OrderScalarFieldEnum = {
   closedAt: 'closedAt',
   totalGross: 'totalGross',
   itemCount: 'itemCount',
-  lastInteractionAt: 'lastInteractionAt'
+  lastInteractionAt: 'lastInteractionAt',
+  onlinePaymentStatus: 'onlinePaymentStatus'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -473,6 +476,8 @@ export const OrderItemScalarFieldEnum = {
   isRush: 'isRush',
   isPriority: 'isPriority',
   printBold: 'printBold',
+  paidQuantity: 'paidQuantity',
+  lockedQuantity: 'lockedQuantity',
   createdAt: 'createdAt'
 } as const
 
@@ -491,6 +496,30 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const OnlinePaymentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  provider: 'provider',
+  transactionId: 'transactionId',
+  amount: 'amount',
+  tipAmount: 'tipAmount',
+  totalCharged: 'totalCharged',
+  currency: 'currency',
+  status: 'status',
+  itemsJson: 'itemsJson',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  receiptToken: 'receiptToken',
+  providerResponse: 'providerResponse',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type OnlinePaymentScalarFieldEnum = (typeof OnlinePaymentScalarFieldEnum)[keyof typeof OnlinePaymentScalarFieldEnum]
 
 
 export const TipScalarFieldEnum = {
@@ -1131,6 +1160,7 @@ export const ProductSuggestionScalarFieldEnum = {
   suggestedId: 'suggestedId',
   type: 'type',
   priority: 'priority',
+  note: 'note',
   isActive: 'isActive'
 } as const
 
@@ -1422,7 +1452,8 @@ export const TableOrderByRelevanceFieldEnum = {
   roomId: 'roomId',
   assignedUser: 'assignedUser',
   description: 'description',
-  customColor: 'customColor'
+  customColor: 'customColor',
+  qrId: 'qrId'
 } as const
 
 export type TableOrderByRelevanceFieldEnum = (typeof TableOrderByRelevanceFieldEnum)[keyof typeof TableOrderByRelevanceFieldEnum]
@@ -1570,6 +1601,22 @@ export const PaymentOrderByRelevanceFieldEnum = {
 } as const
 
 export type PaymentOrderByRelevanceFieldEnum = (typeof PaymentOrderByRelevanceFieldEnum)[keyof typeof PaymentOrderByRelevanceFieldEnum]
+
+
+export const OnlinePaymentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  provider: 'provider',
+  transactionId: 'transactionId',
+  currency: 'currency',
+  status: 'status',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  receiptToken: 'receiptToken',
+  errorMessage: 'errorMessage'
+} as const
+
+export type OnlinePaymentOrderByRelevanceFieldEnum = (typeof OnlinePaymentOrderByRelevanceFieldEnum)[keyof typeof OnlinePaymentOrderByRelevanceFieldEnum]
 
 
 export const TipOrderByRelevanceFieldEnum = {
@@ -1999,7 +2046,8 @@ export const ProductSuggestionOrderByRelevanceFieldEnum = {
   id: 'id',
   productId: 'productId',
   suggestedId: 'suggestedId',
-  type: 'type'
+  type: 'type',
+  note: 'note'
 } as const
 
 export type ProductSuggestionOrderByRelevanceFieldEnum = (typeof ProductSuggestionOrderByRelevanceFieldEnum)[keyof typeof ProductSuggestionOrderByRelevanceFieldEnum]

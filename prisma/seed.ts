@@ -570,6 +570,69 @@ async function main() {
   }
   console.log("  ✓ Grupy modyfikatorów: wysmażenie, dodatki, sosy, pierogi, mleko");
 
+  // 8c. Koszt (costPrice) dla piw — do priorytetyzacji sugestii po marży
+  const beerCosts: Record<string, number> = {
+    "Łabędzie 0.5L": 4,
+    "Kormoran Jasny 0.5L": 5,
+    "Kormoran Świeży 0.5L": 5,
+    "Śliwka w Piwie 0.5L": 5,
+    "Rybak (Piwo Naturalne) 0.5L": 5,
+    "Surfer (Piwo Pszeniczne) 0.5L": 5,
+    "Cydr Bursztynowy 330ml": 5,
+    "Heineken 0.5L": 4,
+    "Żywiec z Nalewaka 0.5L": 3,
+    "Warka 0.5L": 3,
+    "Warka Strong 0.5L": 3,
+  };
+  for (const [name, cost] of Object.entries(beerCosts)) {
+    const pid = productsByName[name];
+    if (pid) {
+      await prisma.product.update({ where: { id: pid }, data: { costPrice: cost } });
+    }
+  }
+  console.log("  ✓ costPrice dla piw (marża do sugestii)");
+
+  // 8d. Sugestie produktów (cross-sell v2) — reguły z CURSOR_TASK_CROSSSELL_v2
+  const { SUGGESTION_RULES, findProductByName } = await import("./suggestion-rules-v2");
+  const allProducts = await prisma.product.findMany({
+    where: { isActive: true },
+    select: { id: true, name: true },
+  });
+  const ensureSuggestion = async (productId: string, suggestedId: string, type: string, priority: number) => {
+    if (productId === suggestedId) return;
+    try {
+      await prisma.productSuggestion.upsert({
+        where: { productId_suggestedId: { productId, suggestedId } },
+        update: { priority, type, isActive: true },
+        create: { productId, suggestedId, type, priority },
+      });
+    } catch {
+      /* duplicate */
+    }
+  };
+  const ruleKeys = Object.keys(SUGGESTION_RULES).sort((a, b) => b.length - a.length); // dłuższe klucze first
+  let added = 0;
+  let skipped = 0;
+  for (const product of allProducts) {
+    const productNameLc = product.name.toLowerCase();
+    for (const key of ruleKeys) {
+      if (!productNameLc.includes(key.toLowerCase())) continue;
+      const rules = SUGGESTION_RULES[key];
+      for (const rule of rules) {
+        const suggestedId = findProductByName(allProducts, rule.suggested);
+        if (!suggestedId) {
+          skipped++;
+          continue;
+        }
+        await ensureSuggestion(product.id, suggestedId, rule.type, rule.priority);
+        added++;
+      }
+      break; // jedna reguła na produkt (pierwszy dopasowany klucz)
+    }
+  }
+  const suggestionCount = await prisma.productSuggestion.count();
+  console.log(`  ✓ Sugestie produktów v2: ${suggestionCount} powiązań (dodano: ${added}, pominięto brak: ${skipped})`);
+
   // 9. Magazyny (Warehouse nie ma @unique na name — findFirst + create)
   const ensureWarehouse = async (name: string, type: "MAIN" | "BAR" | "KITCHEN" | "COLD_STORAGE") => {
     const w = await prisma.warehouse.findFirst({ where: { name } });

@@ -113,6 +113,11 @@ export type OrderItem = Prisma.OrderItemModel
  */
 export type Payment = Prisma.PaymentModel
 /**
+ * Model OnlinePayment
+ * 
+ */
+export type OnlinePayment = Prisma.OnlinePaymentModel
+/**
  * Model Tip
  * 
  */

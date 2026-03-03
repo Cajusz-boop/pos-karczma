@@ -403,6 +403,7 @@ export const ModelName = {
   Order: 'Order',
   OrderItem: 'OrderItem',
   Payment: 'Payment',
+  OnlinePayment: 'OnlinePayment',
   Tip: 'Tip',
   Discount: 'Discount',
   Promotion: 'Promotion',
@@ -472,7 +473,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "cardReaderConfig" | "role" | "room" | "roomMerge" | "table" | "category" | "product" | "superGroup" | "setComponent" | "taxRate" | "modifierGroup" | "modifier" | "productModifierGroup" | "allergen" | "productAllergen" | "order" | "orderItem" | "payment" | "tip" | "discount" | "promotion" | "invoice" | "receipt" | "warehouse" | "ingredient" | "stockItem" | "stockMove" | "recipe" | "recipeItem" | "kDSStation" | "kDSOrderArchive" | "kDSStationCategory" | "kDSLoadSnapshot" | "kitchenMessage" | "customerDisplay" | "printer" | "printerCategory" | "printLog" | "reservation" | "banquetEvent" | "banquetMenu" | "banquetMenuModification" | "shift" | "cashDrawer" | "cashOperation" | "auditLog" | "dailyReport" | "exportBatch" | "notification" | "pushSubscription" | "deliveryZone" | "deliveryStreet" | "deliveryDriver" | "driverSettlement" | "systemConfig" | "workstationConfig" | "customer" | "loyaltyTransaction" | "loyaltyReward" | "productSuggestion" | "timeEntry" | "giftVoucher" | "workSchedule" | "staffAvailability" | "shiftSwapRequest" | "announcement" | "userMacro" | "userPosPreference" | "pendingPayment" | "syncLog" | "receiptErrorLog" | "fiscalEvent"
+    modelProps: "user" | "cardReaderConfig" | "role" | "room" | "roomMerge" | "table" | "category" | "product" | "superGroup" | "setComponent" | "taxRate" | "modifierGroup" | "modifier" | "productModifierGroup" | "allergen" | "productAllergen" | "order" | "orderItem" | "payment" | "onlinePayment" | "tip" | "discount" | "promotion" | "invoice" | "receipt" | "warehouse" | "ingredient" | "stockItem" | "stockMove" | "recipe" | "recipeItem" | "kDSStation" | "kDSOrderArchive" | "kDSStationCategory" | "kDSLoadSnapshot" | "kitchenMessage" | "customerDisplay" | "printer" | "printerCategory" | "printLog" | "reservation" | "banquetEvent" | "banquetMenu" | "banquetMenuModification" | "shift" | "cashDrawer" | "cashOperation" | "auditLog" | "dailyReport" | "exportBatch" | "notification" | "pushSubscription" | "deliveryZone" | "deliveryStreet" | "deliveryDriver" | "driverSettlement" | "systemConfig" | "workstationConfig" | "customer" | "loyaltyTransaction" | "loyaltyReward" | "productSuggestion" | "timeEntry" | "giftVoucher" | "workSchedule" | "staffAvailability" | "shiftSwapRequest" | "announcement" | "userMacro" | "userPosPreference" | "pendingPayment" | "syncLog" | "receiptErrorLog" | "fiscalEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1727,6 +1728,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.PaymentCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.PaymentCountAggregateOutputType> | number
+        }
+      }
+    }
+    OnlinePayment: {
+      payload: Prisma.$OnlinePaymentPayload<ExtArgs>
+      fields: Prisma.OnlinePaymentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OnlinePaymentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OnlinePaymentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload>
+        }
+        findFirst: {
+          args: Prisma.OnlinePaymentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OnlinePaymentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload>
+        }
+        findMany: {
+          args: Prisma.OnlinePaymentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload>[]
+        }
+        create: {
+          args: Prisma.OnlinePaymentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload>
+        }
+        createMany: {
+          args: Prisma.OnlinePaymentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.OnlinePaymentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload>
+        }
+        update: {
+          args: Prisma.OnlinePaymentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload>
+        }
+        deleteMany: {
+          args: Prisma.OnlinePaymentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OnlinePaymentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.OnlinePaymentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OnlinePaymentPayload>
+        }
+        aggregate: {
+          args: Prisma.OnlinePaymentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOnlinePayment>
+        }
+        groupBy: {
+          args: Prisma.OnlinePaymentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OnlinePaymentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OnlinePaymentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OnlinePaymentCountAggregateOutputType> | number
         }
       }
     }
@@ -5433,7 +5500,8 @@ export const TableScalarFieldEnum = {
   description: 'description',
   isAvailable: 'isAvailable',
   allowMultipleOrders: 'allowMultipleOrders',
-  customColor: 'customColor'
+  customColor: 'customColor',
+  qrId: 'qrId'
 } as const
 
 export type TableScalarFieldEnum = (typeof TableScalarFieldEnum)[keyof typeof TableScalarFieldEnum]
@@ -5616,7 +5684,8 @@ export const OrderScalarFieldEnum = {
   closedAt: 'closedAt',
   totalGross: 'totalGross',
   itemCount: 'itemCount',
-  lastInteractionAt: 'lastInteractionAt'
+  lastInteractionAt: 'lastInteractionAt',
+  onlinePaymentStatus: 'onlinePaymentStatus'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
@@ -5664,6 +5733,8 @@ export const OrderItemScalarFieldEnum = {
   isRush: 'isRush',
   isPriority: 'isPriority',
   printBold: 'printBold',
+  paidQuantity: 'paidQuantity',
+  lockedQuantity: 'lockedQuantity',
   createdAt: 'createdAt'
 } as const
 
@@ -5682,6 +5753,30 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const OnlinePaymentScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  provider: 'provider',
+  transactionId: 'transactionId',
+  amount: 'amount',
+  tipAmount: 'tipAmount',
+  totalCharged: 'totalCharged',
+  currency: 'currency',
+  status: 'status',
+  itemsJson: 'itemsJson',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  receiptToken: 'receiptToken',
+  providerResponse: 'providerResponse',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt',
+  completedAt: 'completedAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type OnlinePaymentScalarFieldEnum = (typeof OnlinePaymentScalarFieldEnum)[keyof typeof OnlinePaymentScalarFieldEnum]
 
 
 export const TipScalarFieldEnum = {
@@ -6322,6 +6417,7 @@ export const ProductSuggestionScalarFieldEnum = {
   suggestedId: 'suggestedId',
   type: 'type',
   priority: 'priority',
+  note: 'note',
   isActive: 'isActive'
 } as const
 
@@ -6613,7 +6709,8 @@ export const TableOrderByRelevanceFieldEnum = {
   roomId: 'roomId',
   assignedUser: 'assignedUser',
   description: 'description',
-  customColor: 'customColor'
+  customColor: 'customColor',
+  qrId: 'qrId'
 } as const
 
 export type TableOrderByRelevanceFieldEnum = (typeof TableOrderByRelevanceFieldEnum)[keyof typeof TableOrderByRelevanceFieldEnum]
@@ -6761,6 +6858,22 @@ export const PaymentOrderByRelevanceFieldEnum = {
 } as const
 
 export type PaymentOrderByRelevanceFieldEnum = (typeof PaymentOrderByRelevanceFieldEnum)[keyof typeof PaymentOrderByRelevanceFieldEnum]
+
+
+export const OnlinePaymentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  provider: 'provider',
+  transactionId: 'transactionId',
+  currency: 'currency',
+  status: 'status',
+  customerEmail: 'customerEmail',
+  customerPhone: 'customerPhone',
+  receiptToken: 'receiptToken',
+  errorMessage: 'errorMessage'
+} as const
+
+export type OnlinePaymentOrderByRelevanceFieldEnum = (typeof OnlinePaymentOrderByRelevanceFieldEnum)[keyof typeof OnlinePaymentOrderByRelevanceFieldEnum]
 
 
 export const TipOrderByRelevanceFieldEnum = {
@@ -7190,7 +7303,8 @@ export const ProductSuggestionOrderByRelevanceFieldEnum = {
   id: 'id',
   productId: 'productId',
   suggestedId: 'suggestedId',
-  type: 'type'
+  type: 'type',
+  note: 'note'
 } as const
 
 export type ProductSuggestionOrderByRelevanceFieldEnum = (typeof ProductSuggestionOrderByRelevanceFieldEnum)[keyof typeof ProductSuggestionOrderByRelevanceFieldEnum]
@@ -7451,6 +7565,13 @@ export type EnumOrderTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$Prisma
  * Reference to a field of type 'DeliveryStatus'
  */
 export type EnumDeliveryStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DeliveryStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'OnlinePaymentStatus'
+ */
+export type EnumOnlinePaymentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OnlinePaymentStatus'>
     
 
 
@@ -7721,6 +7842,7 @@ export type GlobalOmitConfig = {
   order?: Prisma.OrderOmit
   orderItem?: Prisma.OrderItemOmit
   payment?: Prisma.PaymentOmit
+  onlinePayment?: Prisma.OnlinePaymentOmit
   tip?: Prisma.TipOmit
   discount?: Prisma.DiscountOmit
   promotion?: Prisma.PromotionOmit

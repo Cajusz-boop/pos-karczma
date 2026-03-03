@@ -186,6 +186,9 @@ export function ConnectionMonitor() {
 
   if (!showBanner) return null;
 
+  // APK (Capacitor) — pokazuj baner TYLKO gdy brak internetu; online = bez komunikatów
+  if (isNativeApp() && status !== "offline") return null;
+
   // APK (Capacitor) offline — tylko informacja, bez przekierowań
   if (isNativeApp() && status === "offline") {
     return (

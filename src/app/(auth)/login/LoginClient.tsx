@@ -37,7 +37,7 @@ export function LoginClient() {
   const router = useRouter();
   const currentUser = useAuthStore((s) => s.currentUser);
   const setCurrentUser = useAuthStore((s) => s.setCurrentUser);
-  const [mode, setMode] = useState<LoginMode>("token");
+  const [mode, setMode] = useState<LoginMode>("pin");
   const [users, setUsers] = useState<UserItem[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [usersError, setUsersError] = useState<string | null>(null);

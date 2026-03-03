@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAllRooms } from "@/hooks/useRooms";
 import { db } from "@/lib/db/offline-db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import "@/components/ui/dialog";
-import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone, Truck, Package, Tv, CreditCard, BarChart3, Archive, Wrench, HardDrive, RefreshCw, Trash2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Settings, Building2, Printer, Users, LayoutGrid, Utensils, Tags, Percent, FileSpreadsheet, Gift, Heart, GraduationCap, CalendarDays, Monitor, Smartphone, Truck, Package, Tv, CreditCard, BarChart3, Archive, Wrench, HardDrive, RefreshCw, Trash2, LogOut } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { pl } from "date-fns/locale";
@@ -399,8 +405,22 @@ function OfflineDataResetSection() {
 
 type TabId = "general" | "rooms" | "printers" | "shifts";
 
+type OpenShift = {
+  id: string;
+  userId: string;
+  userName: string;
+  startedAt: string;
+  cashStart: number;
+  turnover: number;
+  expectedCash?: number;
+};
+
 export default function SettingsPageClient() {
   const [tab, setTab] = useState<TabId>("general");
+  const queryClient = useQueryClient();
+  const [closingShift, setClosingShift] = useState<OpenShift | null>(null);
+  const [closeCashEnd, setCloseCashEnd] = useState("");
+  const [closeHandoverTo, setCloseHandoverTo] = useState("");
 
   const { data: config = {}, refetch: refetchConfig } = useQuery({
     queryKey: ["config"],
@@ -470,7 +490,7 @@ export default function SettingsPageClient() {
     enabled: tab === "printers",
   });
 
-  const { data: openShifts = [] } = useQuery({
+  const { data: openShifts = [] } = useQuery<OpenShift[]>({
     queryKey: ["shifts-open"],
     queryFn: async () => {
       const r = await fetch("/api/shifts?status=OPEN");
@@ -478,6 +498,39 @@ export default function SettingsPageClient() {
       return r.json();
     },
     enabled: tab === "shifts",
+  });
+
+  const { data: users = [] } = useQuery<Array<{ id: string; name: string }>>({
+    queryKey: ["users-for-handover"],
+    queryFn: async () => {
+      const r = await fetch("/api/users?all=true");
+      if (!r.ok) throw new Error("Błąd");
+      return r.json();
+    },
+    enabled: !!closingShift,
+  });
+
+  const closeShiftMutation = useMutation({
+    mutationFn: async ({ shiftId, cashEnd, handoverToUserId }: { shiftId: string; cashEnd?: number; handoverToUserId?: string }) => {
+      const r = await fetch(`/api/shifts/${shiftId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "CLOSED",
+          cashEnd: cashEnd ?? undefined,
+          handoverToUserId: handoverToUserId || undefined,
+        }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error || "Błąd zamknięcia zmiany");
+      return data;
+    },
+    onSuccess: () => {
+      setClosingShift(null);
+      setCloseCashEnd("");
+      setCloseHandoverTo("");
+      queryClient.invalidateQueries({ queryKey: ["shifts-open"] });
+    },
   });
 
   const TABS: { id: TabId; label: string; icon: React.ReactNode }[] = [
@@ -634,7 +687,7 @@ export default function SettingsPageClient() {
       {tab === "shifts" && (
         <section className="rounded-lg border p-4">
           <h2 className="mb-3 text-lg font-medium">Otwarte zmiany</h2>
-          <p className="mb-3 text-sm text-muted-foreground">Kto ma otwartą zmianę, od kiedy, obrót.</p>
+          <p className="mb-3 text-sm text-muted-foreground">Kto ma otwartą zmianę, od kiedy, obrót. Możesz zamknąć pojedynczą zmianę i przekazać stoliki innemu kelnerowi.</p>
           <div className="overflow-x-auto rounded-md border">
             <table className="w-full text-sm">
               <thead>
@@ -643,21 +696,98 @@ export default function SettingsPageClient() {
                   <th className="p-2 text-left">Od</th>
                   <th className="p-2 text-right">Gotówka start</th>
                   <th className="p-2 text-right">Obrót</th>
+                  <th className="p-2 text-right">Oczek. gotówka</th>
+                  <th className="p-2 text-right"></th>
                 </tr>
               </thead>
               <tbody>
-                {openShifts.map((s: { userName: string; startedAt: string; cashStart: number; turnover: number }) => (
-                  <tr key={s.startedAt + s.userName} className="border-b">
+                {openShifts.map((s) => (
+                  <tr key={s.id} className="border-b">
                     <td className="p-2 font-medium">{s.userName}</td>
                     <td className="p-2">{format(new Date(s.startedAt), "d MMM HH:mm", { locale: pl })}</td>
                     <td className="p-2 text-right">{Number(s.cashStart).toFixed(2)} zł</td>
                     <td className="p-2 text-right">{Number(s.turnover).toFixed(2)} zł</td>
+                    <td className="p-2 text-right tabular-nums">{s.expectedCash != null ? `${s.expectedCash.toFixed(2)} zł` : "—"}</td>
+                    <td className="p-2 text-right">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        onClick={() => {
+                          setClosingShift(s);
+                          setCloseCashEnd(s.expectedCash != null ? String(s.expectedCash) : "");
+                          setCloseHandoverTo("");
+                        }}
+                      >
+                        <LogOut className="h-3 w-3" />
+                        Zamknij zmianę
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           {openShifts.length === 0 && <p className="mt-2 text-sm text-muted-foreground">Brak otwartych zmian.</p>}
+
+          <Dialog open={!!closingShift} onOpenChange={(open) => !open && setClosingShift(null)}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Zamknij zmianę — {closingShift?.userName}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Stan końcowy gotówki (zł)</label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={closeCashEnd}
+                    onChange={(e) => setCloseCashEnd(e.target.value)}
+                    placeholder={closingShift?.expectedCash != null ? String(closingShift.expectedCash) : "0"}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-sm font-medium">Przekaż otwarte stoliki do (opcjonalnie)</label>
+                  <select
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={closeHandoverTo}
+                    onChange={(e) => setCloseHandoverTo(e.target.value)}
+                  >
+                    <option value="">— Nie przekazuj —</option>
+                    {users
+                      .filter((u) => u.id !== closingShift?.userId)
+                      .map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name}
+                        </option>
+                      ))}
+                  </select>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Kelner B przejmie otwarte zamówienia i stoliki kelnera A.
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setClosingShift(null)} disabled={closeShiftMutation.isPending}>
+                  Anuluj
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (!closingShift) return;
+                    const cashEndNum = parseFloat(closeCashEnd);
+                    closeShiftMutation.mutate({
+                      shiftId: closingShift.id,
+                      cashEnd: !isNaN(cashEndNum) ? cashEndNum : undefined,
+                      handoverToUserId: closeHandoverTo || undefined,
+                    });
+                  }}
+                  disabled={closeShiftMutation.isPending}
+                >
+                  {closeShiftMutation.isPending ? "Zamykanie…" : "Zamknij zmianę"}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </section>
       )}
 

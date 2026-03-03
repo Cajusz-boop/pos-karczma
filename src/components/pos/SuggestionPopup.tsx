@@ -14,12 +14,15 @@ export interface SuggestionProduct {
 
 export interface SuggestionPopupProps {
   productId: string | null;
+  /** Nazwa produktu do wyświetlenia w tytule (np. "Golonka pieczona") */
+  productName?: string | null;
   onAdd: (product: SuggestionProduct) => void;
   onDismiss: () => void;
 }
 
 export function SuggestionPopup({
   productId,
+  productName,
   onAdd,
   onDismiss,
 }: SuggestionPopupProps) {
@@ -39,7 +42,12 @@ export function SuggestionPopup({
     setAnimatingOut(false);
     setLoading(true);
 
-    fetch(`/api/suggestions?productId=${encodeURIComponent(productId)}`)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    fetch(`/api/suggestions?productId=${encodeURIComponent(productId)}`, {
+      signal: controller.signal,
+    })
       .then((res) => (res.ok ? res.json() : Promise.resolve([])))
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
@@ -56,7 +64,10 @@ export function SuggestionPopup({
         }
       })
       .catch(() => setSuggestions([]))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setLoading(false);
+      });
   }, [productId]);
 
   const handleDismiss = useCallback(() => {
@@ -101,7 +112,11 @@ export function SuggestionPopup({
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Sparkles className="h-4 w-4 text-amber-500" />
-            Polecane do Twojego zamówienia
+            {productName?.trim() ? (
+              <>Polecane do <span className="text-amber-600 dark:text-amber-400">{productName}</span></>
+            ) : (
+              "Polecane do Twojego zamówienia"
+            )}
           </div>
           <button
             type="button"
@@ -123,7 +138,7 @@ export function SuggestionPopup({
           </div>
         ) : (
           <div className="flex flex-wrap gap-2">
-            {suggestions.map((s) => (
+            {suggestions.slice(0, 3).map((s) => (
               <div
                 key={s.id}
                 className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2"

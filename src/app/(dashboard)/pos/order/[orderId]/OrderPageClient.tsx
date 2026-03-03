@@ -20,6 +20,7 @@ import {
 import { OrderPageView } from "./OrderPageView";
 import { OrderSyncBadge } from "@/components/OrderSyncBadge";
 import { SuggestionPopup, type SuggestionProduct } from "@/components/pos/SuggestionPopup";
+import { OrderSuggestionsPanel } from "@/components/pos/OrderSuggestionsPanel";
 import type { CategoryNode } from "./orderPageTypes";
 
 const PaymentDialog = lazy(() => import("./PaymentDialog").then(m => ({ default: m.PaymentDialog })));
@@ -130,6 +131,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const [searchQuery, setSearchQuery] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const [lastAddedProductId, setLastAddedProductId] = useState<string | null>(null);
+  const [lastAddedProductName, setLastAddedProductName] = useState<string | null>(null);
   const [recentProductIds, setRecentProductIds] = useState<string[]>([]);
   const [excludedAllergens, setExcludedAllergens] = useState<string[]>([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
@@ -146,6 +148,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [splitDialogOpen, setSplitDialogOpen] = useState(false);
   const [mergeDialogOpen, setMergeDialogOpen] = useState(false);
+  const [suggestionsPanelOpen, setSuggestionsPanelOpen] = useState(false);
   const [opError, setOpError] = useState<string | null>(null);
   const [opLoading, setOpLoading] = useState(false);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
@@ -500,6 +503,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
           courseNumber: 1,
         });
         setLastAddedProductId(product.id);
+        setLastAddedProductName(product.name);
         setRecentProductIds((prev) => [product.id, ...prev.filter((id) => id !== product.id)].slice(0, 6));
         return;
       }
@@ -540,6 +544,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       courseNumber: 1,
     });
     setLastAddedProductId(product.id);
+    setLastAddedProductName(product.name);
     setRecentProductIds((prev) => [product.id, ...prev.filter((id) => id !== product.id)].slice(0, 6));
     setModifierProduct(null);
   }
@@ -571,6 +576,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       courseNumber: 1,
     });
     setLastAddedProductId(product.id);
+    setLastAddedProductName(product.name);
     setRecentProductIds((prev) => [product.id, ...prev.filter((id) => id !== product.id)].slice(0, 6));
     setModifierProduct(null);
   };
@@ -965,6 +971,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
         onSplitOrder={() => { setSplitDialogOpen(true); setSplitSelectedIds([]); setOpError(null); }}
         onMergeOrder={() => { setMergeDialogOpen(true); setMergeTargetOrderId(null); setOpError(null); }}
         onMessageToKitchen={() => { setMessageToKitchenOpen(true); setMessageToKitchenText(""); }}
+        onOpenSuggestions={() => setSuggestionsPanelOpen(true)}
         isHotelOrder={isHotelOrder}
         hotelRoomNumber={hotelRoomNumber}
         hotelGuestName={hotelGuestName}
@@ -985,8 +992,15 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       />
       <SuggestionPopup
         productId={lastAddedProductId}
+        productName={lastAddedProductName}
         onAdd={handleSuggestionAdd}
-        onDismiss={() => setLastAddedProductId(null)}
+        onDismiss={() => { setLastAddedProductId(null); setLastAddedProductName(null); }}
+      />
+      <OrderSuggestionsPanel
+        open={suggestionsPanelOpen}
+        onOpenChange={setSuggestionsPanelOpen}
+        orderItems={items.map((i) => ({ productId: i.productId, productName: i.productName }))}
+        onAdd={handleSuggestionAdd}
       />
       {showReadyBanner && orderData?.status === "READY" && (
         <div className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-lg border-2 border-green-600 bg-green-100 px-4 py-3 shadow-lg dark:bg-green-900/90 dark:text-green-100">

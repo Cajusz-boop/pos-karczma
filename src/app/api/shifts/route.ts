@@ -26,15 +26,20 @@ export async function GET(request: NextRequest) {
     const result = await Promise.all(
       shifts.map(async (s) => {
         let turnover = 0;
+        let cashTurnover = 0;
         if (s.status === "OPEN") {
           const payments = await prisma.payment.findMany({
             where: {
               order: { userId: s.userId, status: "CLOSED", closedAt: { gte: s.startedAt } },
             },
-            select: { amount: true },
+            select: { amount: true, method: true },
           });
           turnover = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+          cashTurnover = payments
+            .filter((p) => p.method === "CASH")
+            .reduce((sum, p) => sum + Number(p.amount), 0);
         }
+        const expectedCash = Number(s.cashStart) + cashTurnover;
         return {
           id: s.id,
           userId: s.userId,
@@ -45,6 +50,7 @@ export async function GET(request: NextRequest) {
           cashEnd: s.cashEnd != null ? Number(s.cashEnd) : null,
           status: s.status,
           turnover: Math.round(turnover * 100) / 100,
+          expectedCash: s.status === "OPEN" ? Math.round(expectedCash * 100) / 100 : undefined,
         };
       })
     );

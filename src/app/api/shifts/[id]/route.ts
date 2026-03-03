@@ -88,7 +88,7 @@ export async function GET(
   }
 }
 
-/** PATCH /api/shifts/[id] — close shift with cash declaration and report */
+/** PATCH /api/shifts/[id] — close shift with cash declaration, optional handover, and report */
 export async function PATCH(
   request: NextRequest,
   context: RouteContext
@@ -96,7 +96,11 @@ export async function PATCH(
   try {
     const { id } = await context.params;
     const body = await request.json();
-    const { cashEnd, status: newStatus } = body as { cashEnd?: number; status?: string };
+    const { cashEnd, status: newStatus, handoverToUserId } = body as {
+      cashEnd?: number;
+      status?: string;
+      handoverToUserId?: string;
+    };
 
     const shift = await prisma.shift.findUnique({
       where: { id },
@@ -114,6 +118,34 @@ export async function PATCH(
       data.status = "CLOSED";
       data.endedAt = now;
       if (cashEnd != null) data.cashEnd = Number(cashEnd);
+
+      // Handover: transfer open orders and table assignments to another user
+      if (handoverToUserId && handoverToUserId !== shift.userId) {
+        const targetUser = await prisma.user.findUnique({
+          where: { id: handoverToUserId },
+          select: { id: true },
+        });
+        if (!targetUser) {
+          return NextResponse.json({ error: "Docelowy użytkownik nie istnieje" }, { status: 404 });
+        }
+        const openOrders = await prisma.order.findMany({
+          where: { userId: shift.userId, status: "OPEN" },
+          select: { id: true, tableId: true },
+        });
+        const tableIds = Array.from(new Set(openOrders.map((o) => o.tableId).filter((id): id is string => Boolean(id))));
+        await prisma.$transaction([
+          prisma.order.updateMany({
+            where: { id: { in: openOrders.map((o) => o.id) } },
+            data: { userId: handoverToUserId },
+          }),
+          ...tableIds.map((tableId) =>
+            prisma.table.update({
+              where: { id: tableId },
+              data: { assignedUser: handoverToUserId },
+            })
+          ),
+        ]);
+      }
 
       // Calculate expected cash for audit
       const payments = await prisma.payment.findMany({
@@ -139,6 +171,7 @@ export async function PATCH(
         expectedCash: Math.round(expectedCash * 100) / 100,
         shortage,
         cashTurnover: Math.round(cashTurnover * 100) / 100,
+        ...(handoverToUserId && { handoverToUserId }),
       });
     }
 

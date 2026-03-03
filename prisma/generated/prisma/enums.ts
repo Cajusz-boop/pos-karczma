@@ -101,6 +101,16 @@ export const OrderStatus = {
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
 
 
+export const OnlinePaymentStatus = {
+  UNPAID: 'UNPAID',
+  PARTIAL: 'PARTIAL',
+  PENDING: 'PENDING',
+  PAID: 'PAID'
+} as const
+
+export type OnlinePaymentStatus = (typeof OnlinePaymentStatus)[keyof typeof OnlinePaymentStatus]
+
+
 export const OrderType = {
   DINE_IN: 'DINE_IN',
   TAKEAWAY: 'TAKEAWAY',

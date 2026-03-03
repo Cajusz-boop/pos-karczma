@@ -23,6 +23,8 @@ import {
   Snowflake,
   ChevronDown,
   ChevronRight,
+  QrCode,
+  Download,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -32,6 +34,7 @@ interface TableData {
   seats: number;
   shape: string;
   status: string;
+  qrId?: string | null;
   positionX: number;
   positionY: number;
 }
@@ -227,10 +230,39 @@ export default function RoomsPage() {
                   {room.tables.sort((a, b) => a.number - b.number).map((t) => (
                     <div key={t.id} className="flex items-center justify-between rounded-lg border p-2">
                       <div>
-                        <p className="font-bold">#{t.number}</p>
+                        <p className="font-bold flex items-center gap-1.5">
+                          #{t.number}
+                          <span className={cn(
+                            "rounded px-1.5 py-0.5 text-[10px] font-normal",
+                            t.qrId ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200" : "bg-muted text-muted-foreground"
+                          )}>
+                            {t.qrId ? "QR ✓" : "Brak QR"}
+                          </span>
+                        </p>
                         <p className="text-xs text-muted-foreground">{t.seats} miejsc • {TABLE_SHAPES.find((s) => s.value === t.shape)?.label}</p>
                       </div>
-                      <div className="flex gap-0.5">
+                      <div className="flex gap-0.5 items-center">
+                        {t.qrId ? (
+                          <Button variant="ghost" size="icon" className="h-7 w-7" title="Pobierz kod QR" onClick={async () => {
+                            const res = await fetch(`/api/tables/${t.id}/qr`);
+                            if (res.ok) {
+                              const blob = await res.blob();
+                              const a = document.createElement("a");
+                              a.href = URL.createObjectURL(blob);
+                              a.download = `stolik-${t.number}-qr.png`;
+                              a.click();
+                              URL.revokeObjectURL(a.href);
+                            }
+                          }}>
+                            <Download className="h-3.5 w-3.5" />
+                          </Button>
+                        ) : null}
+                        <Button variant="ghost" size="icon" className="h-7 w-7" title={t.qrId ? "Regeneruj QR" : "Aktywuj QR"} onClick={async () => {
+                          const res = await fetch(`/api/tables/${t.id}/qr`, { method: "POST" });
+                          if (res.ok) fetchRooms();
+                        }}>
+                          <QrCode className="h-3.5 w-3.5" />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditTable(room.id, t)}><Pencil className="h-3.5 w-3.5" /></Button>
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteTable(t.id)}><Trash2 className="h-3.5 w-3.5" /></Button>
                       </div>

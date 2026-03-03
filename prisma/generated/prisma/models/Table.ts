@@ -67,6 +67,7 @@ export type TableMinAggregateOutputType = {
   isAvailable: boolean | null
   allowMultipleOrders: boolean | null
   customColor: string | null
+  qrId: string | null
 }
 
 export type TableMaxAggregateOutputType = {
@@ -88,6 +89,7 @@ export type TableMaxAggregateOutputType = {
   isAvailable: boolean | null
   allowMultipleOrders: boolean | null
   customColor: string | null
+  qrId: string | null
 }
 
 export type TableCountAggregateOutputType = {
@@ -109,6 +111,7 @@ export type TableCountAggregateOutputType = {
   isAvailable: number
   allowMultipleOrders: number
   customColor: number
+  qrId: number
   _all: number
 }
 
@@ -154,6 +157,7 @@ export type TableMinAggregateInputType = {
   isAvailable?: true
   allowMultipleOrders?: true
   customColor?: true
+  qrId?: true
 }
 
 export type TableMaxAggregateInputType = {
@@ -175,6 +179,7 @@ export type TableMaxAggregateInputType = {
   isAvailable?: true
   allowMultipleOrders?: true
   customColor?: true
+  qrId?: true
 }
 
 export type TableCountAggregateInputType = {
@@ -196,6 +201,7 @@ export type TableCountAggregateInputType = {
   isAvailable?: true
   allowMultipleOrders?: true
   customColor?: true
+  qrId?: true
   _all?: true
 }
 
@@ -304,6 +310,7 @@ export type TableGroupByOutputType = {
   isAvailable: boolean
   allowMultipleOrders: boolean
   customColor: string | null
+  qrId: string | null
   _count: TableCountAggregateOutputType | null
   _avg: TableAvgAggregateOutputType | null
   _sum: TableSumAggregateOutputType | null
@@ -348,6 +355,7 @@ export type TableWhereInput = {
   isAvailable?: Prisma.BoolFilter<"Table"> | boolean
   allowMultipleOrders?: Prisma.BoolFilter<"Table"> | boolean
   customColor?: Prisma.StringNullableFilter<"Table"> | string | null
+  qrId?: Prisma.StringNullableFilter<"Table"> | string | null
   room?: Prisma.XOR<Prisma.RoomScalarRelationFilter, Prisma.RoomWhereInput>
   orders?: Prisma.OrderListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
@@ -372,6 +380,7 @@ export type TableOrderByWithRelationInput = {
   isAvailable?: Prisma.SortOrder
   allowMultipleOrders?: Prisma.SortOrder
   customColor?: Prisma.SortOrderInput | Prisma.SortOrder
+  qrId?: Prisma.SortOrderInput | Prisma.SortOrder
   room?: Prisma.RoomOrderByWithRelationInput
   orders?: Prisma.OrderOrderByRelationAggregateInput
   reservations?: Prisma.ReservationOrderByRelationAggregateInput
@@ -380,6 +389,7 @@ export type TableOrderByWithRelationInput = {
 
 export type TableWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  qrId?: string
   AND?: Prisma.TableWhereInput | Prisma.TableWhereInput[]
   OR?: Prisma.TableWhereInput[]
   NOT?: Prisma.TableWhereInput | Prisma.TableWhereInput[]
@@ -403,7 +413,7 @@ export type TableWhereUniqueInput = Prisma.AtLeast<{
   room?: Prisma.XOR<Prisma.RoomScalarRelationFilter, Prisma.RoomWhereInput>
   orders?: Prisma.OrderListRelationFilter
   reservations?: Prisma.ReservationListRelationFilter
-}, "id">
+}, "id" | "qrId">
 
 export type TableOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -424,6 +434,7 @@ export type TableOrderByWithAggregationInput = {
   isAvailable?: Prisma.SortOrder
   allowMultipleOrders?: Prisma.SortOrder
   customColor?: Prisma.SortOrderInput | Prisma.SortOrder
+  qrId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TableCountOrderByAggregateInput
   _avg?: Prisma.TableAvgOrderByAggregateInput
   _max?: Prisma.TableMaxOrderByAggregateInput
@@ -453,6 +464,7 @@ export type TableScalarWhereWithAggregatesInput = {
   isAvailable?: Prisma.BoolWithAggregatesFilter<"Table"> | boolean
   allowMultipleOrders?: Prisma.BoolWithAggregatesFilter<"Table"> | boolean
   customColor?: Prisma.StringNullableWithAggregatesFilter<"Table"> | string | null
+  qrId?: Prisma.StringNullableWithAggregatesFilter<"Table"> | string | null
 }
 
 export type TableCreateInput = {
@@ -473,6 +485,7 @@ export type TableCreateInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   room: Prisma.RoomCreateNestedOneWithoutTablesInput
   orders?: Prisma.OrderCreateNestedManyWithoutTableInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutTableInput
@@ -497,6 +510,7 @@ export type TableUncheckedCreateInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTableInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutTableInput
 }
@@ -519,6 +533,7 @@ export type TableUpdateInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   room?: Prisma.RoomUpdateOneRequiredWithoutTablesNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTableNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutTableNestedInput
@@ -543,6 +558,7 @@ export type TableUncheckedUpdateInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTableNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutTableNestedInput
 }
@@ -566,6 +582,7 @@ export type TableCreateManyInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
 }
 
 export type TableUpdateManyMutationInput = {
@@ -586,6 +603,7 @@ export type TableUpdateManyMutationInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TableUncheckedUpdateManyInput = {
@@ -607,6 +625,7 @@ export type TableUncheckedUpdateManyInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TableListRelationFilter = {
@@ -644,6 +663,7 @@ export type TableCountOrderByAggregateInput = {
   isAvailable?: Prisma.SortOrder
   allowMultipleOrders?: Prisma.SortOrder
   customColor?: Prisma.SortOrder
+  qrId?: Prisma.SortOrder
 }
 
 export type TableAvgOrderByAggregateInput = {
@@ -676,6 +696,7 @@ export type TableMaxOrderByAggregateInput = {
   isAvailable?: Prisma.SortOrder
   allowMultipleOrders?: Prisma.SortOrder
   customColor?: Prisma.SortOrder
+  qrId?: Prisma.SortOrder
 }
 
 export type TableMinOrderByAggregateInput = {
@@ -697,6 +718,7 @@ export type TableMinOrderByAggregateInput = {
   isAvailable?: Prisma.SortOrder
   allowMultipleOrders?: Prisma.SortOrder
   customColor?: Prisma.SortOrder
+  qrId?: Prisma.SortOrder
 }
 
 export type TableSumOrderByAggregateInput = {
@@ -815,6 +837,7 @@ export type TableCreateWithoutRoomInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   orders?: Prisma.OrderCreateNestedManyWithoutTableInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutTableInput
 }
@@ -837,6 +860,7 @@ export type TableUncheckedCreateWithoutRoomInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTableInput
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutTableInput
 }
@@ -889,6 +913,7 @@ export type TableScalarWhereInput = {
   isAvailable?: Prisma.BoolFilter<"Table"> | boolean
   allowMultipleOrders?: Prisma.BoolFilter<"Table"> | boolean
   customColor?: Prisma.StringNullableFilter<"Table"> | string | null
+  qrId?: Prisma.StringNullableFilter<"Table"> | string | null
 }
 
 export type TableCreateWithoutOrdersInput = {
@@ -909,6 +934,7 @@ export type TableCreateWithoutOrdersInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   room: Prisma.RoomCreateNestedOneWithoutTablesInput
   reservations?: Prisma.ReservationCreateNestedManyWithoutTableInput
 }
@@ -932,6 +958,7 @@ export type TableUncheckedCreateWithoutOrdersInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   reservations?: Prisma.ReservationUncheckedCreateNestedManyWithoutTableInput
 }
 
@@ -969,6 +996,7 @@ export type TableUpdateWithoutOrdersInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   room?: Prisma.RoomUpdateOneRequiredWithoutTablesNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutTableNestedInput
 }
@@ -992,6 +1020,7 @@ export type TableUncheckedUpdateWithoutOrdersInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutTableNestedInput
 }
 
@@ -1013,6 +1042,7 @@ export type TableCreateWithoutReservationsInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   room: Prisma.RoomCreateNestedOneWithoutTablesInput
   orders?: Prisma.OrderCreateNestedManyWithoutTableInput
 }
@@ -1036,6 +1066,7 @@ export type TableUncheckedCreateWithoutReservationsInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
   orders?: Prisma.OrderUncheckedCreateNestedManyWithoutTableInput
 }
 
@@ -1073,6 +1104,7 @@ export type TableUpdateWithoutReservationsInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   room?: Prisma.RoomUpdateOneRequiredWithoutTablesNestedInput
   orders?: Prisma.OrderUpdateManyWithoutTableNestedInput
 }
@@ -1096,6 +1128,7 @@ export type TableUncheckedUpdateWithoutReservationsInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTableNestedInput
 }
 
@@ -1117,6 +1150,7 @@ export type TableCreateManyRoomInput = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: string | null
+  qrId?: string | null
 }
 
 export type TableUpdateWithoutRoomInput = {
@@ -1137,6 +1171,7 @@ export type TableUpdateWithoutRoomInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderUpdateManyWithoutTableNestedInput
   reservations?: Prisma.ReservationUpdateManyWithoutTableNestedInput
 }
@@ -1159,6 +1194,7 @@ export type TableUncheckedUpdateWithoutRoomInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orders?: Prisma.OrderUncheckedUpdateManyWithoutTableNestedInput
   reservations?: Prisma.ReservationUncheckedUpdateManyWithoutTableNestedInput
 }
@@ -1181,6 +1217,7 @@ export type TableUncheckedUpdateManyWithoutRoomInput = {
   isAvailable?: Prisma.BoolFieldUpdateOperationsInput | boolean
   allowMultipleOrders?: Prisma.BoolFieldUpdateOperationsInput | boolean
   customColor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  qrId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1242,6 +1279,7 @@ export type TableSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: boolean
+  qrId?: boolean
   room?: boolean | Prisma.RoomDefaultArgs<ExtArgs>
   orders?: boolean | Prisma.Table$ordersArgs<ExtArgs>
   reservations?: boolean | Prisma.Table$reservationsArgs<ExtArgs>
@@ -1269,9 +1307,10 @@ export type TableSelectScalar = {
   isAvailable?: boolean
   allowMultipleOrders?: boolean
   customColor?: boolean
+  qrId?: boolean
 }
 
-export type TableOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "roomId" | "number" | "seats" | "positionX" | "positionY" | "width" | "height" | "rotation" | "zIndex" | "shape" | "status" | "assignedUser" | "needsAttention" | "description" | "isAvailable" | "allowMultipleOrders" | "customColor", ExtArgs["result"]["table"]>
+export type TableOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "roomId" | "number" | "seats" | "positionX" | "positionY" | "width" | "height" | "rotation" | "zIndex" | "shape" | "status" | "assignedUser" | "needsAttention" | "description" | "isAvailable" | "allowMultipleOrders" | "customColor" | "qrId", ExtArgs["result"]["table"]>
 export type TableInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   room?: boolean | Prisma.RoomDefaultArgs<ExtArgs>
   orders?: boolean | Prisma.Table$ordersArgs<ExtArgs>
@@ -1305,6 +1344,7 @@ export type $TablePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     isAvailable: boolean
     allowMultipleOrders: boolean
     customColor: string | null
+    qrId: string | null
   }, ExtArgs["result"]["table"]>
   composites: {}
 }
@@ -1695,6 +1735,7 @@ export interface TableFieldRefs {
   readonly isAvailable: Prisma.FieldRef<"Table", 'Boolean'>
   readonly allowMultipleOrders: Prisma.FieldRef<"Table", 'Boolean'>
   readonly customColor: Prisma.FieldRef<"Table", 'String'>
+  readonly qrId: Prisma.FieldRef<"Table", 'String'>
 }
     
 

@@ -24,6 +24,7 @@ import {
   Loader2,
   CheckCircle2,
   AlertTriangle,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -92,6 +93,7 @@ export interface OrderPageViewProps {
   onSplitOrder: () => void;
   onMergeOrder: () => void;
   onMessageToKitchen?: () => void;
+  onOpenSuggestions?: () => void;
   orderType?: string;
   courseReleasedUpTo?: number;
   onReleaseCourse?: (courseNumber: number) => void;
@@ -165,9 +167,10 @@ export function OrderPageView(props: OrderPageViewProps) {
     onStornoItem,
     onMoveOrder,
     onSplitOrder,
-    onMergeOrder,
-    onMessageToKitchen,
-    orderType,
+        onMergeOrder,
+        onMessageToKitchen,
+        onOpenSuggestions,
+        orderType,
     courseReleasedUpTo = 1,
     onReleaseCourse,
     isHotelOrder = false,
@@ -563,6 +566,12 @@ export function OrderPageView(props: OrderPageViewProps) {
 
             {/* Operations row */}
             <div className="flex flex-wrap gap-1">
+              {items.length > 0 && onOpenSuggestions && (
+                <Button variant="ghost" size="sm" className="h-7 gap-1 text-[11px]" onClick={onOpenSuggestions}>
+                  <Sparkles className="h-3 w-3" />
+                  Sugestie
+                </Button>
+              )}
               {onMessageToKitchen && (
                 <Button variant="ghost" size="sm" className="h-7 gap-1 text-[11px]" onClick={onMessageToKitchen}>
                   <MessageSquare className="h-3 w-3" />
@@ -742,11 +751,10 @@ export function OrderPageView(props: OrderPageViewProps) {
           </div>
         )}
 
-        {/* Categories - tabs style (horizontal scrollable) */}
-        {/* Always show root categories for easy navigation */}
+        {/* Categories - tabs style (flex-wrap: all visible on one screen, no scroll) */}
         {!searchQuery && rootCategories.length > 0 && (
           <div className="border-b">
-            <div className="flex overflow-x-auto px-2 py-1.5 gap-1 scrollbar-hide">
+            <div className="flex flex-wrap px-2 py-1.5 gap-1">
               {/* Favorites tab */}
               {onToggleFavoritesView && favoriteProductIds.length > 0 && (
                 <button
@@ -785,32 +793,6 @@ export function OrderPageView(props: OrderPageViewProps) {
                     {getCategoryEmoji(cat.name, cat.icon) && (
                       <span className="mr-1">{getCategoryEmoji(cat.name, cat.icon)}</span>
                     )}
-                    {cat.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Show subcategories if current category has children */}
-        {!searchQuery && childCategories.length > 0 && categoryStack.length > 0 && (
-          <div className="border-b bg-muted/30">
-            <div className="flex overflow-x-auto px-2 py-1 gap-1 scrollbar-hide">
-              {childCategories.map((cat) => {
-                const isActive = categoryStack[categoryStack.length - 1] === cat.id;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => onCategoryClick(cat)}
-                    className={cn(
-                      "shrink-0 rounded px-2.5 py-1 text-xs font-medium transition-all active:scale-95",
-                      isActive
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-background text-foreground hover:bg-muted",
-                    )}
-                  >
                     {cat.name}
                   </button>
                 );

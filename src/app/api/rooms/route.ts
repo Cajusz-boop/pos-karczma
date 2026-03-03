@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
           seats: t.seats,
           shape: t.shape,
           status: t.status,
+          qrId: t.qrId,
           positionX: t.positionX,
           positionY: t.positionY,
           activeOrder: activeOrder

@@ -79,6 +79,7 @@ export type OrderMinAggregateOutputType = {
   totalGross: runtime.Decimal | null
   itemCount: number | null
   lastInteractionAt: Date | null
+  onlinePaymentStatus: $Enums.OnlinePaymentStatus | null
 }
 
 export type OrderMaxAggregateOutputType = {
@@ -112,6 +113,7 @@ export type OrderMaxAggregateOutputType = {
   totalGross: runtime.Decimal | null
   itemCount: number | null
   lastInteractionAt: Date | null
+  onlinePaymentStatus: $Enums.OnlinePaymentStatus | null
 }
 
 export type OrderCountAggregateOutputType = {
@@ -146,6 +148,7 @@ export type OrderCountAggregateOutputType = {
   totalGross: number
   itemCount: number
   lastInteractionAt: number
+  onlinePaymentStatus: number
   _all: number
 }
 
@@ -203,6 +206,7 @@ export type OrderMinAggregateInputType = {
   totalGross?: true
   itemCount?: true
   lastInteractionAt?: true
+  onlinePaymentStatus?: true
 }
 
 export type OrderMaxAggregateInputType = {
@@ -236,6 +240,7 @@ export type OrderMaxAggregateInputType = {
   totalGross?: true
   itemCount?: true
   lastInteractionAt?: true
+  onlinePaymentStatus?: true
 }
 
 export type OrderCountAggregateInputType = {
@@ -270,6 +275,7 @@ export type OrderCountAggregateInputType = {
   totalGross?: true
   itemCount?: true
   lastInteractionAt?: true
+  onlinePaymentStatus?: true
   _all?: true
 }
 
@@ -391,6 +397,7 @@ export type OrderGroupByOutputType = {
   totalGross: runtime.Decimal
   itemCount: number
   lastInteractionAt: Date
+  onlinePaymentStatus: $Enums.OnlinePaymentStatus
   _count: OrderCountAggregateOutputType | null
   _avg: OrderAvgAggregateOutputType | null
   _sum: OrderSumAggregateOutputType | null
@@ -448,6 +455,7 @@ export type OrderWhereInput = {
   totalGross?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFilter<"Order"> | number
   lastInteractionAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFilter<"Order"> | $Enums.OnlinePaymentStatus
   table?: Prisma.XOR<Prisma.TableNullableScalarRelationFilter, Prisma.TableWhereInput> | null
   room?: Prisma.XOR<Prisma.RoomNullableScalarRelationFilter, Prisma.RoomWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -459,6 +467,7 @@ export type OrderWhereInput = {
   receipts?: Prisma.ReceiptListRelationFilter
   invoices?: Prisma.InvoiceListRelationFilter
   tips?: Prisma.TipListRelationFilter
+  onlinePayments?: Prisma.OnlinePaymentListRelationFilter
 }
 
 export type OrderOrderByWithRelationInput = {
@@ -493,6 +502,7 @@ export type OrderOrderByWithRelationInput = {
   totalGross?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
+  onlinePaymentStatus?: Prisma.SortOrder
   table?: Prisma.TableOrderByWithRelationInput
   room?: Prisma.RoomOrderByWithRelationInput
   user?: Prisma.UserOrderByWithRelationInput
@@ -504,6 +514,7 @@ export type OrderOrderByWithRelationInput = {
   receipts?: Prisma.ReceiptOrderByRelationAggregateInput
   invoices?: Prisma.InvoiceOrderByRelationAggregateInput
   tips?: Prisma.TipOrderByRelationAggregateInput
+  onlinePayments?: Prisma.OnlinePaymentOrderByRelationAggregateInput
   _relevance?: Prisma.OrderOrderByRelevanceInput
 }
 
@@ -542,6 +553,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   totalGross?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFilter<"Order"> | number
   lastInteractionAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFilter<"Order"> | $Enums.OnlinePaymentStatus
   table?: Prisma.XOR<Prisma.TableNullableScalarRelationFilter, Prisma.TableWhereInput> | null
   room?: Prisma.XOR<Prisma.RoomNullableScalarRelationFilter, Prisma.RoomWhereInput> | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -553,6 +565,7 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   receipts?: Prisma.ReceiptListRelationFilter
   invoices?: Prisma.InvoiceListRelationFilter
   tips?: Prisma.TipListRelationFilter
+  onlinePayments?: Prisma.OnlinePaymentListRelationFilter
 }, "id">
 
 export type OrderOrderByWithAggregationInput = {
@@ -587,6 +600,7 @@ export type OrderOrderByWithAggregationInput = {
   totalGross?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
+  onlinePaymentStatus?: Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
   _avg?: Prisma.OrderAvgOrderByAggregateInput
   _max?: Prisma.OrderMaxOrderByAggregateInput
@@ -629,6 +643,7 @@ export type OrderScalarWhereWithAggregatesInput = {
   totalGross?: Prisma.DecimalWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntWithAggregatesFilter<"Order"> | number
   lastInteractionAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusWithAggregatesFilter<"Order"> | $Enums.OnlinePaymentStatus
 }
 
 export type OrderCreateInput = {
@@ -657,6 +672,7 @@ export type OrderCreateInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -668,6 +684,7 @@ export type OrderCreateInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateInput = {
@@ -702,11 +719,13 @@ export type OrderUncheckedCreateInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUpdateInput = {
@@ -735,6 +754,7 @@ export type OrderUpdateInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -746,6 +766,7 @@ export type OrderUpdateInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateInput = {
@@ -780,11 +801,13 @@ export type OrderUncheckedUpdateInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateManyInput = {
@@ -819,6 +842,7 @@ export type OrderCreateManyInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
 }
 
 export type OrderUpdateManyMutationInput = {
@@ -847,6 +871,7 @@ export type OrderUpdateManyMutationInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 export type OrderUncheckedUpdateManyInput = {
@@ -881,6 +906,7 @@ export type OrderUncheckedUpdateManyInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 export type OrderListRelationFilter = {
@@ -931,6 +957,7 @@ export type OrderCountOrderByAggregateInput = {
   totalGross?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
+  onlinePaymentStatus?: Prisma.SortOrder
 }
 
 export type OrderAvgOrderByAggregateInput = {
@@ -975,6 +1002,7 @@ export type OrderMaxOrderByAggregateInput = {
   totalGross?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
+  onlinePaymentStatus?: Prisma.SortOrder
 }
 
 export type OrderMinOrderByAggregateInput = {
@@ -1008,6 +1036,7 @@ export type OrderMinOrderByAggregateInput = {
   totalGross?: Prisma.SortOrder
   itemCount?: Prisma.SortOrder
   lastInteractionAt?: Prisma.SortOrder
+  onlinePaymentStatus?: Prisma.SortOrder
 }
 
 export type OrderSumOrderByAggregateInput = {
@@ -1169,6 +1198,10 @@ export type NullableEnumDeliveryStatusFieldUpdateOperationsInput = {
   set?: $Enums.DeliveryStatus | null
 }
 
+export type EnumOnlinePaymentStatusFieldUpdateOperationsInput = {
+  set?: $Enums.OnlinePaymentStatus
+}
+
 export type OrderCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.OrderCreateWithoutItemsInput, Prisma.OrderUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.OrderCreateOrConnectWithoutItemsInput
@@ -1195,6 +1228,20 @@ export type OrderUpdateOneRequiredWithoutPaymentsNestedInput = {
   upsert?: Prisma.OrderUpsertWithoutPaymentsInput
   connect?: Prisma.OrderWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutPaymentsInput, Prisma.OrderUpdateWithoutPaymentsInput>, Prisma.OrderUncheckedUpdateWithoutPaymentsInput>
+}
+
+export type OrderCreateNestedOneWithoutOnlinePaymentsInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutOnlinePaymentsInput, Prisma.OrderUncheckedCreateWithoutOnlinePaymentsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutOnlinePaymentsInput
+  connect?: Prisma.OrderWhereUniqueInput
+}
+
+export type OrderUpdateOneRequiredWithoutOnlinePaymentsNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutOnlinePaymentsInput, Prisma.OrderUncheckedCreateWithoutOnlinePaymentsInput>
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutOnlinePaymentsInput
+  upsert?: Prisma.OrderUpsertWithoutOnlinePaymentsInput
+  connect?: Prisma.OrderWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutOnlinePaymentsInput, Prisma.OrderUpdateWithoutOnlinePaymentsInput>, Prisma.OrderUncheckedUpdateWithoutOnlinePaymentsInput>
 }
 
 export type OrderCreateNestedOneWithoutTipsInput = {
@@ -1393,6 +1440,7 @@ export type OrderCreateWithoutUserInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
@@ -1403,6 +1451,7 @@ export type OrderCreateWithoutUserInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutUserInput = {
@@ -1436,11 +1485,13 @@ export type OrderUncheckedCreateWithoutUserInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutUserInput = {
@@ -1504,6 +1555,7 @@ export type OrderScalarWhereInput = {
   totalGross?: Prisma.DecimalFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFilter<"Order"> | number
   lastInteractionAt?: Prisma.DateTimeFilter<"Order"> | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFilter<"Order"> | $Enums.OnlinePaymentStatus
 }
 
 export type OrderCreateWithoutRoomInput = {
@@ -1532,6 +1584,7 @@ export type OrderCreateWithoutRoomInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
   customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
@@ -1542,6 +1595,7 @@ export type OrderCreateWithoutRoomInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutRoomInput = {
@@ -1575,11 +1629,13 @@ export type OrderUncheckedCreateWithoutRoomInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutRoomInput = {
@@ -1634,6 +1690,7 @@ export type OrderCreateWithoutTableInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
   customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
@@ -1644,6 +1701,7 @@ export type OrderCreateWithoutTableInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTableInput = {
@@ -1677,11 +1735,13 @@ export type OrderUncheckedCreateWithoutTableInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTableInput = {
@@ -1736,6 +1796,7 @@ export type OrderCreateWithoutItemsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1746,6 +1807,7 @@ export type OrderCreateWithoutItemsInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutItemsInput = {
@@ -1780,10 +1842,12 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutItemsInput = {
@@ -1828,6 +1892,7 @@ export type OrderUpdateWithoutItemsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -1838,6 +1903,7 @@ export type OrderUpdateWithoutItemsInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutItemsInput = {
@@ -1872,10 +1938,12 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutPaymentsInput = {
@@ -1904,6 +1972,7 @@ export type OrderCreateWithoutPaymentsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -1914,6 +1983,7 @@ export type OrderCreateWithoutPaymentsInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutPaymentsInput = {
@@ -1948,10 +2018,12 @@ export type OrderUncheckedCreateWithoutPaymentsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutPaymentsInput = {
@@ -1996,6 +2068,7 @@ export type OrderUpdateWithoutPaymentsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -2006,6 +2079,7 @@ export type OrderUpdateWithoutPaymentsInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutPaymentsInput = {
@@ -2040,7 +2114,185 @@ export type OrderUncheckedUpdateWithoutPaymentsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
+  tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderCreateWithoutOnlinePaymentsInput = {
+  id?: string
+  orderNumber?: number
+  status?: $Enums.OrderStatus
+  type?: $Enums.OrderType
+  guestCount?: number
+  discountJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  note?: string | null
+  courseReleasedUpTo?: number
+  deliveryPhone?: string | null
+  deliveryAddress?: string | null
+  deliveryStatus?: $Enums.DeliveryStatus | null
+  deliveryNote?: string | null
+  estimatedAt?: Date | string | null
+  assignedDriverId?: string | null
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  driverCommission?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveredAt?: Date | string | null
+  maxTotal?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  copiedFromId?: string | null
+  closedButVisible?: boolean
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  itemCount?: number
+  lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
+  table?: Prisma.TableCreateNestedOneWithoutOrdersInput
+  room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
+  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  banquetEvent?: Prisma.BanquetEventCreateNestedOneWithoutOrdersInput
+  deliveryZone?: Prisma.DeliveryZoneCreateNestedOneWithoutOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
+  receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
+  tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutOnlinePaymentsInput = {
+  id?: string
+  orderNumber?: number
+  tableId?: string | null
+  roomId?: string | null
+  userId: string
+  customerId?: string | null
+  status?: $Enums.OrderStatus
+  type?: $Enums.OrderType
+  guestCount?: number
+  banquetEventId?: string | null
+  discountJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  note?: string | null
+  courseReleasedUpTo?: number
+  deliveryPhone?: string | null
+  deliveryAddress?: string | null
+  deliveryStatus?: $Enums.DeliveryStatus | null
+  deliveryNote?: string | null
+  estimatedAt?: Date | string | null
+  deliveryZoneId?: string | null
+  assignedDriverId?: string | null
+  deliveryCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  driverCommission?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveredAt?: Date | string | null
+  maxTotal?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  copiedFromId?: string | null
+  closedButVisible?: boolean
+  createdAt?: Date | string
+  closedAt?: Date | string | null
+  totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  itemCount?: number
+  lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
+  receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
+  tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutOnlinePaymentsInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutOnlinePaymentsInput, Prisma.OrderUncheckedCreateWithoutOnlinePaymentsInput>
+}
+
+export type OrderUpsertWithoutOnlinePaymentsInput = {
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutOnlinePaymentsInput, Prisma.OrderUncheckedUpdateWithoutOnlinePaymentsInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutOnlinePaymentsInput, Prisma.OrderUncheckedCreateWithoutOnlinePaymentsInput>
+  where?: Prisma.OrderWhereInput
+}
+
+export type OrderUpdateToOneWithWhereWithoutOnlinePaymentsInput = {
+  where?: Prisma.OrderWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutOnlinePaymentsInput, Prisma.OrderUncheckedUpdateWithoutOnlinePaymentsInput>
+}
+
+export type OrderUpdateWithoutOnlinePaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  type?: Prisma.EnumOrderTypeFieldUpdateOperationsInput | $Enums.OrderType
+  guestCount?: Prisma.IntFieldUpdateOperationsInput | number
+  discountJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  courseReleasedUpTo?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
+  deliveryNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assignedDriverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  driverCommission?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxTotal?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  copiedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closedButVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  itemCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
+  table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
+  room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
+  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  banquetEvent?: Prisma.BanquetEventUpdateOneWithoutOrdersNestedInput
+  deliveryZone?: Prisma.DeliveryZoneUpdateOneWithoutOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
+  receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
+  tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutOnlinePaymentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNumber?: Prisma.IntFieldUpdateOperationsInput | number
+  tableId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  roomId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  type?: Prisma.EnumOrderTypeFieldUpdateOperationsInput | $Enums.OrderType
+  guestCount?: Prisma.IntFieldUpdateOperationsInput | number
+  banquetEventId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  courseReleasedUpTo?: Prisma.IntFieldUpdateOperationsInput | number
+  deliveryPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryStatus?: Prisma.NullableEnumDeliveryStatusFieldUpdateOperationsInput | $Enums.DeliveryStatus | null
+  deliveryNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  estimatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  deliveryZoneId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assignedDriverId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  driverCommission?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  maxTotal?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  copiedFromId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closedButVisible?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  closedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  itemCount?: Prisma.IntFieldUpdateOperationsInput | number
+  lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
@@ -2072,6 +2324,7 @@ export type OrderCreateWithoutTipsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -2082,6 +2335,7 @@ export type OrderCreateWithoutTipsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutTipsInput = {
@@ -2116,10 +2370,12 @@ export type OrderUncheckedCreateWithoutTipsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutTipsInput = {
@@ -2164,6 +2420,7 @@ export type OrderUpdateWithoutTipsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -2174,6 +2431,7 @@ export type OrderUpdateWithoutTipsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTipsInput = {
@@ -2208,10 +2466,12 @@ export type OrderUncheckedUpdateWithoutTipsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutInvoicesInput = {
@@ -2240,6 +2500,7 @@ export type OrderCreateWithoutInvoicesInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -2250,6 +2511,7 @@ export type OrderCreateWithoutInvoicesInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutInvoicesInput = {
@@ -2284,10 +2546,12 @@ export type OrderUncheckedCreateWithoutInvoicesInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutInvoicesInput = {
@@ -2332,6 +2596,7 @@ export type OrderUpdateWithoutInvoicesInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -2342,6 +2607,7 @@ export type OrderUpdateWithoutInvoicesInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutInvoicesInput = {
@@ -2376,10 +2642,12 @@ export type OrderUncheckedUpdateWithoutInvoicesInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutReceiptsInput = {
@@ -2408,6 +2676,7 @@ export type OrderCreateWithoutReceiptsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -2418,6 +2687,7 @@ export type OrderCreateWithoutReceiptsInput = {
   payments?: Prisma.PaymentCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutReceiptsInput = {
@@ -2452,10 +2722,12 @@ export type OrderUncheckedCreateWithoutReceiptsInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutReceiptsInput = {
@@ -2500,6 +2772,7 @@ export type OrderUpdateWithoutReceiptsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -2510,6 +2783,7 @@ export type OrderUpdateWithoutReceiptsInput = {
   payments?: Prisma.PaymentUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutReceiptsInput = {
@@ -2544,10 +2818,12 @@ export type OrderUncheckedUpdateWithoutReceiptsInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderCreateWithoutBanquetEventInput = {
@@ -2576,6 +2852,7 @@ export type OrderCreateWithoutBanquetEventInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -2586,6 +2863,7 @@ export type OrderCreateWithoutBanquetEventInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutBanquetEventInput = {
@@ -2619,11 +2897,13 @@ export type OrderUncheckedCreateWithoutBanquetEventInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutBanquetEventInput = {
@@ -2678,6 +2958,7 @@ export type OrderCreateWithoutDeliveryZoneInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -2688,6 +2969,7 @@ export type OrderCreateWithoutDeliveryZoneInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutDeliveryZoneInput = {
@@ -2721,11 +3003,13 @@ export type OrderUncheckedCreateWithoutDeliveryZoneInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutDeliveryZoneInput = {
@@ -2780,6 +3064,7 @@ export type OrderCreateWithoutCustomerInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   table?: Prisma.TableCreateNestedOneWithoutOrdersInput
   room?: Prisma.RoomCreateNestedOneWithoutOrdersInput
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
@@ -2790,6 +3075,7 @@ export type OrderCreateWithoutCustomerInput = {
   receipts?: Prisma.ReceiptCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentCreateNestedManyWithoutOrderInput
 }
 
 export type OrderUncheckedCreateWithoutCustomerInput = {
@@ -2823,11 +3109,13 @@ export type OrderUncheckedCreateWithoutCustomerInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
   payments?: Prisma.PaymentUncheckedCreateNestedManyWithoutOrderInput
   receipts?: Prisma.ReceiptUncheckedCreateNestedManyWithoutOrderInput
   invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrderInput
   tips?: Prisma.TipUncheckedCreateNestedManyWithoutOrderInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedCreateNestedManyWithoutOrderInput
 }
 
 export type OrderCreateOrConnectWithoutCustomerInput = {
@@ -2887,6 +3175,7 @@ export type OrderCreateManyUserInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
 }
 
 export type OrderUpdateWithoutUserInput = {
@@ -2915,6 +3204,7 @@ export type OrderUpdateWithoutUserInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
@@ -2925,6 +3215,7 @@ export type OrderUpdateWithoutUserInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutUserInput = {
@@ -2958,11 +3249,13 @@ export type OrderUncheckedUpdateWithoutUserInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutUserInput = {
@@ -2996,6 +3289,7 @@ export type OrderUncheckedUpdateManyWithoutUserInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 export type OrderCreateManyRoomInput = {
@@ -3029,6 +3323,7 @@ export type OrderCreateManyRoomInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
 }
 
 export type OrderUpdateWithoutRoomInput = {
@@ -3057,6 +3352,7 @@ export type OrderUpdateWithoutRoomInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
@@ -3067,6 +3363,7 @@ export type OrderUpdateWithoutRoomInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutRoomInput = {
@@ -3100,11 +3397,13 @@ export type OrderUncheckedUpdateWithoutRoomInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutRoomInput = {
@@ -3138,6 +3437,7 @@ export type OrderUncheckedUpdateManyWithoutRoomInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 export type OrderCreateManyTableInput = {
@@ -3171,6 +3471,7 @@ export type OrderCreateManyTableInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
 }
 
 export type OrderUpdateWithoutTableInput = {
@@ -3199,6 +3500,7 @@ export type OrderUpdateWithoutTableInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
   customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
@@ -3209,6 +3511,7 @@ export type OrderUpdateWithoutTableInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutTableInput = {
@@ -3242,11 +3545,13 @@ export type OrderUncheckedUpdateWithoutTableInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutTableInput = {
@@ -3280,6 +3585,7 @@ export type OrderUncheckedUpdateManyWithoutTableInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 export type OrderCreateManyBanquetEventInput = {
@@ -3313,6 +3619,7 @@ export type OrderCreateManyBanquetEventInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
 }
 
 export type OrderUpdateWithoutBanquetEventInput = {
@@ -3341,6 +3648,7 @@ export type OrderUpdateWithoutBanquetEventInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -3351,6 +3659,7 @@ export type OrderUpdateWithoutBanquetEventInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutBanquetEventInput = {
@@ -3384,11 +3693,13 @@ export type OrderUncheckedUpdateWithoutBanquetEventInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutBanquetEventInput = {
@@ -3422,6 +3733,7 @@ export type OrderUncheckedUpdateManyWithoutBanquetEventInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 export type OrderCreateManyDeliveryZoneInput = {
@@ -3455,6 +3767,7 @@ export type OrderCreateManyDeliveryZoneInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
 }
 
 export type OrderUpdateWithoutDeliveryZoneInput = {
@@ -3483,6 +3796,7 @@ export type OrderUpdateWithoutDeliveryZoneInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -3493,6 +3807,7 @@ export type OrderUpdateWithoutDeliveryZoneInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutDeliveryZoneInput = {
@@ -3526,11 +3841,13 @@ export type OrderUncheckedUpdateWithoutDeliveryZoneInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutDeliveryZoneInput = {
@@ -3564,6 +3881,7 @@ export type OrderUncheckedUpdateManyWithoutDeliveryZoneInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 export type OrderCreateManyCustomerInput = {
@@ -3597,6 +3915,7 @@ export type OrderCreateManyCustomerInput = {
   totalGross?: runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: number
   lastInteractionAt?: Date | string
+  onlinePaymentStatus?: $Enums.OnlinePaymentStatus
 }
 
 export type OrderUpdateWithoutCustomerInput = {
@@ -3625,6 +3944,7 @@ export type OrderUpdateWithoutCustomerInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   table?: Prisma.TableUpdateOneWithoutOrdersNestedInput
   room?: Prisma.RoomUpdateOneWithoutOrdersNestedInput
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
@@ -3635,6 +3955,7 @@ export type OrderUpdateWithoutCustomerInput = {
   receipts?: Prisma.ReceiptUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateWithoutCustomerInput = {
@@ -3668,11 +3989,13 @@ export type OrderUncheckedUpdateWithoutCustomerInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
   payments?: Prisma.PaymentUncheckedUpdateManyWithoutOrderNestedInput
   receipts?: Prisma.ReceiptUncheckedUpdateManyWithoutOrderNestedInput
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrderNestedInput
   tips?: Prisma.TipUncheckedUpdateManyWithoutOrderNestedInput
+  onlinePayments?: Prisma.OnlinePaymentUncheckedUpdateManyWithoutOrderNestedInput
 }
 
 export type OrderUncheckedUpdateManyWithoutCustomerInput = {
@@ -3706,6 +4029,7 @@ export type OrderUncheckedUpdateManyWithoutCustomerInput = {
   totalGross?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   itemCount?: Prisma.IntFieldUpdateOperationsInput | number
   lastInteractionAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  onlinePaymentStatus?: Prisma.EnumOnlinePaymentStatusFieldUpdateOperationsInput | $Enums.OnlinePaymentStatus
 }
 
 
@@ -3719,6 +4043,7 @@ export type OrderCountOutputType = {
   receipts: number
   invoices: number
   tips: number
+  onlinePayments: number
 }
 
 export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3727,6 +4052,7 @@ export type OrderCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   receipts?: boolean | OrderCountOutputTypeCountReceiptsArgs
   invoices?: boolean | OrderCountOutputTypeCountInvoicesArgs
   tips?: boolean | OrderCountOutputTypeCountTipsArgs
+  onlinePayments?: boolean | OrderCountOutputTypeCountOnlinePaymentsArgs
 }
 
 /**
@@ -3774,6 +4100,13 @@ export type OrderCountOutputTypeCountTipsArgs<ExtArgs extends runtime.Types.Exte
   where?: Prisma.TipWhereInput
 }
 
+/**
+ * OrderCountOutputType without action
+ */
+export type OrderCountOutputTypeCountOnlinePaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.OnlinePaymentWhereInput
+}
+
 
 export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3807,6 +4140,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   totalGross?: boolean
   itemCount?: boolean
   lastInteractionAt?: boolean
+  onlinePaymentStatus?: boolean
   table?: boolean | Prisma.Order$tableArgs<ExtArgs>
   room?: boolean | Prisma.Order$roomArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -3818,6 +4152,7 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   receipts?: boolean | Prisma.Order$receiptsArgs<ExtArgs>
   invoices?: boolean | Prisma.Order$invoicesArgs<ExtArgs>
   tips?: boolean | Prisma.Order$tipsArgs<ExtArgs>
+  onlinePayments?: boolean | Prisma.Order$onlinePaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
@@ -3855,9 +4190,10 @@ export type OrderSelectScalar = {
   totalGross?: boolean
   itemCount?: boolean
   lastInteractionAt?: boolean
+  onlinePaymentStatus?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "tableId" | "roomId" | "userId" | "customerId" | "status" | "type" | "guestCount" | "banquetEventId" | "discountJson" | "note" | "courseReleasedUpTo" | "deliveryPhone" | "deliveryAddress" | "deliveryStatus" | "deliveryNote" | "estimatedAt" | "deliveryZoneId" | "assignedDriverId" | "deliveryCost" | "driverCommission" | "deliveredAt" | "maxTotal" | "copiedFromId" | "closedButVisible" | "createdAt" | "closedAt" | "totalGross" | "itemCount" | "lastInteractionAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNumber" | "tableId" | "roomId" | "userId" | "customerId" | "status" | "type" | "guestCount" | "banquetEventId" | "discountJson" | "note" | "courseReleasedUpTo" | "deliveryPhone" | "deliveryAddress" | "deliveryStatus" | "deliveryNote" | "estimatedAt" | "deliveryZoneId" | "assignedDriverId" | "deliveryCost" | "driverCommission" | "deliveredAt" | "maxTotal" | "copiedFromId" | "closedButVisible" | "createdAt" | "closedAt" | "totalGross" | "itemCount" | "lastInteractionAt" | "onlinePaymentStatus", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   table?: boolean | Prisma.Order$tableArgs<ExtArgs>
   room?: boolean | Prisma.Order$roomArgs<ExtArgs>
@@ -3870,6 +4206,7 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   receipts?: boolean | Prisma.Order$receiptsArgs<ExtArgs>
   invoices?: boolean | Prisma.Order$invoicesArgs<ExtArgs>
   tips?: boolean | Prisma.Order$tipsArgs<ExtArgs>
+  onlinePayments?: boolean | Prisma.Order$onlinePaymentsArgs<ExtArgs>
   _count?: boolean | Prisma.OrderCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -3887,6 +4224,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     receipts: Prisma.$ReceiptPayload<ExtArgs>[]
     invoices: Prisma.$InvoicePayload<ExtArgs>[]
     tips: Prisma.$TipPayload<ExtArgs>[]
+    onlinePayments: Prisma.$OnlinePaymentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3920,6 +4258,7 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     totalGross: runtime.Decimal
     itemCount: number
     lastInteractionAt: Date
+    onlinePaymentStatus: $Enums.OnlinePaymentStatus
   }, ExtArgs["result"]["order"]>
   composites: {}
 }
@@ -4271,6 +4610,7 @@ export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Ty
   receipts<T extends Prisma.Order$receiptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$receiptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invoices<T extends Prisma.Order$invoicesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tips<T extends Prisma.Order$tipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$tipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  onlinePayments<T extends Prisma.Order$onlinePaymentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$onlinePaymentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OnlinePaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4331,6 +4671,7 @@ export interface OrderFieldRefs {
   readonly totalGross: Prisma.FieldRef<"Order", 'Decimal'>
   readonly itemCount: Prisma.FieldRef<"Order", 'Int'>
   readonly lastInteractionAt: Prisma.FieldRef<"Order", 'DateTime'>
+  readonly onlinePaymentStatus: Prisma.FieldRef<"Order", 'OnlinePaymentStatus'>
 }
     
 
@@ -4886,6 +5227,30 @@ export type Order$tipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
   take?: number
   skip?: number
   distinct?: Prisma.TipScalarFieldEnum | Prisma.TipScalarFieldEnum[]
+}
+
+/**
+ * Order.onlinePayments
+ */
+export type Order$onlinePaymentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the OnlinePayment
+   */
+  select?: Prisma.OnlinePaymentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the OnlinePayment
+   */
+  omit?: Prisma.OnlinePaymentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.OnlinePaymentInclude<ExtArgs> | null
+  where?: Prisma.OnlinePaymentWhereInput
+  orderBy?: Prisma.OnlinePaymentOrderByWithRelationInput | Prisma.OnlinePaymentOrderByWithRelationInput[]
+  cursor?: Prisma.OnlinePaymentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.OnlinePaymentScalarFieldEnum | Prisma.OnlinePaymentScalarFieldEnum[]
 }
 
 /**

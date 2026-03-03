@@ -25,6 +25,8 @@ export async function middleware(request: NextRequest) {
   const PUBLIC_API_PREFIXES = [
     "/api/e-receipt/",
     "/api/tools/",
+    "/api/public/",
+    "/api/webhooks/",
   ];
 
   function isPublicApiRoute(pathname: string): boolean {

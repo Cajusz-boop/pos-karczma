@@ -5,6 +5,10 @@ import { prisma } from "@/lib/prisma";
 import { parseBody, createProductSchema } from "@/lib/validation";
 import { autoExportConfigSnapshot } from "@/lib/config-snapshot";
 import { cached, cacheDeletePattern } from "@/lib/redis";
+import {
+  createSuggestionsForNewProduct,
+  addNewBeverageAsSuggestionToMainDishes,
+} from "@/lib/product-suggestions";
 
 const CACHE_TTL = 120;
 
@@ -218,6 +222,24 @@ export async function POST(request: NextRequest) {
         taxRate: { select: { id: true, fiscalSymbol: true } },
       },
     });
+
+    // Auto-tworzenie sugestii dla nowego produktu
+    try {
+      const catName = (product.category as { name: string }).name;
+      if (["Mięsne", "Rybne", "Wege", "Zupy", "Przystawki", "Desery"].includes(catName)) {
+        await createSuggestionsForNewProduct(prisma, product.id, categoryId, catName);
+      }
+      if (catName === "Piwo" || catName === "Alkohol") {
+        await addNewBeverageAsSuggestionToMainDishes(
+          prisma,
+          product.id,
+          Number(product.priceGross),
+          product.costPrice
+        );
+      }
+    } catch (e) {
+      console.warn("[Products] Błąd tworzenia sugestii dla nowego produktu:", e);
+    }
 
     autoExportConfigSnapshot();
     

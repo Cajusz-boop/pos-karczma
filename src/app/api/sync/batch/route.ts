@@ -5,6 +5,17 @@ import { prisma, Prisma } from "@/lib/prisma";
 import { auditLog } from "@/lib/audit";
 import type { OrderType, PaymentMethod } from "../../../../../prisma/generated/prisma/enums";
 import { posnetDriver } from "@/lib/fiscal";
+import { emitTableEvent } from "@/lib/sse/event-bus";
+
+async function emitOrderUpdatedForTable(orderId: string) {
+  const table = await prisma.table.findFirst({
+    where: { orders: { some: { id: orderId } } },
+    select: { qrId: true },
+  });
+  if (table?.qrId) {
+    emitTableEvent(table.qrId, { type: "ORDER_UPDATED", payload: {} });
+  }
+}
 import { addDays } from "date-fns";
 
 interface BatchOperation {
@@ -374,6 +385,7 @@ async function processOrderItemOp(op: BatchOperation): Promise<Omit<BatchResultI
       return { serverId: item.id };
     });
 
+    await emitOrderUpdatedForTable(op.parentServerId!);
     return { success: true, serverId: result.serverId, serverVersion: 1 };
   }
 
@@ -427,6 +439,11 @@ async function processOrderItemOp(op: BatchOperation): Promise<Omit<BatchResultI
         });
       });
 
+      const item = await prisma.orderItem.findUnique({
+        where: { id: serverId },
+        select: { orderId: true },
+      });
+      if (item) await emitOrderUpdatedForTable(item.orderId);
       return { success: true, serverId };
     }
 
@@ -473,6 +490,11 @@ async function processOrderItemOp(op: BatchOperation): Promise<Omit<BatchResultI
         });
       });
 
+      const itemForEmit = await prisma.orderItem.findUnique({
+        where: { id: serverId },
+        select: { orderId: true },
+      });
+      if (itemForEmit) await emitOrderUpdatedForTable(itemForEmit.orderId);
       return { success: true, serverId };
     }
   }

@@ -40,6 +40,7 @@ export type ProductSuggestionMinAggregateOutputType = {
   suggestedId: string | null
   type: string | null
   priority: number | null
+  note: string | null
   isActive: boolean | null
 }
 
@@ -49,6 +50,7 @@ export type ProductSuggestionMaxAggregateOutputType = {
   suggestedId: string | null
   type: string | null
   priority: number | null
+  note: string | null
   isActive: boolean | null
 }
 
@@ -58,6 +60,7 @@ export type ProductSuggestionCountAggregateOutputType = {
   suggestedId: number
   type: number
   priority: number
+  note: number
   isActive: number
   _all: number
 }
@@ -77,6 +80,7 @@ export type ProductSuggestionMinAggregateInputType = {
   suggestedId?: true
   type?: true
   priority?: true
+  note?: true
   isActive?: true
 }
 
@@ -86,6 +90,7 @@ export type ProductSuggestionMaxAggregateInputType = {
   suggestedId?: true
   type?: true
   priority?: true
+  note?: true
   isActive?: true
 }
 
@@ -95,6 +100,7 @@ export type ProductSuggestionCountAggregateInputType = {
   suggestedId?: true
   type?: true
   priority?: true
+  note?: true
   isActive?: true
   _all?: true
 }
@@ -191,6 +197,7 @@ export type ProductSuggestionGroupByOutputType = {
   suggestedId: string
   type: string
   priority: number
+  note: string | null
   isActive: boolean
   _count: ProductSuggestionCountAggregateOutputType | null
   _avg: ProductSuggestionAvgAggregateOutputType | null
@@ -223,6 +230,7 @@ export type ProductSuggestionWhereInput = {
   suggestedId?: Prisma.StringFilter<"ProductSuggestion"> | string
   type?: Prisma.StringFilter<"ProductSuggestion"> | string
   priority?: Prisma.IntFilter<"ProductSuggestion"> | number
+  note?: Prisma.StringNullableFilter<"ProductSuggestion"> | string | null
   isActive?: Prisma.BoolFilter<"ProductSuggestion"> | boolean
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   suggested?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
@@ -234,6 +242,7 @@ export type ProductSuggestionOrderByWithRelationInput = {
   suggestedId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   product?: Prisma.ProductOrderByWithRelationInput
   suggested?: Prisma.ProductOrderByWithRelationInput
@@ -250,6 +259,7 @@ export type ProductSuggestionWhereUniqueInput = Prisma.AtLeast<{
   suggestedId?: Prisma.StringFilter<"ProductSuggestion"> | string
   type?: Prisma.StringFilter<"ProductSuggestion"> | string
   priority?: Prisma.IntFilter<"ProductSuggestion"> | number
+  note?: Prisma.StringNullableFilter<"ProductSuggestion"> | string | null
   isActive?: Prisma.BoolFilter<"ProductSuggestion"> | boolean
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
   suggested?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
@@ -261,6 +271,7 @@ export type ProductSuggestionOrderByWithAggregationInput = {
   suggestedId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  note?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   _count?: Prisma.ProductSuggestionCountOrderByAggregateInput
   _avg?: Prisma.ProductSuggestionAvgOrderByAggregateInput
@@ -278,6 +289,7 @@ export type ProductSuggestionScalarWhereWithAggregatesInput = {
   suggestedId?: Prisma.StringWithAggregatesFilter<"ProductSuggestion"> | string
   type?: Prisma.StringWithAggregatesFilter<"ProductSuggestion"> | string
   priority?: Prisma.IntWithAggregatesFilter<"ProductSuggestion"> | number
+  note?: Prisma.StringNullableWithAggregatesFilter<"ProductSuggestion"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"ProductSuggestion"> | boolean
 }
 
@@ -285,6 +297,7 @@ export type ProductSuggestionCreateInput = {
   id?: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
   product: Prisma.ProductCreateNestedOneWithoutSuggestionsBaseInput
   suggested: Prisma.ProductCreateNestedOneWithoutSuggestionsTargetInput
@@ -296,6 +309,7 @@ export type ProductSuggestionUncheckedCreateInput = {
   suggestedId: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
 }
 
@@ -303,6 +317,7 @@ export type ProductSuggestionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   product?: Prisma.ProductUpdateOneRequiredWithoutSuggestionsBaseNestedInput
   suggested?: Prisma.ProductUpdateOneRequiredWithoutSuggestionsTargetNestedInput
@@ -314,6 +329,7 @@ export type ProductSuggestionUncheckedUpdateInput = {
   suggestedId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -323,6 +339,7 @@ export type ProductSuggestionCreateManyInput = {
   suggestedId: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
 }
 
@@ -330,6 +347,7 @@ export type ProductSuggestionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -339,6 +357,7 @@ export type ProductSuggestionUncheckedUpdateManyInput = {
   suggestedId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -369,6 +388,7 @@ export type ProductSuggestionCountOrderByAggregateInput = {
   suggestedId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  note?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
 }
 
@@ -382,6 +402,7 @@ export type ProductSuggestionMaxOrderByAggregateInput = {
   suggestedId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  note?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
 }
 
@@ -391,6 +412,7 @@ export type ProductSuggestionMinOrderByAggregateInput = {
   suggestedId?: Prisma.SortOrder
   type?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  note?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
 }
 
@@ -486,6 +508,7 @@ export type ProductSuggestionCreateWithoutProductInput = {
   id?: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
   suggested: Prisma.ProductCreateNestedOneWithoutSuggestionsTargetInput
 }
@@ -495,6 +518,7 @@ export type ProductSuggestionUncheckedCreateWithoutProductInput = {
   suggestedId: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
 }
 
@@ -512,6 +536,7 @@ export type ProductSuggestionCreateWithoutSuggestedInput = {
   id?: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
   product: Prisma.ProductCreateNestedOneWithoutSuggestionsBaseInput
 }
@@ -521,6 +546,7 @@ export type ProductSuggestionUncheckedCreateWithoutSuggestedInput = {
   productId: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
 }
 
@@ -559,6 +585,7 @@ export type ProductSuggestionScalarWhereInput = {
   suggestedId?: Prisma.StringFilter<"ProductSuggestion"> | string
   type?: Prisma.StringFilter<"ProductSuggestion"> | string
   priority?: Prisma.IntFilter<"ProductSuggestion"> | number
+  note?: Prisma.StringNullableFilter<"ProductSuggestion"> | string | null
   isActive?: Prisma.BoolFilter<"ProductSuggestion"> | boolean
 }
 
@@ -583,6 +610,7 @@ export type ProductSuggestionCreateManyProductInput = {
   suggestedId: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
 }
 
@@ -591,6 +619,7 @@ export type ProductSuggestionCreateManySuggestedInput = {
   productId: string
   type: string
   priority?: number
+  note?: string | null
   isActive?: boolean
 }
 
@@ -598,6 +627,7 @@ export type ProductSuggestionUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   suggested?: Prisma.ProductUpdateOneRequiredWithoutSuggestionsTargetNestedInput
 }
@@ -607,6 +637,7 @@ export type ProductSuggestionUncheckedUpdateWithoutProductInput = {
   suggestedId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -615,6 +646,7 @@ export type ProductSuggestionUncheckedUpdateManyWithoutProductInput = {
   suggestedId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -622,6 +654,7 @@ export type ProductSuggestionUpdateWithoutSuggestedInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   product?: Prisma.ProductUpdateOneRequiredWithoutSuggestionsBaseNestedInput
 }
@@ -631,6 +664,7 @@ export type ProductSuggestionUncheckedUpdateWithoutSuggestedInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -639,6 +673,7 @@ export type ProductSuggestionUncheckedUpdateManyWithoutSuggestedInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -650,6 +685,7 @@ export type ProductSuggestionSelect<ExtArgs extends runtime.Types.Extensions.Int
   suggestedId?: boolean
   type?: boolean
   priority?: boolean
+  note?: boolean
   isActive?: boolean
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   suggested?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -663,10 +699,11 @@ export type ProductSuggestionSelectScalar = {
   suggestedId?: boolean
   type?: boolean
   priority?: boolean
+  note?: boolean
   isActive?: boolean
 }
 
-export type ProductSuggestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "suggestedId" | "type" | "priority" | "isActive", ExtArgs["result"]["productSuggestion"]>
+export type ProductSuggestionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "suggestedId" | "type" | "priority" | "note" | "isActive", ExtArgs["result"]["productSuggestion"]>
 export type ProductSuggestionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   suggested?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -684,6 +721,7 @@ export type $ProductSuggestionPayload<ExtArgs extends runtime.Types.Extensions.I
     suggestedId: string
     type: string
     priority: number
+    note: string | null
     isActive: boolean
   }, ExtArgs["result"]["productSuggestion"]>
   composites: {}
@@ -1061,6 +1099,7 @@ export interface ProductSuggestionFieldRefs {
   readonly suggestedId: Prisma.FieldRef<"ProductSuggestion", 'String'>
   readonly type: Prisma.FieldRef<"ProductSuggestion", 'String'>
   readonly priority: Prisma.FieldRef<"ProductSuggestion", 'Int'>
+  readonly note: Prisma.FieldRef<"ProductSuggestion", 'String'>
   readonly isActive: Prisma.FieldRef<"ProductSuggestion", 'Boolean'>
 }
     

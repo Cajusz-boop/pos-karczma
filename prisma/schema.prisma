@@ -158,6 +158,7 @@ model Table {
   isAvailable    Boolean     @default(true) // false = szary, niedostępny
   allowMultipleOrders Boolean @default(false) // dwa zamówienia na stoliku
   customColor    String?     // hex color override
+  qrId           String?     @unique // UUID v4 — identyfikator kodu QR (null = brak QR)
 
   orders        Order[]
   reservations  Reservation[]
@@ -411,12 +412,14 @@ model Order {
   totalGross        Decimal     @db.Decimal(10, 2) @default(0) // cached sum of items
   itemCount         Int         @default(0)                     // cached count of items
   lastInteractionAt DateTime    @default(now())                 // last change timestamp
+  onlinePaymentStatus OnlinePaymentStatus @default(UNPAID) // dla płatności QR
 
   items           OrderItem[]
   payments        Payment[]
   receipts        Receipt[]
   invoices        Invoice[]
   tips            Tip[]
+  onlinePayments  OnlinePayment[]
 
   @@index([tableId, status])
   @@index([status, createdAt])
@@ -431,6 +434,13 @@ enum OrderStatus {
   BILL_REQUESTED
   CLOSED
   CANCELLED
+}
+
+enum OnlinePaymentStatus {
+  UNPAID
+  PARTIAL
+  PENDING
+  PAID
 }
 
 enum OrderType {
@@ -498,6 +508,8 @@ model OrderItem {
   isRush          Boolean        @default(false) // "Na ratunek" - expedited prep
   isPriority      Boolean        @default(false) // "Jako pierwsze" 
   printBold       Boolean        @default(false) // print in bold on kitchen printer
+  paidQuantity    Decimal        @db.Decimal(10, 3) @default(0) // dla płatności QR
+  lockedQuantity  Decimal        @db.Decimal(10, 3) @default(0) // lock w trakcie płatności
 
   createdAt       DateTime       @default(now())
 
@@ -548,6 +560,31 @@ enum PaymentMethod {
   TRANSFER
   VOUCHER
   ROOM_CHARGE
+}
+
+model OnlinePayment {
+  id              String    @id @default(cuid())
+  order           Order     @relation(fields: [orderId], references: [id])
+  orderId         String
+  provider        String    // "STRIPE", "PAYU", "PRZELEWY24"
+  transactionId   String?   @unique
+  amount          Decimal   @db.Decimal(10, 2)   // kwota za pozycje (BEZ napiwku)
+  tipAmount       Decimal   @db.Decimal(10, 2) @default(0)
+  totalCharged    Decimal   @db.Decimal(10, 2)   // amount + tipAmount
+  currency        String    @default("PLN")
+  status          String    @default("PENDING")  // PENDING | SUCCESS | FAILED | REFUNDED | EXPIRED
+  itemsJson       Json      // [{orderItemId, quantity, unitPrice, lineTotal, fiscalSymbol, name}]
+  customerEmail   String?
+  customerPhone   String?
+  receiptToken    String?   @unique  // token do trwałego linku potwierdzenia
+  providerResponse Json?
+  errorMessage    String?
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+  expiresAt       DateTime? // timeout na lock (np. +15 min)
+
+  @@index([orderId])
+  @@index([status, createdAt])
 }
 
 model Tip {
@@ -1343,9 +1380,11 @@ model ProductSuggestion {
   suggestedId   String
   type          String   // "ADDON", "UPSELL", "CROSS_SELL"
   priority      Int      @default(0)
+  note          String?  // notatka dla kelnera (tooltip)
   isActive      Boolean  @default(true)
 
   @@unique([productId, suggestedId])
+  @@index([productId, isActive, priority])
 }
 
 // ============================================================

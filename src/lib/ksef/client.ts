@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import * as Sentry from "@sentry/nextjs";
 import { getKsefConfig } from "./config";
 import { auditLog } from "@/lib/audit";
 
@@ -242,12 +243,18 @@ export async function sendInvoiceToKsef(invoiceId: string): Promise<KsefSendResu
 
     if (!sendResponse.ok) {
       const errText = await sendResponse.text().catch(() => "");
+      const errMsg = `Błąd wysyłki: ${sendResponse.status} ${errText.slice(0, 200)}`;
       await prisma.invoice.update({
         where: { id: invoiceId },
         data: {
           ksefStatus: "REJECTED",
-          ksefErrorMessage: `Błąd wysyłki: ${sendResponse.status} ${errText.slice(0, 200)}`,
+          ksefErrorMessage: errMsg,
         },
+      });
+      Sentry.captureMessage("Invoice.ksefStatus REJECTED — błąd wysyłki KSeF", {
+        level: "error",
+        tags: { invoiceId },
+        extra: { status: sendResponse.status, error: errMsg },
       });
       return {
         sent: true,
@@ -333,17 +340,23 @@ export async function pollKsefStatus(invoiceId: string): Promise<KsefStatusResul
     }
 
     if (ksefStatus === "400" || ksefStatus === "500") {
+      const errMsg = data?.message ?? "Odrzucona przez KSeF";
       await prisma.invoice.update({
         where: { id: invoiceId },
         data: {
           ksefStatus: "REJECTED",
-          ksefErrorMessage: data?.message ?? "Odrzucona przez KSeF",
+          ksefErrorMessage: errMsg,
         },
+      });
+      Sentry.captureMessage("Invoice.ksefStatus REJECTED — faktura odrzucona przez KSeF", {
+        level: "error",
+        tags: { invoiceId },
+        extra: { ksefStatus, errorMessage: errMsg },
       });
       return {
         status: "REJECTED",
         refNumber: invoice.ksefRefNumber,
-        errorMessage: data?.message ?? "Odrzucona",
+        errorMessage: errMsg,
       };
     }
 

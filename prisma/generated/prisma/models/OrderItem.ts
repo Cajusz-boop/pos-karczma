@@ -34,6 +34,8 @@ export type OrderItemAvgAggregateOutputType = {
   delayMinutes: number | null
   confirmedWeight: runtime.Decimal | null
   componentPriceDelta: runtime.Decimal | null
+  paidQuantity: runtime.Decimal | null
+  lockedQuantity: runtime.Decimal | null
 }
 
 export type OrderItemSumAggregateOutputType = {
@@ -44,6 +46,8 @@ export type OrderItemSumAggregateOutputType = {
   delayMinutes: number | null
   confirmedWeight: runtime.Decimal | null
   componentPriceDelta: runtime.Decimal | null
+  paidQuantity: runtime.Decimal | null
+  lockedQuantity: runtime.Decimal | null
 }
 
 export type OrderItemMinAggregateOutputType = {
@@ -85,6 +89,8 @@ export type OrderItemMinAggregateOutputType = {
   isRush: boolean | null
   isPriority: boolean | null
   printBold: boolean | null
+  paidQuantity: runtime.Decimal | null
+  lockedQuantity: runtime.Decimal | null
   createdAt: Date | null
 }
 
@@ -127,6 +133,8 @@ export type OrderItemMaxAggregateOutputType = {
   isRush: boolean | null
   isPriority: boolean | null
   printBold: boolean | null
+  paidQuantity: runtime.Decimal | null
+  lockedQuantity: runtime.Decimal | null
   createdAt: Date | null
 }
 
@@ -172,6 +180,8 @@ export type OrderItemCountAggregateOutputType = {
   isRush: number
   isPriority: number
   printBold: number
+  paidQuantity: number
+  lockedQuantity: number
   createdAt: number
   _all: number
 }
@@ -185,6 +195,8 @@ export type OrderItemAvgAggregateInputType = {
   delayMinutes?: true
   confirmedWeight?: true
   componentPriceDelta?: true
+  paidQuantity?: true
+  lockedQuantity?: true
 }
 
 export type OrderItemSumAggregateInputType = {
@@ -195,6 +207,8 @@ export type OrderItemSumAggregateInputType = {
   delayMinutes?: true
   confirmedWeight?: true
   componentPriceDelta?: true
+  paidQuantity?: true
+  lockedQuantity?: true
 }
 
 export type OrderItemMinAggregateInputType = {
@@ -236,6 +250,8 @@ export type OrderItemMinAggregateInputType = {
   isRush?: true
   isPriority?: true
   printBold?: true
+  paidQuantity?: true
+  lockedQuantity?: true
   createdAt?: true
 }
 
@@ -278,6 +294,8 @@ export type OrderItemMaxAggregateInputType = {
   isRush?: true
   isPriority?: true
   printBold?: true
+  paidQuantity?: true
+  lockedQuantity?: true
   createdAt?: true
 }
 
@@ -323,6 +341,8 @@ export type OrderItemCountAggregateInputType = {
   isRush?: true
   isPriority?: true
   printBold?: true
+  paidQuantity?: true
+  lockedQuantity?: true
   createdAt?: true
   _all?: true
 }
@@ -455,6 +475,8 @@ export type OrderItemGroupByOutputType = {
   isRush: boolean
   isPriority: boolean
   printBold: boolean
+  paidQuantity: runtime.Decimal
+  lockedQuantity: runtime.Decimal
   createdAt: Date
   _count: OrderItemCountAggregateOutputType | null
   _avg: OrderItemAvgAggregateOutputType | null
@@ -523,6 +545,8 @@ export type OrderItemWhereInput = {
   isRush?: Prisma.BoolFilter<"OrderItem"> | boolean
   isPriority?: Prisma.BoolFilter<"OrderItem"> | boolean
   printBold?: Prisma.BoolFilter<"OrderItem"> | boolean
+  paidQuantity?: Prisma.DecimalFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"OrderItem"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
@@ -571,6 +595,8 @@ export type OrderItemOrderByWithRelationInput = {
   isRush?: Prisma.SortOrder
   isPriority?: Prisma.SortOrder
   printBold?: Prisma.SortOrder
+  paidQuantity?: Prisma.SortOrder
+  lockedQuantity?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   order?: Prisma.OrderOrderByWithRelationInput
   product?: Prisma.ProductOrderByWithRelationInput
@@ -623,6 +649,8 @@ export type OrderItemWhereUniqueInput = Prisma.AtLeast<{
   isRush?: Prisma.BoolFilter<"OrderItem"> | boolean
   isPriority?: Prisma.BoolFilter<"OrderItem"> | boolean
   printBold?: Prisma.BoolFilter<"OrderItem"> | boolean
+  paidQuantity?: Prisma.DecimalFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"OrderItem"> | Date | string
   order?: Prisma.XOR<Prisma.OrderScalarRelationFilter, Prisma.OrderWhereInput>
   product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
@@ -671,6 +699,8 @@ export type OrderItemOrderByWithAggregationInput = {
   isRush?: Prisma.SortOrder
   isPriority?: Prisma.SortOrder
   printBold?: Prisma.SortOrder
+  paidQuantity?: Prisma.SortOrder
+  lockedQuantity?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.OrderItemCountOrderByAggregateInput
   _avg?: Prisma.OrderItemAvgOrderByAggregateInput
@@ -724,6 +754,8 @@ export type OrderItemScalarWhereWithAggregatesInput = {
   isRush?: Prisma.BoolWithAggregatesFilter<"OrderItem"> | boolean
   isPriority?: Prisma.BoolWithAggregatesFilter<"OrderItem"> | boolean
   printBold?: Prisma.BoolWithAggregatesFilter<"OrderItem"> | boolean
+  paidQuantity?: Prisma.DecimalWithAggregatesFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalWithAggregatesFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"OrderItem"> | Date | string
 }
 
@@ -766,6 +798,8 @@ export type OrderItemCreateInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutItemsInput
   product: Prisma.ProductCreateNestedOneWithoutOrderItemsInput
@@ -814,6 +848,8 @@ export type OrderItemUncheckedCreateInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -856,6 +892,8 @@ export type OrderItemUpdateInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutOrderItemsNestedInput
@@ -904,6 +942,8 @@ export type OrderItemUncheckedUpdateInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -949,6 +989,8 @@ export type OrderItemCreateManyInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -991,6 +1033,8 @@ export type OrderItemUpdateManyMutationInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1036,6 +1080,8 @@ export type OrderItemUncheckedUpdateManyInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1097,6 +1143,8 @@ export type OrderItemCountOrderByAggregateInput = {
   isRush?: Prisma.SortOrder
   isPriority?: Prisma.SortOrder
   printBold?: Prisma.SortOrder
+  paidQuantity?: Prisma.SortOrder
+  lockedQuantity?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -1108,6 +1156,8 @@ export type OrderItemAvgOrderByAggregateInput = {
   delayMinutes?: Prisma.SortOrder
   confirmedWeight?: Prisma.SortOrder
   componentPriceDelta?: Prisma.SortOrder
+  paidQuantity?: Prisma.SortOrder
+  lockedQuantity?: Prisma.SortOrder
 }
 
 export type OrderItemMaxOrderByAggregateInput = {
@@ -1149,6 +1199,8 @@ export type OrderItemMaxOrderByAggregateInput = {
   isRush?: Prisma.SortOrder
   isPriority?: Prisma.SortOrder
   printBold?: Prisma.SortOrder
+  paidQuantity?: Prisma.SortOrder
+  lockedQuantity?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -1191,6 +1243,8 @@ export type OrderItemMinOrderByAggregateInput = {
   isRush?: Prisma.SortOrder
   isPriority?: Prisma.SortOrder
   printBold?: Prisma.SortOrder
+  paidQuantity?: Prisma.SortOrder
+  lockedQuantity?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -1202,6 +1256,8 @@ export type OrderItemSumOrderByAggregateInput = {
   delayMinutes?: Prisma.SortOrder
   confirmedWeight?: Prisma.SortOrder
   componentPriceDelta?: Prisma.SortOrder
+  paidQuantity?: Prisma.SortOrder
+  lockedQuantity?: Prisma.SortOrder
 }
 
 export type OrderItemCreateNestedManyWithoutProductInput = {
@@ -1377,6 +1433,8 @@ export type OrderItemCreateWithoutProductInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutItemsInput
   taxRate: Prisma.TaxRateCreateNestedOneWithoutOrderItemsInput
@@ -1423,6 +1481,8 @@ export type OrderItemUncheckedCreateWithoutProductInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -1497,6 +1557,8 @@ export type OrderItemScalarWhereInput = {
   isRush?: Prisma.BoolFilter<"OrderItem"> | boolean
   isPriority?: Prisma.BoolFilter<"OrderItem"> | boolean
   printBold?: Prisma.BoolFilter<"OrderItem"> | boolean
+  paidQuantity?: Prisma.DecimalFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFilter<"OrderItem"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFilter<"OrderItem"> | Date | string
 }
 
@@ -1539,6 +1601,8 @@ export type OrderItemCreateWithoutTaxRateInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   order: Prisma.OrderCreateNestedOneWithoutItemsInput
   product: Prisma.ProductCreateNestedOneWithoutOrderItemsInput
@@ -1585,6 +1649,8 @@ export type OrderItemUncheckedCreateWithoutTaxRateInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -1653,6 +1719,8 @@ export type OrderItemCreateWithoutOrderInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
   product: Prisma.ProductCreateNestedOneWithoutOrderItemsInput
   taxRate: Prisma.TaxRateCreateNestedOneWithoutOrderItemsInput
@@ -1699,6 +1767,8 @@ export type OrderItemUncheckedCreateWithoutOrderInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -1769,6 +1839,8 @@ export type OrderItemCreateManyProductInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -1811,6 +1883,8 @@ export type OrderItemUpdateWithoutProductInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
   taxRate?: Prisma.TaxRateUpdateOneRequiredWithoutOrderItemsNestedInput
@@ -1857,6 +1931,8 @@ export type OrderItemUncheckedUpdateWithoutProductInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1901,6 +1977,8 @@ export type OrderItemUncheckedUpdateManyWithoutProductInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1945,6 +2023,8 @@ export type OrderItemCreateManyTaxRateInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -1987,6 +2067,8 @@ export type OrderItemUpdateWithoutTaxRateInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   order?: Prisma.OrderUpdateOneRequiredWithoutItemsNestedInput
   product?: Prisma.ProductUpdateOneRequiredWithoutOrderItemsNestedInput
@@ -2033,6 +2115,8 @@ export type OrderItemUncheckedUpdateWithoutTaxRateInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -2077,6 +2161,8 @@ export type OrderItemUncheckedUpdateManyWithoutTaxRateInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -2121,6 +2207,8 @@ export type OrderItemCreateManyOrderInput = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Date | string
 }
 
@@ -2163,6 +2251,8 @@ export type OrderItemUpdateWithoutOrderInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   product?: Prisma.ProductUpdateOneRequiredWithoutOrderItemsNestedInput
   taxRate?: Prisma.TaxRateUpdateOneRequiredWithoutOrderItemsNestedInput
@@ -2209,6 +2299,8 @@ export type OrderItemUncheckedUpdateWithoutOrderInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -2253,6 +2345,8 @@ export type OrderItemUncheckedUpdateManyWithoutOrderInput = {
   isRush?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isPriority?: Prisma.BoolFieldUpdateOperationsInput | boolean
   printBold?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  paidQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lockedQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -2300,6 +2394,8 @@ export type OrderItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: boolean
+  lockedQuantity?: boolean
   createdAt?: boolean
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -2350,10 +2446,12 @@ export type OrderItemSelectScalar = {
   isRush?: boolean
   isPriority?: boolean
   printBold?: boolean
+  paidQuantity?: boolean
+  lockedQuantity?: boolean
   createdAt?: boolean
 }
 
-export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "productId" | "quantity" | "unitPrice" | "taxRateId" | "discountAmount" | "modifiersJson" | "note" | "courseNumber" | "status" | "sentToKitchenAt" | "startedAt" | "preparedByUserId" | "kdsStationId" | "readyAt" | "servedAt" | "cancelledAt" | "cancelReason" | "isBanquetExtra" | "isModifiedAfterSend" | "delayMinutes" | "fireAt" | "isFire" | "firedAt" | "isTakeaway" | "requiresWeightConfirm" | "weightConfirmed" | "confirmedWeight" | "weightConfirmedAt" | "weightConfirmedBy" | "weightBarcodeScanned" | "parentItemId" | "isSetComponent" | "componentPriceDelta" | "removedComponentsJson" | "addedComponentsJson" | "noteType" | "isRush" | "isPriority" | "printBold" | "createdAt", ExtArgs["result"]["orderItem"]>
+export type OrderItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderId" | "productId" | "quantity" | "unitPrice" | "taxRateId" | "discountAmount" | "modifiersJson" | "note" | "courseNumber" | "status" | "sentToKitchenAt" | "startedAt" | "preparedByUserId" | "kdsStationId" | "readyAt" | "servedAt" | "cancelledAt" | "cancelReason" | "isBanquetExtra" | "isModifiedAfterSend" | "delayMinutes" | "fireAt" | "isFire" | "firedAt" | "isTakeaway" | "requiresWeightConfirm" | "weightConfirmed" | "confirmedWeight" | "weightConfirmedAt" | "weightConfirmedBy" | "weightBarcodeScanned" | "parentItemId" | "isSetComponent" | "componentPriceDelta" | "removedComponentsJson" | "addedComponentsJson" | "noteType" | "isRush" | "isPriority" | "printBold" | "paidQuantity" | "lockedQuantity" | "createdAt", ExtArgs["result"]["orderItem"]>
 export type OrderItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   order?: boolean | Prisma.OrderDefaultArgs<ExtArgs>
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
@@ -2409,6 +2507,8 @@ export type $OrderItemPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     isRush: boolean
     isPriority: boolean
     printBold: boolean
+    paidQuantity: runtime.Decimal
+    lockedQuantity: runtime.Decimal
     createdAt: Date
   }, ExtArgs["result"]["orderItem"]>
   composites: {}
@@ -2823,6 +2923,8 @@ export interface OrderItemFieldRefs {
   readonly isRush: Prisma.FieldRef<"OrderItem", 'Boolean'>
   readonly isPriority: Prisma.FieldRef<"OrderItem", 'Boolean'>
   readonly printBold: Prisma.FieldRef<"OrderItem", 'Boolean'>
+  readonly paidQuantity: Prisma.FieldRef<"OrderItem", 'Decimal'>
+  readonly lockedQuantity: Prisma.FieldRef<"OrderItem", 'Decimal'>
   readonly createdAt: Prisma.FieldRef<"OrderItem", 'DateTime'>
 }
     

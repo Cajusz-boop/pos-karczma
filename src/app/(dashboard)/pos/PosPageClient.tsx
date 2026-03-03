@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo, memo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useFloorFromDexie, type TableView } from "@/hooks/useFloorFromDexie";
 import { hydrateOrderFromApiCreate } from "@/lib/orders/order-actions";
@@ -36,6 +36,7 @@ import {
   Hotel,
   RefreshCw,
   LayoutGrid,
+  CalendarCheck,
 } from "lucide-react";
 
 type TableStatus = "FREE" | "OCCUPIED" | "BILL_REQUESTED" | "RESERVED" | "BANQUET_MODE" | "INACTIVE";
@@ -583,7 +584,7 @@ function FloorPlanView({
     if (!el) return;
     const ro = new ResizeObserver(() => {
       const r = el.getBoundingClientRect();
-      const s = Math.min(r.width / canvasW, r.height / canvasH, 1);
+      const s = Math.min(r.width / canvasW, r.height / canvasH);
       setScale(Math.max(0.3, s));
     });
     ro.observe(el);
@@ -634,13 +635,16 @@ function FloorPlanView({
   );
 }
 
+type OpenShiftItem = { id: string; userId: string; userName: string; startedAt: string; cashStart: number; turnover: number; expectedCash?: number };
+
 export function PosPageClient() {
   const router = useRouter();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const currentUser = useAuthStore((s) => s.currentUser);
   const logout = useAuthStore((s) => s.logout);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [guestDialog, setGuestDialog] = useState<{ tableId: string; roomId: string; tableNumber: number } | null>(null);
+  const [guestDialog, setGuestDialog] = useState<{ tableId: string; roomId: string; tableNumber: number; seats: number } | null>(null);
   const [guestCount, setGuestCount] = useState("2");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState("");
@@ -648,6 +652,11 @@ export function PosPageClient() {
   const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
   const [isResetting, setIsResetting] = useState(false);
   const [tableViewMode, setTableViewMode] = useState<"grid" | "floorPlan">("grid");
+
+  // Zamknięcie zmiany — widoczne dla kelnera (nie ownera) z otwartą zmianą
+  const [closeShiftDialogOpen, setCloseShiftDialogOpen] = useState(false);
+  const [closeCashEnd, setCloseCashEnd] = useState("");
+  const [closeHandoverTo, setCloseHandoverTo] = useState("");
 
   useEffect(() => {
     const tick = () =>
@@ -685,6 +694,59 @@ export function PosPageClient() {
     refetchOnWindowFocus: false,
   });
 
+  const { data: myOpenShifts = [] } = useQuery<OpenShiftItem[]>({
+    queryKey: ["shifts-open", currentUser?.id],
+    queryFn: async () => {
+      const res = await fetch(`/api/shifts?status=OPEN&userId=${currentUser!.id}`);
+      if (!res.ok) throw new Error("Błąd");
+      return res.json();
+    },
+    enabled: !!currentUser && !currentUser.isOwner,
+  });
+
+  const myOpenShift = myOpenShifts[0] ?? null;
+
+  const { data: usersForHandover = [] } = useQuery<Array<{ id: string; name: string }>>({
+    queryKey: ["users-for-handover"],
+    queryFn: async () => {
+      const res = await fetch("/api/users?all=true");
+      if (!res.ok) throw new Error("Błąd");
+      return res.json();
+    },
+    enabled: closeShiftDialogOpen,
+  });
+
+  const closeShiftMutation = useMutation({
+    mutationFn: async ({
+      shiftId,
+      cashEnd,
+      handoverToUserId,
+    }: {
+      shiftId: string;
+      cashEnd?: number;
+      handoverToUserId?: string;
+    }) => {
+      const res = await fetch(`/api/shifts/${shiftId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "CLOSED",
+          cashEnd: cashEnd ?? undefined,
+          handoverToUserId: handoverToUserId || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Błąd zamknięcia zmiany");
+      return data;
+    },
+    onSuccess: () => {
+      setCloseShiftDialogOpen(false);
+      setCloseCashEnd("");
+      setCloseHandoverTo("");
+      queryClient.invalidateQueries({ queryKey: ["shifts-open"] });
+    },
+  });
+
   const rooms = dexieRooms;
   const alerts = (alertsData?.alerts ?? []).filter(a => !dismissedAlerts.has(a.id));
 
@@ -712,8 +774,8 @@ export function PosPageClient() {
       if (table.status === "FREE" || !table.activeOrder) {
         // P22-FIX: Also allow opening guest dialog if table has no active order
         // (handles edge case where table.status is stale but no order exists)
-        setGuestDialog({ tableId: table.id, roomId, tableNumber: table.number });
-        setGuestCount("2");
+        setGuestDialog({ tableId: table.id, roomId, tableNumber: table.number, seats: table.seats });
+        setGuestCount(String(Math.min(2, table.seats)));
         setCreateError("");
       } else if (table.activeOrder) {
         prefetchOrder(table.activeOrder.id);
@@ -789,6 +851,10 @@ export function PosPageClient() {
     const num = parseInt(guestCount, 10);
     if (Number.isNaN(num) || num < 1) {
       setCreateError("Podaj liczbę gości (min 1)");
+      return;
+    }
+    if (num > guestDialog.seats) {
+      setCreateError(`Stolik mieści max ${guestDialog.seats} osób`);
       return;
     }
     await handleStartOrderWithCount(num);
@@ -1121,6 +1187,21 @@ export function PosPageClient() {
             <span className="hidden sm:inline">Ustawienia</span>
           </Button>
         )}
+        {myOpenShift && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs sm:text-sm"
+            onClick={() => {
+              setCloseCashEnd(myOpenShift.expectedCash != null ? String(myOpenShift.expectedCash) : "");
+              setCloseHandoverTo("");
+              setCloseShiftDialogOpen(true);
+            }}
+          >
+            <CalendarCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Zamknij zmianę</span>
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="sm"
@@ -1137,12 +1218,12 @@ export function PosPageClient() {
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              Stolik {guestDialog?.tableNumber} — ile gości?
+              Stolik {guestDialog?.tableNumber} (max {guestDialog?.seats} os.) — ile gości?
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              {Array.from({ length: Math.min(8, guestDialog?.seats ?? 8) }, (_, i) => i + 1).map((n) => (
                 <Button
                   key={n}
                   variant={guestCount === String(n) ? "default" : "outline"}
@@ -1162,7 +1243,7 @@ export function PosPageClient() {
               <Input
                 type="number"
                 min={1}
-                max={99}
+                max={guestDialog?.seats ?? 99}
                 value={guestCount}
                 onChange={(e) => setGuestCount(e.target.value)}
                 className="w-20 text-center"
@@ -1182,6 +1263,76 @@ export function PosPageClient() {
           <DialogFooter className="sm:justify-center">
             <Button variant="outline" onClick={() => setGuestDialog(null)}>
               Anuluj
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* === ZAMKNIĘCIE ZMIANY === */}
+      <Dialog open={closeShiftDialogOpen} onOpenChange={(o) => !o && setCloseShiftDialogOpen(false)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Zamknij zmianę</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Koniec zmiany — wpisz stan gotówki i opcjonalnie przekaż stoliki innemu kelnerowi.</p>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium">Stan końcowy gotówki (zł)</label>
+              <Input
+                type="number"
+                step="0.01"
+                value={closeCashEnd}
+                onChange={(e) => setCloseCashEnd(e.target.value)}
+                placeholder={myOpenShift?.expectedCash != null ? String(myOpenShift.expectedCash) : "0"}
+              />
+            </div>
+            {closeShiftMutation.isError && (
+              <p className="text-sm text-destructive">
+                {closeShiftMutation.error instanceof Error ? closeShiftMutation.error.message : "Błąd zamknięcia"}
+              </p>
+            )}
+            <div>
+              <label className="mb-1 block text-sm font-medium">Przekaż otwarte stoliki do</label>
+              <select
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={closeHandoverTo}
+                onChange={(e) => setCloseHandoverTo(e.target.value)}
+              >
+                <option value="">— Nie przekazuj —</option>
+                {usersForHandover
+                  .filter((u) => u.id !== currentUser?.id)
+                  .map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>
+                  ))}
+              </select>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Wybrany kelner przejmie Twoje otwarte zamówienia i stoliki.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setCloseShiftDialogOpen(false)}
+              disabled={closeShiftMutation.isPending}
+            >
+              Anuluj
+            </Button>
+            <Button
+              onClick={() => {
+                if (!myOpenShift) return;
+                const cashEndNum = parseFloat(closeCashEnd);
+                closeShiftMutation.mutate({
+                  shiftId: myOpenShift.id,
+                  cashEnd: !isNaN(cashEndNum) ? cashEndNum : undefined,
+                  handoverToUserId: closeHandoverTo || undefined,
+                });
+              }}
+              disabled={closeShiftMutation.isPending}
+            >
+              {closeShiftMutation.isPending ? "Zamykanie…" : "Zamknij zmianę"}
             </Button>
           </DialogFooter>
         </DialogContent>
