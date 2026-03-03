@@ -124,6 +124,16 @@ export function DexieProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
+        // Stoliki — diagnoza (również produkcja)
+        const tablesCount = result.tables["tables"] ?? -1;
+        const roomsCount = result.tables["rooms"] ?? 0;
+        if (roomsCount > 0 && (tablesCount === 0 || tablesCount === -1)) {
+          console.warn(
+            "[DexieProvider] Brak stolików w sync (rooms:", roomsCount, ", tables:", tablesCount, ").",
+            "Użytkownicy: Ustawienia → Resetuj cache offline"
+          );
+        }
+
         // Diagnostyka — dev only, dostęp do db w konsoli
         if (process.env.NODE_ENV === "development" && typeof window !== "undefined") {
           (window as unknown as { __POS_DB__?: typeof db }).__POS_DB__ = db;

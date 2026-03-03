@@ -80,7 +80,8 @@ const TABLE_CONFIG: Record<string, {
         seats: t.seats,
         shape: t.shape,
         status: t.status,
-        isAvailable: t.isAvailable ?? true,
+        // Normalize isAvailable — MySQL/Prisma może zwrócić 0/1; null/undefined → true
+        isAvailable: t.isAvailable !== false && t.isAvailable !== 0,
         description: t.description ?? undefined,
         positionX: t.positionX ?? 0,
         positionY: t.positionY ?? 0,
@@ -168,6 +169,10 @@ export async function GET(request: NextRequest) {
 
     const serverTimestamp = new Date().toISOString();
     const transformed = config.transform(records, serverTimestamp);
+
+    if (table === "tables") {
+      console.log(`[SyncPull] tables: ${records.length} records from DB`);
+    }
 
     return NextResponse.json({
       data: transformed,

@@ -1051,7 +1051,19 @@ export function PosPageClient() {
             )}
           </div>
         ) : selectedRoom ? (
-          tableViewMode === "grid" ? (
+          // Sale są, ale brak stolików w cache (sync tables mógł się nie powieść)
+          rooms.reduce((s, r) => s + r.tables.length, 0) === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 px-4 text-center">
+              <p className="text-lg font-medium text-muted-foreground">Stoliki nie zostały załadowane</p>
+              <p className="max-w-sm text-sm text-muted-foreground">
+                Dane offline mogą być niekompletne. Przejdź do Ustawień i kliknij „Resetuj cache offline”, żeby pobrać stoliki z serwera.
+              </p>
+              <Button onClick={() => router.push("/settings")} variant="default">
+                <Settings className="mr-2 h-4 w-4" />
+                Ustawienia
+              </Button>
+            </div>
+          ) : tableViewMode === "grid" ? (
             <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-4 sm:py-4">
               <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                 {selectedRoom.tables.map((table) => (
