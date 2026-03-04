@@ -119,6 +119,8 @@ model Room {
   reservations  Reservation[]
   banquetEvents BanquetEvent[]
   orders        Order[]
+
+  @@map("room")
 }
 
 enum RoomType {
@@ -135,6 +137,8 @@ model RoomMerge {
   isActive    Boolean  @default(true)
   activeFrom  DateTime
   activeTo    DateTime?
+
+  @@map("roommerge")
 }
 
 model Table {
@@ -164,6 +168,7 @@ model Table {
   reservations  Reservation[]
 
   @@index([roomId, status])
+  @@map("table")
 }
 
 enum TableShape {
@@ -319,6 +324,8 @@ model TaxRate {
 
   products      Product[]
   orderItems    OrderItem[]
+
+  @@map("taxrate")
 }
 
 model ModifierGroup {
@@ -330,6 +337,8 @@ model ModifierGroup {
 
   modifiers   Modifier[]
   products    ProductModifierGroup[]
+
+  @@map("modifiergroup")
 }
 
 model Modifier {
@@ -357,6 +366,8 @@ model Allergen {
   icon  String?        // emoji or icon name
 
   products ProductAllergen[]
+
+  @@map("allergen")
 }
 
 model ProductAllergen {
@@ -515,6 +526,7 @@ model OrderItem {
 
   @@index([orderId, status])
   @@index([parentItemId])
+  @@map("orderitem")
 }
 
 enum NoteType {
@@ -1522,6 +1534,8 @@ model SystemConfig {
   id    String @id @default(cuid())
   key   String @unique
   value Json
+
+  @@map("systemconfig")
 }
 
 model WorkstationConfig {
