@@ -34,6 +34,13 @@ export async function middleware(request: NextRequest) {
     return PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   }
 
+  /** Receptury: odczyt bez logowania (dla linku szefa kuchni). */
+  const isRecepturyRead =
+    request.method === "GET" &&
+    (pathname === "/api/receptury" ||
+      pathname.startsWith("/api/receptury/") ||
+      pathname === "/api/tagi");
+
   function getClientIp(req: NextRequest): string {
     return (
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
@@ -73,7 +80,7 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  if (isPublicApiRoute(pathname)) {
+  if (isPublicApiRoute(pathname) || isRecepturyRead) {
     const res = NextResponse.next();
     res.headers.set("X-RateLimit-Remaining", String(rl.remaining));
     return res;

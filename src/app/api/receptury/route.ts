@@ -19,10 +19,8 @@ async function requireRecepturyAccess() {
   return { user };
 }
 
-/** GET /api/receptury — lista receptur (query: tag, search, status, archived) */
+/** GET /api/receptury — lista receptur (dostęp bez logowania dla linku szefa kuchni) */
 export async function GET(request: NextRequest) {
-  const check = await requireRecepturyAccess();
-  if (check.error) return check.error;
   try {
     const { searchParams } = new URL(request.url);
     const tagId = searchParams.get("tag");

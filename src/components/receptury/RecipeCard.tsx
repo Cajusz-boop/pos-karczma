@@ -10,6 +10,7 @@ const STATUS_BG: Record<string, string> = {
 };
 
 export interface RecipeCardProps {
+  readOnly?: boolean;
   recipe: {
     id: number;
     name: string;
@@ -22,11 +23,12 @@ export interface RecipeCardProps {
   };
 }
 
-export function RecipeCard({ recipe }: RecipeCardProps) {
+export function RecipeCard({ recipe, readOnly }: RecipeCardProps) {
   const bgClass = STATUS_BG[recipe.status] ?? "bg-gray-50 border-gray-200";
+  const href = readOnly ? `/receptury/${recipe.id}` : `/receptury/${recipe.id}/edytuj`;
 
   return (
-    <Link href={`/receptury/${recipe.id}/edytuj`} className="block">
+    <Link href={href} className="block">
       <Card
         className={cn(
           "cursor-pointer transition-shadow hover:shadow-md min-h-[120px] flex flex-col",

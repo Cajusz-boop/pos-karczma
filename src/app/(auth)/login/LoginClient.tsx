@@ -150,6 +150,7 @@ export function LoginClient() {
 
   const checkShiftAndRedirect = useCallback(
     async (user: AuthUser) => {
+      const destination = redirectTo ?? "/pos";
       if (user.roleName === "SZEF_KUCHNI" && redirectTo) {
         router.replace(redirectTo);
         return;
@@ -159,18 +160,18 @@ export function LoginClient() {
         return;
       }
       if (user.isOwner) {
-        router.replace("/pos");
+        router.replace(destination);
         return;
       }
       try {
         const base = await getApiBaseUrl();
         const { data, offline } = await safeFetch<unknown[]>(`${base}/api/shifts?userId=${user.id}&status=OPEN`);
         if (offline || !data) {
-          router.replace("/pos");
+          router.replace(destination);
           return;
         }
         if (Array.isArray(data) && data.length > 0) {
-          router.replace("/pos");
+          router.replace(destination);
         } else {
           setPendingUser(user);
           setShiftDialogOpen(true);
@@ -178,7 +179,7 @@ export function LoginClient() {
           setShiftError("");
         }
       } catch {
-        router.replace("/pos");
+        router.replace(redirectTo ?? "/pos");
       }
     },
     [router, redirectTo]

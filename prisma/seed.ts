@@ -93,6 +93,7 @@ async function main() {
   // 2. Users (PIN: bcrypt hash) — find by name, create or update pin
   const usersData = [
     { name: "Łukasz", pin: "1234", roleId: roleAdmin.id, isOwner: true },
+    { name: "Basia", pin: "1234", roleId: roleSzefKuchni.id, isOwner: false },
     { name: "Kelner 1", pin: "1111", roleId: roleWaiter.id, isOwner: false },
     { name: "Kelner 2", pin: "2222", roleId: roleWaiter.id, isOwner: false },
     { name: "Kelner 3", pin: "3333", roleId: roleWaiter.id, isOwner: false },
@@ -109,7 +110,7 @@ async function main() {
       });
     }
   }
-  console.log("  ✓ Użytkownicy: Łukasz (1234), Kelner 1–4 (1111–4444)");
+  console.log("  ✓ Użytkownicy: Łukasz (1234), Basia (1234), Kelner 1–4 (1111–4444)");
 
   // 3. Stawki VAT (TaxRate nie ma @unique na fiscalSymbol — findFirst + create)
   const ensureTaxRate = async (name: string, ratePercent: number, fiscalSymbol: string, isDefault: boolean) => {

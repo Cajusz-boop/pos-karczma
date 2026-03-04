@@ -19,13 +19,11 @@ async function requireRecepturyAccess() {
   return { user };
 }
 
-/** GET /api/receptury/[id] — jedna receptura z składnikami */
+/** GET /api/receptury/[id] — jedna receptura z składnikami (dostęp bez logowania) */
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const check = await requireRecepturyAccess();
-  if (check.error) return check.error;
   try {
     const { id } = await params;
     const recipeId = parseInt(id, 10);

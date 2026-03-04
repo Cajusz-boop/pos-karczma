@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useAuthStore } from "@/store/useAuthStore";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ async function fetchTags() {
 const STATUSES = ["AKTYWNA", "ARCHIWALNA"] as const;
 
 export default function RecepturyPage() {
+  const currentUser = useAuthStore((s) => s.currentUser);
   const [filterStatus, setFilterStatus] = useState<string>("");
   const [filterTagId, setFilterTagId] = useState<string>("");
   const [search, setSearch] = useState("");
@@ -77,15 +79,17 @@ export default function RecepturyPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-foreground">Receptury</h1>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="lg"
-            className="h-12"
-            onClick={() => setStatusTagsModalOpen(true)}
-          >
-            <Tags className="h-5 w-5" />
-            Status i etykiety
-          </Button>
+          {currentUser && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-12"
+              onClick={() => setStatusTagsModalOpen(true)}
+            >
+              <Tags className="h-5 w-5" />
+              Status i etykiety
+            </Button>
+          )}
           <Link href="/receptury/produkty">
             <Button variant="outline" size="lg" className="h-12">
               Produkty
@@ -96,12 +100,14 @@ export default function RecepturyPage() {
               Tagi
             </Button>
           </Link>
-          <Link href="/receptury/nowa">
-            <Button size="lg" className="h-12 min-w-[200px] text-base">
-              <Plus className="h-5 w-5" />
-              Dodaj recepturę
-            </Button>
-          </Link>
+          {currentUser && (
+            <Link href="/receptury/nowa">
+              <Button size="lg" className="h-12 min-w-[200px] text-base">
+                <Plus className="h-5 w-5" />
+                Dodaj recepturę
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
@@ -234,6 +240,7 @@ export default function RecepturyPage() {
           {recipes.map((r) => (
             <RecipeCard
               key={r.id}
+              readOnly={!currentUser}
               recipe={{
                 id: r.id,
                 name: r.name,

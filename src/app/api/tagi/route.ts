@@ -13,10 +13,8 @@ async function requireRecepturyAccess() {
   return { user };
 }
 
-/** GET /api/tagi — lista tagów z liczbą receptur */
+/** GET /api/tagi — lista tagów z liczbą receptur (dostęp bez logowania) */
 export async function GET() {
-  const check = await requireRecepturyAccess();
-  if (check.error) return check.error;
   try {
     const tags = await prisma.recipeTag.findMany({
       include: { _count: { select: { recipeDishes: true } } },

@@ -89,7 +89,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isPosView = pathname === "/pos" || pathname.startsWith("/pos/");
   const isKitchenView = pathname === "/kitchen";
   const isRecepturyPath = RECEPTURY_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
-  const navItems = isChef ? RECEPTURY_NAV : isAdmin ? ADMIN_NAV : WAITER_NAV;
+  const navItems =
+    isRecepturyPath && !currentUser
+      ? RECEPTURY_NAV
+      : isChef
+        ? RECEPTURY_NAV
+        : isAdmin
+          ? ADMIN_NAV
+          : WAITER_NAV;
 
   const { data: draftData } = useQuery({
     queryKey: ["events-draft-count"],
@@ -121,11 +128,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!mounted) return;
-    if (!currentUser) {
+    if (!currentUser && !isRecepturyPath) {
       router.replace("/login");
       return;
     }
-    if (isChef && !isRecepturyPath) {
+    if (currentUser && isChef && !isRecepturyPath) {
       router.replace("/receptury");
       return;
     }
@@ -143,7 +150,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.replace("/login");
   };
 
-  if (!mounted || !currentUser) {
+  if (!mounted || (!currentUser && !isRecepturyPath)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -258,15 +265,28 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div className="border-t p-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start gap-2 text-sm text-muted-foreground"
-            onClick={handleLogout}
-          >
-            <LogOut className="h-4 w-4" />
-            Wyloguj
-          </Button>
+          {currentUser ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2 text-sm text-muted-foreground"
+              onClick={handleLogout}
+            >
+              <LogOut className="h-4 w-4" />
+              Wyloguj
+            </Button>
+          ) : (
+            <Link href="/login">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start gap-2 text-sm text-muted-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                Zaloguj
+              </Button>
+            </Link>
+          )}
         </div>
       </aside>
 
@@ -281,13 +301,13 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <span className="font-medium">{currentUser.name}</span>
-            {isAdmin && (
+            <span className="font-medium">{currentUser?.name ?? "Gość"}</span>
+            {currentUser && isAdmin && (
               <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                 Admin
               </span>
             )}
-            {isChef && !isAdmin && (
+            {currentUser && isChef && !isAdmin && (
               <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400">
                 Szef kuchni
               </span>
@@ -298,10 +318,18 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <Clock className="h-3.5 w-3.5" />
               {time}
             </span>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex">
-              <LogOut className="mr-1 h-4 w-4" />
-              Wyloguj
-            </Button>
+            {currentUser ? (
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="hidden md:flex">
+                <LogOut className="mr-1 h-4 w-4" />
+                Wyloguj
+              </Button>
+            ) : (
+              <Link href="/login">
+                <Button variant="ghost" size="sm" className="hidden md:flex">
+                  Zaloguj
+                </Button>
+              </Link>
+            )}
           </div>
         </header>
         <main className="flex-1 overflow-auto p-4">{children}</main>
