@@ -42,11 +42,13 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
 
-      - name: Prepare standalone (copy static + public)
+      - name: Prepare standalone (copy static + public + prisma)
         run: |
           mkdir -p .next/standalone/.next
           cp -r .next/static .next/standalone/.next/
           cp -r public .next/standalone/
+          cp -r prisma .next/standalone/
+          cp prisma.config.ts .next/standalone/ 2>/dev/null || true
 
       - name: Create archive
         run: tar -czf _deploy_next.tar.gz -C .next standalone
@@ -63,10 +65,11 @@ jobs:
             ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
             "cd ${{ secrets.DEPLOY_PATH }} && rm -rf standalone && tar -xzf _deploy_next.tar.gz && rm -f _deploy_next.tar.gz && (test -f .env && cp .env standalone/.env || echo 'Brak .env - DATABASE_URL musi byc w zmiennych srodowiskowych')"
 
-      - name: Run migrations
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Run migrations (on server)
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
+            "cd ${{ secrets.DEPLOY_PATH }}/standalone && npx dotenv-cli -e .env -- npx prisma migrate deploy"
 
       - name: PM2 delete + start
         run: |
