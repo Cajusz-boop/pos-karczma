@@ -195,7 +195,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs tabular-nums text-muted-foreground" suppressHydrationWarning>{time}</span>
-            <span className="text-xs font-medium">{currentUser.name}</span>
+            <span className="text-xs font-medium">{currentUser?.name}</span>
           </div>
         </header>
         <main className="flex-1">{children}</main>
