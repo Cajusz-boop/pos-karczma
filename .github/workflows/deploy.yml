@@ -63,6 +63,11 @@ jobs:
             ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
             "cd ${{ secrets.DEPLOY_PATH }} && rm -rf standalone && tar -xzf _deploy_next.tar.gz && rm -f _deploy_next.tar.gz && (test -f .env && cp .env standalone/.env || echo 'Brak .env - DATABASE_URL musi byc w zmiennych srodowiskowych')"
 
+      - name: Run migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: PM2 delete + start
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
