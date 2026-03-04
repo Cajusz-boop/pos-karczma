@@ -5,6 +5,7 @@
  * Endpoints:
  * - GET /api/v1/external/occupied-rooms — list occupied hotel rooms with guest info
  * - POST /api/v1/external/posting — post a restaurant charge to a hotel room
+ * - GET /api/v1/external/room-charges — list room charges (posiłki) for history fallback
  * - GET /api/breakfast/guests — list guests with breakfast included
  */
 
@@ -251,6 +252,84 @@ export async function postRoomCharge(params: {
       description: params.description,
       orderId: params.orderId,
       status: "FAILED",
+    };
+  }
+}
+
+export interface HotelRoomChargeOrder {
+  orderId: string;
+  orderNumber: number;
+  roomNumber: string;
+  amount: number;
+  createdAt: string;
+  waiterName: string;
+  items: Array<{
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    note: string | null;
+  }>;
+}
+
+/**
+ * Get room charges (posiłki) from hotel system.
+ * Used as fallback when POS has no local Payment records for a room.
+ */
+export async function getRoomChargesFromHotel(params: {
+  roomNumber?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<{ orders: HotelRoomChargeOrder[]; error?: string }> {
+  const config = await getConfig();
+  if (!config.enabled) {
+    return { orders: [] };
+  }
+
+  try {
+    const searchParams = new URLSearchParams();
+    if (params.roomNumber?.trim()) searchParams.set("roomNumber", params.roomNumber.trim());
+    if (params.dateFrom) searchParams.set("dateFrom", params.dateFrom);
+    if (params.dateTo) searchParams.set("dateTo", params.dateTo);
+    const qs = searchParams.toString();
+    const url = `${config.baseUrl}/api/v1/external/room-charges${qs ? `?${qs}` : ""}`;
+
+    const response = await fetchWithTimeout(url, {
+      headers: {
+        "X-API-Key": config.apiKey,
+        Authorization: `Bearer ${config.apiKey}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return { orders: [], error: `Hotel API: ${response.status}` };
+    }
+
+    const data = (await response.json()) as { orders?: HotelRoomChargeOrder[] };
+    const orders = (data.orders ?? []).map((o) => ({
+      orderId: o.orderId,
+      orderNumber: Number(o.orderNumber) || 0,
+      roomNumber: String(o.roomNumber ?? ""),
+      amount: Number(o.amount) || 0,
+      createdAt: String(o.createdAt ?? ""),
+      waiterName: String(o.waiterName ?? ""),
+      items: (o.items ?? []).map((i) => ({
+        productName: String(i.productName ?? "Pozycja"),
+        quantity: Number(i.quantity) || 1,
+        unitPrice: Number(i.unitPrice) || 0,
+        note: i.note ?? null,
+      })),
+    }));
+
+    return { orders };
+  } catch (e) {
+    if (e instanceof Error && e.name === "AbortError") {
+      return { orders: [], error: "Przekroczono czas oczekiwania" };
+    }
+    return {
+      orders: [],
+      error: e instanceof Error ? e.message : "Błąd połączenia z hotelem",
     };
   }
 }

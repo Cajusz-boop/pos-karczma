@@ -2,10 +2,12 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getRoomChargesFromHotel } from "@/lib/hotel/client";
 
 /**
  * GET /api/hotel/orders — historia zamówień obciążonych na pokoje
  * Query: roomNumber (opcjonalny filtr), dateFrom, dateTo (YYYY-MM-DD)
+ * Fallback: gdy lokalne dane puste — pobiera z HotelSystem API
  */
 export async function GET(request: NextRequest) {
   try {
@@ -70,6 +72,24 @@ export async function GET(request: NextRequest) {
         };
       })
       .filter((x): x is NonNullable<typeof x> => x !== null);
+
+    if (result.length > 0) {
+      return NextResponse.json({ orders: result });
+    }
+
+    // Fallback: pobierz z HotelSystem (gdzie są zapisywane obciążenia z POS)
+    try {
+      const hotelResult = await getRoomChargesFromHotel({
+        roomNumber: roomNumberFilter ?? undefined,
+        dateFrom: dateFromParam ?? undefined,
+        dateTo: dateToParam ?? undefined,
+      });
+      if (hotelResult.orders.length > 0) {
+        return NextResponse.json({ orders: hotelResult.orders });
+      }
+    } catch (hotelErr) {
+      console.warn("[Hotel Orders] Fallback z HotelSystem nieudany:", hotelErr);
+    }
 
     return NextResponse.json({ orders: result });
   } catch (e) {
