@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,10 @@ import {
   CalendarCheck,
   Truck,
   Wrench,
+  BookOpen,
+  PartyPopper,
+  ClipboardList,
+  Tags,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +41,11 @@ const ADMIN_NAV = [
   { href: "/products", label: "Produkty", icon: Package },
   { href: "/time-tracking", label: "Czas pracy", icon: Clock },
   { href: "/banquets", label: "Bankiety", icon: UtensilsCrossed },
+  { href: "/receptury", label: "Receptury", icon: BookOpen },
+  { href: "/imprezy", label: "Imprezy", icon: PartyPopper, badgeKey: "draftCount" },
   { href: "/reservations", label: "Rezerwacje", icon: Calendar },
   { href: "/warehouse", label: "Magazyn", icon: Warehouse },
+  { href: "/zaopatrzenie", label: "Zaopatrzenie", icon: ClipboardList },
   { href: "/invoices", label: "Faktury", icon: FileText },
   { href: "/day-close", label: "Zamknięcie dnia", icon: CalendarCheck },
   { href: "/reports", label: "Raporty", icon: BarChart3 },
@@ -53,8 +61,16 @@ const WAITER_NAV = [
 ];
 
 const ADMIN_ONLY_PATHS = [
-  "/delivery", "/products", "/time-tracking", "/banquets", "/reservations",
-  "/warehouse", "/invoices", "/day-close", "/reports", "/manager", "/users", "/settings",
+  "/delivery", "/products", "/time-tracking", "/banquets", "/receptury", "/imprezy", "/reservations",
+  "/warehouse", "/zaopatrzenie", "/invoices", "/day-close", "/reports", "/manager", "/users", "/settings",
+];
+
+/** Szef kuchni ma dostęp tylko do receptur (bez POS). */
+const RECEPTURY_PATHS = ["/receptury"];
+const RECEPTURY_NAV = [
+  { href: "/receptury", label: "Receptury", icon: BookOpen },
+  { href: "/receptury/produkty", label: "Produkty receptur", icon: Package },
+  { href: "/receptury/tagi", label: "Tagi", icon: Tags },
 ];
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
@@ -69,9 +85,21 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const isOwner = currentUser?.isOwner ?? false;
   const roleName = currentUser?.roleName ?? "";
   const isAdmin = isOwner || roleName === "ADMIN";
+  const isChef = roleName === "SZEF_KUCHNI";
   const isPosView = pathname === "/pos" || pathname.startsWith("/pos/");
   const isKitchenView = pathname === "/kitchen";
-  const navItems = isAdmin ? ADMIN_NAV : WAITER_NAV;
+  const isRecepturyPath = RECEPTURY_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
+  const navItems = isChef ? RECEPTURY_NAV : isAdmin ? ADMIN_NAV : WAITER_NAV;
+
+  const { data: draftData } = useQuery({
+    queryKey: ["events-draft-count"],
+    queryFn: async () => {
+      const res = await fetch("/api/events/draft-count");
+      if (!res.ok) return { count: 0 };
+      return res.json();
+    },
+    enabled: isAdmin && mounted,
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -97,10 +125,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       router.replace("/login");
       return;
     }
-    if (!isAdmin && ADMIN_ONLY_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    if (isChef && !isRecepturyPath) {
+      router.replace("/receptury");
+      return;
+    }
+    if (!isAdmin && !isChef && ADMIN_ONLY_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       router.replace("/pos");
     }
-  }, [mounted, currentUser, router, isAdmin, pathname]);
+  }, [mounted, currentUser, router, isAdmin, isChef, isRecepturyPath, pathname]);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -155,7 +187,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs tabular-nums text-muted-foreground">{time}</span>
+            <span className="text-xs tabular-nums text-muted-foreground" suppressHydrationWarning>{time}</span>
             <span className="text-xs font-medium">{currentUser.name}</span>
           </div>
         </header>
@@ -201,6 +233,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
+            const badge =
+              "badgeKey" in item && item.badgeKey === "draftCount" && (draftData?.count ?? 0) > 0;
             return (
               <Link key={item.href} href={item.href}>
                 <Button
@@ -213,6 +247,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 >
                   <Icon className="h-4 w-4" />
                   {item.label}
+                  {badge && (
+                    <span className="ml-auto rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-amber-950">
+                      {draftData?.count}
+                    </span>
+                  )}
                 </Button>
               </Link>
             );
@@ -248,9 +287,14 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                 Admin
               </span>
             )}
+            {isChef && !isAdmin && (
+              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:text-amber-400">
+                Szef kuchni
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-sm tabular-nums text-muted-foreground">
+            <span className="flex items-center gap-1 text-sm tabular-nums text-muted-foreground" suppressHydrationWarning>
               <Clock className="h-3.5 w-3.5" />
               {time}
             </span>

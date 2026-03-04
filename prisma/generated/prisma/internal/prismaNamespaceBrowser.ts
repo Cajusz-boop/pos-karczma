@@ -82,6 +82,20 @@ export const ModelName = {
   StockMove: 'StockMove',
   Recipe: 'Recipe',
   RecipeItem: 'RecipeItem',
+  RecipeProduct: 'RecipeProduct',
+  UnitConversion: 'UnitConversion',
+  RecipeDish: 'RecipeDish',
+  RecipeDishIngredient: 'RecipeDishIngredient',
+  RecipeTag: 'RecipeTag',
+  RecipeDishTag: 'RecipeDishTag',
+  RecipeHistory: 'RecipeHistory',
+  EventPackage: 'EventPackage',
+  EventPackageItem: 'EventPackageItem',
+  ProcurementCalculation: 'ProcurementCalculation',
+  StockMinimum: 'StockMinimum',
+  Event: 'Event',
+  CalendarSyncLog: 'CalendarSyncLog',
+  CalendarConfig: 'CalendarConfig',
   KDSStation: 'KDSStation',
   KDSOrderArchive: 'KDSOrderArchive',
   KDSStationCategory: 'KDSStationCategory',
@@ -677,6 +691,188 @@ export const RecipeItemScalarFieldEnum = {
 } as const
 
 export type RecipeItemScalarFieldEnum = (typeof RecipeItemScalarFieldEnum)[keyof typeof RecipeItemScalarFieldEnum]
+
+
+export const RecipeProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  defaultUnit: 'defaultUnit',
+  mergedIntoId: 'mergedIntoId',
+  createdAt: 'createdAt'
+} as const
+
+export type RecipeProductScalarFieldEnum = (typeof RecipeProductScalarFieldEnum)[keyof typeof RecipeProductScalarFieldEnum]
+
+
+export const UnitConversionScalarFieldEnum = {
+  id: 'id',
+  fromUnit: 'fromUnit',
+  toUnit: 'toUnit',
+  factor: 'factor'
+} as const
+
+export type UnitConversionScalarFieldEnum = (typeof UnitConversionScalarFieldEnum)[keyof typeof UnitConversionScalarFieldEnum]
+
+
+export const RecipeDishScalarFieldEnum = {
+  id: 'id',
+  recipeNumber: 'recipeNumber',
+  name: 'name',
+  basePortions: 'basePortions',
+  portionUnit: 'portionUnit',
+  status: 'status',
+  notes: 'notes',
+  isArchived: 'isArchived',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipeDishScalarFieldEnum = (typeof RecipeDishScalarFieldEnum)[keyof typeof RecipeDishScalarFieldEnum]
+
+
+export const RecipeDishIngredientScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  productId: 'productId',
+  subRecipeId: 'subRecipeId',
+  quantity: 'quantity',
+  unit: 'unit',
+  sortOrder: 'sortOrder'
+} as const
+
+export type RecipeDishIngredientScalarFieldEnum = (typeof RecipeDishIngredientScalarFieldEnum)[keyof typeof RecipeDishIngredientScalarFieldEnum]
+
+
+export const RecipeTagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  color: 'color',
+  createdAt: 'createdAt'
+} as const
+
+export type RecipeTagScalarFieldEnum = (typeof RecipeTagScalarFieldEnum)[keyof typeof RecipeTagScalarFieldEnum]
+
+
+export const RecipeDishTagScalarFieldEnum = {
+  recipeId: 'recipeId',
+  tagId: 'tagId'
+} as const
+
+export type RecipeDishTagScalarFieldEnum = (typeof RecipeDishTagScalarFieldEnum)[keyof typeof RecipeDishTagScalarFieldEnum]
+
+
+export const RecipeHistoryScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  changedBy: 'changedBy',
+  changeNote: 'changeNote',
+  snapshot: 'snapshot',
+  createdAt: 'createdAt'
+} as const
+
+export type RecipeHistoryScalarFieldEnum = (typeof RecipeHistoryScalarFieldEnum)[keyof typeof RecipeHistoryScalarFieldEnum]
+
+
+export const EventPackageScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  eventType: 'eventType',
+  eventTypes: 'eventTypes',
+  pricePerPerson: 'pricePerPerson',
+  isActive: 'isActive',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventPackageScalarFieldEnum = (typeof EventPackageScalarFieldEnum)[keyof typeof EventPackageScalarFieldEnum]
+
+
+export const EventPackageItemScalarFieldEnum = {
+  id: 'id',
+  packageId: 'packageId',
+  recipeDishId: 'recipeDishId',
+  portionsPerPerson: 'portionsPerPerson',
+  notes: 'notes',
+  sortOrder: 'sortOrder'
+} as const
+
+export type EventPackageItemScalarFieldEnum = (typeof EventPackageItemScalarFieldEnum)[keyof typeof EventPackageItemScalarFieldEnum]
+
+
+export const ProcurementCalculationScalarFieldEnum = {
+  id: 'id',
+  weekStart: 'weekStart',
+  weekEnd: 'weekEnd',
+  calculatedAt: 'calculatedAt',
+  calculatedBy: 'calculatedBy',
+  result: 'result',
+  emailSentAt: 'emailSentAt',
+  emailSentTo: 'emailSentTo'
+} as const
+
+export type ProcurementCalculationScalarFieldEnum = (typeof ProcurementCalculationScalarFieldEnum)[keyof typeof ProcurementCalculationScalarFieldEnum]
+
+
+export const StockMinimumScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  minimum: 'minimum',
+  unit: 'unit',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StockMinimumScalarFieldEnum = (typeof StockMinimumScalarFieldEnum)[keyof typeof StockMinimumScalarFieldEnum]
+
+
+export const EventScalarFieldEnum = {
+  id: 'id',
+  googleEventId: 'googleEventId',
+  googleCalendarId: 'googleCalendarId',
+  calendarName: 'calendarName',
+  eventType: 'eventType',
+  title: 'title',
+  description: 'description',
+  googleEventUrl: 'googleEventUrl',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  roomName: 'roomName',
+  guestCount: 'guestCount',
+  guestCountSource: 'guestCountSource',
+  packageId: 'packageId',
+  notes: 'notes',
+  status: 'status',
+  syncedAt: 'syncedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type EventScalarFieldEnum = (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum]
+
+
+export const CalendarSyncLogScalarFieldEnum = {
+  id: 'id',
+  syncedAt: 'syncedAt',
+  eventsAdded: 'eventsAdded',
+  eventsUpdated: 'eventsUpdated',
+  eventsCancelled: 'eventsCancelled',
+  error: 'error'
+} as const
+
+export type CalendarSyncLogScalarFieldEnum = (typeof CalendarSyncLogScalarFieldEnum)[keyof typeof CalendarSyncLogScalarFieldEnum]
+
+
+export const CalendarConfigScalarFieldEnum = {
+  id: 'id',
+  calendarId: 'calendarId',
+  calendarName: 'calendarName',
+  eventType: 'eventType',
+  roomName: 'roomName',
+  defaultPackageId: 'defaultPackageId',
+  isActive: 'isActive'
+} as const
+
+export type CalendarConfigScalarFieldEnum = (typeof CalendarConfigScalarFieldEnum)[keyof typeof CalendarConfigScalarFieldEnum]
 
 
 export const KDSStationScalarFieldEnum = {
@@ -1736,6 +1932,114 @@ export const RecipeItemOrderByRelevanceFieldEnum = {
 } as const
 
 export type RecipeItemOrderByRelevanceFieldEnum = (typeof RecipeItemOrderByRelevanceFieldEnum)[keyof typeof RecipeItemOrderByRelevanceFieldEnum]
+
+
+export const RecipeProductOrderByRelevanceFieldEnum = {
+  name: 'name',
+  defaultUnit: 'defaultUnit'
+} as const
+
+export type RecipeProductOrderByRelevanceFieldEnum = (typeof RecipeProductOrderByRelevanceFieldEnum)[keyof typeof RecipeProductOrderByRelevanceFieldEnum]
+
+
+export const UnitConversionOrderByRelevanceFieldEnum = {
+  fromUnit: 'fromUnit',
+  toUnit: 'toUnit'
+} as const
+
+export type UnitConversionOrderByRelevanceFieldEnum = (typeof UnitConversionOrderByRelevanceFieldEnum)[keyof typeof UnitConversionOrderByRelevanceFieldEnum]
+
+
+export const RecipeDishOrderByRelevanceFieldEnum = {
+  name: 'name',
+  portionUnit: 'portionUnit',
+  notes: 'notes'
+} as const
+
+export type RecipeDishOrderByRelevanceFieldEnum = (typeof RecipeDishOrderByRelevanceFieldEnum)[keyof typeof RecipeDishOrderByRelevanceFieldEnum]
+
+
+export const RecipeDishIngredientOrderByRelevanceFieldEnum = {
+  unit: 'unit'
+} as const
+
+export type RecipeDishIngredientOrderByRelevanceFieldEnum = (typeof RecipeDishIngredientOrderByRelevanceFieldEnum)[keyof typeof RecipeDishIngredientOrderByRelevanceFieldEnum]
+
+
+export const RecipeTagOrderByRelevanceFieldEnum = {
+  name: 'name',
+  color: 'color'
+} as const
+
+export type RecipeTagOrderByRelevanceFieldEnum = (typeof RecipeTagOrderByRelevanceFieldEnum)[keyof typeof RecipeTagOrderByRelevanceFieldEnum]
+
+
+export const RecipeHistoryOrderByRelevanceFieldEnum = {
+  changedBy: 'changedBy',
+  changeNote: 'changeNote'
+} as const
+
+export type RecipeHistoryOrderByRelevanceFieldEnum = (typeof RecipeHistoryOrderByRelevanceFieldEnum)[keyof typeof RecipeHistoryOrderByRelevanceFieldEnum]
+
+
+export const EventPackageOrderByRelevanceFieldEnum = {
+  name: 'name',
+  notes: 'notes'
+} as const
+
+export type EventPackageOrderByRelevanceFieldEnum = (typeof EventPackageOrderByRelevanceFieldEnum)[keyof typeof EventPackageOrderByRelevanceFieldEnum]
+
+
+export const EventPackageItemOrderByRelevanceFieldEnum = {
+  notes: 'notes'
+} as const
+
+export type EventPackageItemOrderByRelevanceFieldEnum = (typeof EventPackageItemOrderByRelevanceFieldEnum)[keyof typeof EventPackageItemOrderByRelevanceFieldEnum]
+
+
+export const ProcurementCalculationOrderByRelevanceFieldEnum = {
+  calculatedBy: 'calculatedBy',
+  emailSentTo: 'emailSentTo'
+} as const
+
+export type ProcurementCalculationOrderByRelevanceFieldEnum = (typeof ProcurementCalculationOrderByRelevanceFieldEnum)[keyof typeof ProcurementCalculationOrderByRelevanceFieldEnum]
+
+
+export const StockMinimumOrderByRelevanceFieldEnum = {
+  unit: 'unit'
+} as const
+
+export type StockMinimumOrderByRelevanceFieldEnum = (typeof StockMinimumOrderByRelevanceFieldEnum)[keyof typeof StockMinimumOrderByRelevanceFieldEnum]
+
+
+export const EventOrderByRelevanceFieldEnum = {
+  googleEventId: 'googleEventId',
+  googleCalendarId: 'googleCalendarId',
+  calendarName: 'calendarName',
+  title: 'title',
+  description: 'description',
+  googleEventUrl: 'googleEventUrl',
+  roomName: 'roomName',
+  notes: 'notes'
+} as const
+
+export type EventOrderByRelevanceFieldEnum = (typeof EventOrderByRelevanceFieldEnum)[keyof typeof EventOrderByRelevanceFieldEnum]
+
+
+export const CalendarSyncLogOrderByRelevanceFieldEnum = {
+  error: 'error'
+} as const
+
+export type CalendarSyncLogOrderByRelevanceFieldEnum = (typeof CalendarSyncLogOrderByRelevanceFieldEnum)[keyof typeof CalendarSyncLogOrderByRelevanceFieldEnum]
+
+
+export const CalendarConfigOrderByRelevanceFieldEnum = {
+  calendarId: 'calendarId',
+  calendarName: 'calendarName',
+  roomName: 'roomName'
+} as const
+
+export type CalendarConfigOrderByRelevanceFieldEnum = (typeof CalendarConfigOrderByRelevanceFieldEnum)[keyof typeof CalendarConfigOrderByRelevanceFieldEnum]
 
 
 export const KDSStationOrderByRelevanceFieldEnum = {

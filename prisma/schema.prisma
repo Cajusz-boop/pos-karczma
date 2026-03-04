@@ -779,6 +779,269 @@ model RecipeItem {
 }
 
 // ============================================================
+// MODUŁ RECEPTUR v3 (szefowa kuchni, planowanie imprez)
+// Słownik produktów + receptury + tagi + historia zmian
+// Odmienne od Recipe/RecipeItem (Product->Ingredient dla magazynu)
+// ============================================================
+
+model RecipeProduct {
+  id            Int       @id @default(autoincrement())
+  name          String    @unique @db.VarChar(200)
+  defaultUnit   String    @default("kg") @db.VarChar(20) @map("unit")
+  mergedIntoId  Int?
+  createdAt     DateTime  @default(now())
+
+  mergedInto    RecipeProduct?  @relation("ProductMerge", fields: [mergedIntoId], references: [id])
+  aliases       RecipeProduct[] @relation("ProductMerge")
+  ingredients   RecipeDishIngredient[]
+  stockMinimum  StockMinimum?
+
+  @@map("products")
+}
+
+model UnitConversion {
+  id       Int    @id @default(autoincrement())
+  fromUnit String @db.VarChar(20)
+  toUnit   String @db.VarChar(20)
+  factor   Float
+
+  @@unique([fromUnit, toUnit])
+  @@map("unit_conversions")
+}
+
+model RecipeDish {
+  id            Int           @id @default(autoincrement())
+  recipeNumber  Int           @unique
+  name          String        @db.VarChar(200)
+  basePortions  Float         @default(1)
+  portionUnit   String        @default("porcja") @db.VarChar(20)
+  status        RecipeStatus  @default(AKTYWNA)
+  notes         String?       @db.Text
+  isArchived    Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  ingredients   RecipeDishIngredient[]
+  recipeTags    RecipeDishTag[]
+  history       RecipeHistory[]
+
+  subRecipeOf      RecipeDishIngredient[] @relation("SubRecipes")
+  eventPackageItems EventPackageItem[]
+
+  @@map("recipes")
+}
+
+enum RecipeStatus {
+  AKTYWNA
+  ARCHIWALNA
+}
+
+model RecipeDishIngredient {
+  id           Int           @id @default(autoincrement())
+  recipeId     Int
+  productId    Int?
+  subRecipeId  Int?
+  quantity     Float
+  unit         String        @default("kg") @db.VarChar(20)
+  sortOrder    Int           @default(0)
+
+  recipe       RecipeDish    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product      RecipeProduct? @relation(fields: [productId], references: [id])
+  subRecipe    RecipeDish?   @relation("SubRecipes", fields: [subRecipeId], references: [id])
+
+  @@map("recipe_ingredients")
+}
+
+model RecipeTag {
+  id         Int    @id @default(autoincrement())
+  name       String @unique @db.VarChar(100)
+  color      String @default("#6B7280") @db.VarChar(7)
+  createdAt  DateTime @default(now())
+
+  recipeDishes RecipeDishTag[]
+
+  @@map("tags")
+}
+
+model RecipeDishTag {
+  recipeId  Int
+  tagId     Int
+
+  recipe    RecipeDish @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  tag       RecipeTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([recipeId, tagId])
+  @@map("recipe_tags")
+}
+
+model RecipeHistory {
+  id          Int      @id @default(autoincrement())
+  recipeId    Int
+  changedBy   String   @db.VarChar(100)
+  changeNote  String?  @db.VarChar(500)
+  snapshot    Json
+  createdAt   DateTime @default(now())
+
+  recipe      RecipeDish @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@map("recipe_history")
+}
+
+// ============================================================
+// FAZA 2 — Kalkulator zapotrzebowania (pakiety menu, imprezy)
+// EventPackage / EventPackageItem — relacja do Event w fazie 2A
+// ============================================================
+
+enum EventPackageType {
+  WESELE
+  CHRZCINY
+  KOMUNIA
+  URODZINY
+  KONFERENCJA
+  INNE
+}
+
+model EventPackage {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique @db.VarChar(200)
+  eventType      EventPackageType
+  eventTypes     Json?            // opcjonalnie: typy imprez jako tablica (np. ["WESELE","POPRAWINY"])
+  pricePerPerson Float?
+  isActive       Boolean          @default(true)
+  notes          String?          @db.Text
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  items    EventPackageItem[]
+  events   Event[]
+  calendarConfigs CalendarConfig[]
+
+  @@map("event_packages")
+}
+
+model EventPackageItem {
+  id                Int      @id @default(autoincrement())
+  packageId         Int
+  recipeDishId      Int
+  portionsPerPerson Float    @default(1)
+  notes             String?  @db.VarChar(200)
+  sortOrder         Int      @default(0)
+
+  package    EventPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  recipeDish RecipeDish   @relation(fields: [recipeDishId], references: [id])
+
+  @@map("event_package_items")
+}
+
+model ProcurementCalculation {
+  id           Int       @id @default(autoincrement())
+  weekStart    DateTime
+  weekEnd      DateTime
+  calculatedAt DateTime @default(now())
+  calculatedBy String   @db.VarChar(100)
+  result       Json
+  emailSentAt  DateTime?
+  emailSentTo  String?   @db.VarChar(200)
+
+  @@map("procurement_calculations")
+}
+
+model StockMinimum {
+  id        Int      @id @default(autoincrement())
+  productId Int      @unique
+  minimum   Float
+  unit      String   @db.VarChar(20)
+  updatedAt DateTime @updatedAt
+
+  product RecipeProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("stock_minimums")
+}
+
+// ============================================================
+// FAZA 2A — Google Calendar (imprezy)
+// ============================================================
+
+enum EventType {
+  WESELE
+  POPRAWINY
+  CHRZCINY
+  KOMUNIA
+  URODZINY_ROCZNICA
+  STYPA
+  IMPREZA_FIRMOWA
+  CATERING
+  SPOTKANIE
+  SYLWESTER
+  INNE
+}
+
+enum EventStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+enum GuestCountSource {
+  PARSED
+  MANUAL
+}
+
+model Event {
+  id               Int              @id @default(autoincrement())
+  googleEventId    String           @unique @db.VarChar(200)
+  googleCalendarId String           @db.VarChar(200)
+  calendarName     String           @db.VarChar(100)
+  eventType        EventType
+  title            String           @db.VarChar(500)
+  description      String?          @db.Text
+  googleEventUrl   String?          @db.VarChar(500)
+  startDate        DateTime
+  endDate          DateTime
+  roomName         String?          @db.VarChar(100)
+  guestCount       Int?
+  guestCountSource GuestCountSource @default(MANUAL)
+  packageId        Int?
+  notes            String?          @db.Text
+  status           EventStatus      @default(DRAFT)
+  syncedAt         DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  package EventPackage? @relation(fields: [packageId], references: [id])
+
+  @@index([startDate])
+  @@index([eventType])
+  @@index([status])
+  @@map("events")
+}
+
+model CalendarSyncLog {
+  id              Int       @id @default(autoincrement())
+  syncedAt        DateTime  @default(now())
+  eventsAdded     Int       @default(0)
+  eventsUpdated   Int       @default(0)
+  eventsCancelled Int       @default(0)
+  error           String?   @db.Text
+
+  @@map("calendar_sync_log")
+}
+
+model CalendarConfig {
+  id                Int           @id @default(autoincrement())
+  calendarId        String        @unique @db.VarChar(200)
+  calendarName      String        @db.VarChar(100)
+  eventType         EventType
+  roomName          String?       @db.VarChar(100)
+  defaultPackageId  Int?
+  isActive          Boolean       @default(true)
+
+  defaultPackage EventPackage? @relation(fields: [defaultPackageId], references: [id])
+
+  @@map("calendar_config")
+}
+
+// ============================================================
 // KDS (Kitchen Display)
 // ============================================================
 

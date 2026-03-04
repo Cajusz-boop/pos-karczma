@@ -220,6 +220,60 @@ export const StockMoveType = {
 export type StockMoveType = (typeof StockMoveType)[keyof typeof StockMoveType]
 
 
+export const RecipeStatus = {
+  AKTYWNA: 'AKTYWNA',
+  ARCHIWALNA: 'ARCHIWALNA'
+} as const
+
+export type RecipeStatus = (typeof RecipeStatus)[keyof typeof RecipeStatus]
+
+
+export const EventPackageType = {
+  WESELE: 'WESELE',
+  CHRZCINY: 'CHRZCINY',
+  KOMUNIA: 'KOMUNIA',
+  URODZINY: 'URODZINY',
+  KONFERENCJA: 'KONFERENCJA',
+  INNE: 'INNE'
+} as const
+
+export type EventPackageType = (typeof EventPackageType)[keyof typeof EventPackageType]
+
+
+export const EventType = {
+  WESELE: 'WESELE',
+  POPRAWINY: 'POPRAWINY',
+  CHRZCINY: 'CHRZCINY',
+  KOMUNIA: 'KOMUNIA',
+  URODZINY_ROCZNICA: 'URODZINY_ROCZNICA',
+  STYPA: 'STYPA',
+  IMPREZA_FIRMOWA: 'IMPREZA_FIRMOWA',
+  CATERING: 'CATERING',
+  SPOTKANIE: 'SPOTKANIE',
+  SYLWESTER: 'SYLWESTER',
+  INNE: 'INNE'
+} as const
+
+export type EventType = (typeof EventType)[keyof typeof EventType]
+
+
+export const EventStatus = {
+  DRAFT: 'DRAFT',
+  CONFIRMED: 'CONFIRMED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type EventStatus = (typeof EventStatus)[keyof typeof EventStatus]
+
+
+export const GuestCountSource = {
+  PARSED: 'PARSED',
+  MANUAL: 'MANUAL'
+} as const
+
+export type GuestCountSource = (typeof GuestCountSource)[keyof typeof GuestCountSource]
+
+
 export const PrinterType = {
   FISCAL: 'FISCAL',
   KITCHEN: 'KITCHEN',

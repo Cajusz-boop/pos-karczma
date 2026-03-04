@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore, type AuthUser } from "@/store/useAuthStore";
 import { useTokenReader } from "@/lib/hooks/useTokenReader";
 import { useWebNfc } from "@/lib/hooks/useWebNfc";
@@ -33,8 +33,19 @@ type UserItem = {
 
 type LoginMode = "token" | "pin";
 
+const ALLOWED_REDIRECT_PREFIXES = ["/receptury"];
+
+function getAllowedRedirect(searchParams: URLSearchParams | null): string | null {
+  const r = searchParams?.get("redirect")?.trim();
+  if (!r || !r.startsWith("/")) return null;
+  const allowed = ALLOWED_REDIRECT_PREFIXES.some((p) => r === p || r.startsWith(p + "/"));
+  return allowed ? r : null;
+}
+
 export function LoginClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = getAllowedRedirect(searchParams);
   const currentUser = useAuthStore((s) => s.currentUser);
   const setCurrentUser = useAuthStore((s) => s.setCurrentUser);
   const [mode, setMode] = useState<LoginMode>("pin");
@@ -127,16 +138,26 @@ export function LoginClient() {
     }
   }, [currentUser]);
 
+  const defaultLanding = redirectTo ?? "/pos";
+
   useEffect(() => {
     if (currentUser && !pendingUser) {
-      router.replace("/pos");
+      router.replace(defaultLanding);
       return;
     }
     if (!currentUser) loadUsers();
-  }, [currentUser, pendingUser, router, loadUsers]);
+  }, [currentUser, pendingUser, router, defaultLanding]);
 
   const checkShiftAndRedirect = useCallback(
     async (user: AuthUser) => {
+      if (user.roleName === "SZEF_KUCHNI" && redirectTo) {
+        router.replace(redirectTo);
+        return;
+      }
+      if (user.isOwner && redirectTo) {
+        router.replace(redirectTo);
+        return;
+      }
       if (user.isOwner) {
         router.replace("/pos");
         return;
@@ -160,7 +181,7 @@ export function LoginClient() {
         router.replace("/pos");
       }
     },
-    [router]
+    [router, redirectTo]
   );
 
   const openShiftSubmit = useCallback(async () => {
@@ -188,13 +209,13 @@ export function LoginClient() {
       }
       setShiftDialogOpen(false);
       setPendingUser(null);
-      router.replace("/pos");
+      router.replace(redirectTo ?? "/pos");
     } catch {
       setShiftError("Błąd połączenia");
     } finally {
       setShiftLoading(false);
     }
-  }, [pendingUser, cashStart, router]);
+  }, [pendingUser, cashStart, router, redirectTo]);
 
   // Token login handler (shared by Dallas iButton, NFC, barcode)
   const handleTokenLogin = useCallback(

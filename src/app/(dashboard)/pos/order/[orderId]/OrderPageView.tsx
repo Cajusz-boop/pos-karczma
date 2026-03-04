@@ -731,7 +731,7 @@ export function OrderPageView(props: OrderPageViewProps) {
                         category: { id: "", name: pp.categoryName, parentId: null, color: null, icon: null },
                         priceGross: pp.priceGross,
                         taxRateId: pp.taxRateId,
-                        taxRate: { id: pp.taxRateId, fiscalSymbol: "" },
+                        taxRate: { id: pp.taxRateId, fiscalSymbol: "", ratePercent: 23 },
                         isAvailable: true,
                         color: pp.color,
                         sortOrder: 0,

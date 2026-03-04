@@ -1,0 +1,17 @@
+name: Calendar Sync
+on:
+  schedule:
+    - cron: "*/30 * * * *" # co 30 minut
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync Google Calendar
+        env:
+          POS_URL: ${{ vars.POS_URL || 'https://pos.karczma-labedz.pl' }}
+          CALENDAR_SYNC_SECRET: ${{ secrets.CALENDAR_SYNC_SECRET }}
+        run: |
+          curl -sS -X POST "${POS_URL}/api/sync/calendar" \
+               -H "Authorization: Bearer ${CALENDAR_SYNC_SECRET}"

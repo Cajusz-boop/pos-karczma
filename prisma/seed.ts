@@ -80,7 +80,15 @@ async function main() {
       permissions: WAITER_PERMISSIONS,
     },
   });
-  console.log("  ✓ Role: ADMIN, WAITER");
+  const roleSzefKuchni = await prisma.role.upsert({
+    where: { name: "SZEF_KUCHNI" },
+    update: {},
+    create: {
+      name: "SZEF_KUCHNI",
+      permissions: [], // dostęp tylko do receptur (kontrolowany w API/layout)
+    },
+  });
+  console.log("  ✓ Role: ADMIN, WAITER, SZEF_KUCHNI");
 
   // 2. Users (PIN: bcrypt hash) — find by name, create or update pin
   const usersData = [

@@ -173,6 +173,76 @@ export type Recipe = Prisma.RecipeModel
  */
 export type RecipeItem = Prisma.RecipeItemModel
 /**
+ * Model RecipeProduct
+ * 
+ */
+export type RecipeProduct = Prisma.RecipeProductModel
+/**
+ * Model UnitConversion
+ * 
+ */
+export type UnitConversion = Prisma.UnitConversionModel
+/**
+ * Model RecipeDish
+ * 
+ */
+export type RecipeDish = Prisma.RecipeDishModel
+/**
+ * Model RecipeDishIngredient
+ * 
+ */
+export type RecipeDishIngredient = Prisma.RecipeDishIngredientModel
+/**
+ * Model RecipeTag
+ * 
+ */
+export type RecipeTag = Prisma.RecipeTagModel
+/**
+ * Model RecipeDishTag
+ * 
+ */
+export type RecipeDishTag = Prisma.RecipeDishTagModel
+/**
+ * Model RecipeHistory
+ * 
+ */
+export type RecipeHistory = Prisma.RecipeHistoryModel
+/**
+ * Model EventPackage
+ * 
+ */
+export type EventPackage = Prisma.EventPackageModel
+/**
+ * Model EventPackageItem
+ * 
+ */
+export type EventPackageItem = Prisma.EventPackageItemModel
+/**
+ * Model ProcurementCalculation
+ * 
+ */
+export type ProcurementCalculation = Prisma.ProcurementCalculationModel
+/**
+ * Model StockMinimum
+ * 
+ */
+export type StockMinimum = Prisma.StockMinimumModel
+/**
+ * Model Event
+ * 
+ */
+export type Event = Prisma.EventModel
+/**
+ * Model CalendarSyncLog
+ * 
+ */
+export type CalendarSyncLog = Prisma.CalendarSyncLogModel
+/**
+ * Model CalendarConfig
+ * 
+ */
+export type CalendarConfig = Prisma.CalendarConfigModel
+/**
  * Model KDSStation
  * 
  */
