@@ -34,6 +34,8 @@ export async function middleware(request: NextRequest) {
     return PUBLIC_API_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   }
 
+  const { pathname } = request.nextUrl;
+
   /** Receptury: odczyt bez logowania (dla linku szefa kuchni). */
   const isRecepturyRead =
     request.method === "GET" &&
@@ -49,8 +51,6 @@ export async function middleware(request: NextRequest) {
       "unknown"
     );
   }
-
-  const { pathname } = request.nextUrl;
 
   if (!pathname.startsWith("/api/")) {
     return NextResponse.next();
