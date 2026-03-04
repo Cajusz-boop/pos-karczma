@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
         method: "ROOM_CHARGE",
         transactionRef: { startsWith: "ROOM-" },
         order: {
-          type: "HOTEL_ROOM",
           status: "CLOSED",
         },
       },
@@ -43,11 +42,12 @@ export async function GET(request: NextRequest) {
       take: 500,
     });
 
+    const normalizeRoom = (r: string) => r.replace(/\s+/g, "").trim().toUpperCase();
     const result = payments
       .map((p) => {
-        const roomNumber = p.transactionRef?.replace(/^ROOM-/, "") ?? "";
+        const roomNumber = p.transactionRef?.replace(/^ROOM-/, "").trim() ?? "";
         if (!roomNumber) return null;
-        if (roomNumberFilter && roomNumber !== roomNumberFilter) return null;
+        if (roomNumberFilter && normalizeRoom(roomNumber) !== normalizeRoom(roomNumberFilter)) return null;
         if (dateFrom && p.createdAt < dateFrom) return null;
         if (dateTo && p.createdAt > dateTo) return null;
 
