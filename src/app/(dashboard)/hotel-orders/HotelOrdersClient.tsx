@@ -86,10 +86,7 @@ export function HotelOrdersClient() {
     staleTime: 15_000,
   });
 
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const rooms = (data?.rooms ?? []).filter(
-    (r) => r.checkIn && r.checkIn.slice(0, 10) === todayStr
-  );
+  const rooms = data?.rooms ?? [];
   const apiError = data?.error;
 
   const handleRoomClick = (room: HotelRoom) => {
@@ -235,9 +232,9 @@ export function HotelOrdersClient() {
         <Header time={time} onBack={() => router.push("/pos")} onHistory={() => router.push("/hotel-orders/historia")} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
           <Hotel className="h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium">Brak pokoi na dziś</p>
+          <p className="text-lg font-medium">Brak zajętych pokoi</p>
           <p className="max-w-md text-sm text-muted-foreground">
-            Żaden pokój nie ma rezerwacji z zameldowaniem dzisiaj.
+            Obecnie żaden pokój nie ma gości. Pokoje pojawią się automatycznie po zameldowaniu.
           </p>
           <Button onClick={() => router.push("/pos")} variant="outline">
             Powrót do POS
@@ -260,7 +257,7 @@ export function HotelOrdersClient() {
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Wybierz pokój</h2>
           <p className="text-sm text-muted-foreground">
-            {rooms.length} {rooms.length === 1 ? "pokój" : rooms.length < 5 ? "pokoje" : "pokoi"} z zameldowaniem na dziś
+            {rooms.length} {rooms.length === 1 ? "pokój zajęty" : rooms.length < 5 ? "pokoje zajęte" : "pokoi zajętych"}
           </p>
         </div>
 
