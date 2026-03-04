@@ -87,6 +87,8 @@ model CardReaderConfig {
   workstationId String?   // assigned to specific workstation
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("cardreaderconfig")
 }
 
 model Role {
@@ -293,6 +295,7 @@ model SuperGroup {
   isActive    Boolean   @default(true)
 
   products    Product[]
+  @@map("supergroup")
 }
 
 model SetComponent {
@@ -313,6 +316,7 @@ model SetComponent {
 
   @@unique([setId, componentId])
   @@index([setId])
+  @@map("setcomponent")
 }
 
 model TaxRate {
@@ -602,6 +606,7 @@ model OnlinePayment {
 
   @@index([orderId])
   @@index([status, createdAt])
+  @@map("onlinepayment")
 }
 
 model Tip {
@@ -613,6 +618,8 @@ model Tip {
   amount    Decimal  @db.Decimal(10, 2)
   method    PaymentMethod
   createdAt DateTime @default(now())
+
+  @@map("tip")
 }
 
 model Discount {
@@ -625,6 +632,8 @@ model Discount {
   validFrom   DateTime?
   validTo     DateTime?
   createdAt   DateTime     @default(now())
+
+  @@map("discount")
 }
 
 enum DiscountType {
@@ -642,6 +651,8 @@ model Promotion {
   isActive    Boolean  @default(true)
   validFrom   DateTime
   validTo     DateTime
+
+  @@map("promotion")
 }
 
 // ============================================================
@@ -673,6 +684,8 @@ model Invoice {
   relatedInvoiceId  String?       // for corrections/finals → original invoice
   correctionReason  String?
   createdAt         DateTime      @default(now())
+
+  @@map("invoice")
 }
 
 enum InvoiceType {
@@ -705,6 +718,8 @@ model Receipt {
   viewedAt        DateTime? // when customer opened e-receipt
   expiresAt       DateTime? // link expiry (e.g. 30 days)
   printedAt       DateTime  @default(now())
+
+  @@map("receipt")
 }
 
 // ============================================================
@@ -719,6 +734,8 @@ model Warehouse {
   stockItems StockItem[]
   movesFrom  StockMove[] @relation("MoveFrom")
   movesTo    StockMove[] @relation("MoveTo")
+
+  @@map("warehouse")
 }
 
 enum WarehouseType {
@@ -752,6 +769,7 @@ model StockItem {
   updatedAt         DateTime  @updatedAt
 
   @@unique([warehouseId, ingredientId])
+  @@map("stockitem")
 }
 
 model StockMove {
@@ -766,6 +784,8 @@ model StockMove {
   note            String?
   userId          String
   createdAt       DateTime      @default(now())
+
+  @@map("stockmove")
 }
 
 enum StockMoveType {
@@ -1083,6 +1103,8 @@ model KDSStation {
 
   categories KDSStationCategory[]
   archivedOrders KDSOrderArchive[]
+
+  @@map("kdsstation")
 }
 
 model KDSOrderArchive {
@@ -1101,6 +1123,7 @@ model KDSOrderArchive {
 
   @@index([stationId, createdAt])
   @@index([orderId])
+  @@map("kdsorderarchive")
 }
 
 model KDSStationCategory {
@@ -1110,6 +1133,7 @@ model KDSStationCategory {
   categoryId String
 
   @@id([stationId, categoryId])
+  @@map("kdsstationcategory")
 }
 
 model KDSLoadSnapshot {
@@ -1123,6 +1147,7 @@ model KDSLoadSnapshot {
 
   @@index([timestamp])
   @@index([stationId, timestamp])
+  @@map("kdsloadsnapshot")
 }
 
 model KitchenMessage {
@@ -1132,6 +1157,8 @@ model KitchenMessage {
   message  String
   readAt    DateTime?
   createdAt DateTime  @default(now())
+
+  @@map("kitchenmessage")
 }
 
 model CustomerDisplay {
@@ -1152,6 +1179,8 @@ model CustomerDisplay {
   soundUrl             String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@map("customerdisplay")
 }
 
 // ============================================================
@@ -1177,6 +1206,8 @@ model Printer {
 
   categoryAssignments PrinterCategory[]
   printLogs      PrintLog[]
+
+  @@map("printer")
 }
 
 enum PrinterType {
@@ -1212,6 +1243,7 @@ model PrintLog {
 
   @@index([printerId, createdAt])
   @@index([orderId])
+  @@map("printlog")
 }
 
 enum PrintType {
@@ -1301,6 +1333,8 @@ model BanquetEvent {
   orders          Order[]
   invoices        Invoice[]
   menuModifications BanquetMenuModification[]
+
+  @@map("banquetevent")
 }
 
 enum BanquetEventType {
@@ -1331,6 +1365,8 @@ model BanquetMenu {
   isTemplate      Boolean   @default(true)
 
   events          BanquetEvent[]
+
+  @@map("banquetmenu")
 }
 
 model BanquetMenuModification {
@@ -1341,6 +1377,8 @@ model BanquetMenuModification {
   priceAdjustment Decimal     @db.Decimal(10, 2) @default(0)
   note            String?
   createdAt       DateTime     @default(now())
+
+  @@map("banquetmenumodification")
 }
 
 // ============================================================
@@ -1359,6 +1397,7 @@ model Shift {
 
   @@index([userId, status])
   @@index([startedAt])
+  @@map("shift")
 }
 
 enum ShiftStatus {
@@ -1371,6 +1410,8 @@ model CashDrawer {
   currentAmount Decimal  @db.Decimal(10, 2) @default(0)
   lastOpenedAt  DateTime?
   lastCountedAt DateTime?
+
+  @@map("cashdrawer")
 }
 
 model CashOperation {
@@ -1381,6 +1422,8 @@ model CashOperation {
   user      User               @relation(fields: [userId], references: [id])
   userId    String
   createdAt DateTime           @default(now())
+
+  @@map("cashoperation")
 }
 
 enum CashOperationType {
@@ -1421,6 +1464,8 @@ model DailyReport {
   cancelCount         Int      @default(0)
   cancelAmount        Decimal  @db.Decimal(10, 2) @default(0)
   generatedAt         DateTime @default(now())
+
+  @@map("dailyreport")
 }
 
 model ExportBatch {
@@ -1430,6 +1475,8 @@ model ExportBatch {
   dateTo    DateTime
   filePath  String
   createdAt DateTime @default(now())
+
+  @@map("exportbatch")
 }
 
 // ============================================================
@@ -1448,6 +1495,7 @@ model Notification {
 
   @@index([userId, readAt])
   @@index([userId, createdAt])
+  @@map("notification")
 }
 
 model PushSubscription {
@@ -1460,6 +1508,7 @@ model PushSubscription {
 
   @@unique([userId, endpoint(length: 255)])
   @@index([userId])
+  @@map("pushsubscription")
 }
 
 // ============================================================
@@ -1480,6 +1529,8 @@ model DeliveryZone {
 
   streets         DeliveryStreet[]
   orders          Order[]
+
+  @@map("deliveryzone")
 }
 
 model DeliveryStreet {
@@ -1494,6 +1545,7 @@ model DeliveryStreet {
 
   @@index([streetName])
   @@index([zoneId])
+  @@map("deliverystreet")
 }
 
 model DeliveryDriver {
@@ -1508,6 +1560,8 @@ model DeliveryDriver {
   createdAt       DateTime @default(now())
 
   settlements     DriverSettlement[]
+
+  @@map("deliverydriver")
 }
 
 model DriverSettlement {
@@ -1527,6 +1581,7 @@ model DriverSettlement {
 
   @@unique([driverId, shiftDate])
   @@index([shiftDate])
+  @@map("driversettlement")
 }
 
 enum SettlementStatus {
@@ -1598,6 +1653,8 @@ model WorkstationConfig {
   isActive            Boolean @default(true)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+
+  @@map("workstationconfig")
 }
 
 // ============================================================
@@ -1619,6 +1676,8 @@ model Customer {
 
   orders              Order[]
   loyaltyTransactions LoyaltyTransaction[]
+
+  @@map("customer")
 }
 
 // ============================================================
@@ -1634,6 +1693,8 @@ model LoyaltyTransaction {
   orderId     String?   // related order (if any)
   description String?
   createdAt   DateTime  @default(now())
+
+  @@map("loyaltytransaction")
 }
 
 enum LoyaltyTxType {
@@ -1652,6 +1713,8 @@ model LoyaltyReward {
   productId       String? // if FREE_PRODUCT, which product
   isActive        Boolean @default(true)
   createdAt       DateTime @default(now())
+
+  @@map("loyaltyreward")
 }
 
 // ============================================================
@@ -1687,6 +1750,8 @@ model TimeEntry {
   breakMin  Int       @default(0) // break minutes
   note      String?
   createdAt DateTime  @default(now())
+
+  @@map("timeentry")
 }
 
 // ============================================================
@@ -1707,7 +1772,10 @@ model GiftVoucher {
   createdAt     DateTime  @default(now())
 
   payments      Payment[]
+
+  @@map("giftvoucher")
 }
+
 
 // ============================================================
 // WORK SCHEDULE (grafik pracy)
@@ -1726,6 +1794,7 @@ model WorkSchedule {
   createdAt  DateTime @default(now())
 
   @@unique([userId, date])
+  @@map("workschedule")
 }
 
 model StaffAvailability {
@@ -1740,6 +1809,7 @@ model StaffAvailability {
   createdAt DateTime @default(now())
 
   @@unique([userId, date])
+  @@map("staffavailability")
 }
 
 model ShiftSwapRequest {
@@ -1801,6 +1871,7 @@ model UserMacro {
 
   @@unique([userId, slot])
   @@index([userId])
+  @@map("usermacro")
 }
 
 model UserPosPreference {
@@ -1842,6 +1913,7 @@ model PendingPayment {
 
   @@index([orderId])
   @@index([status])
+  @@map("pendingpayment")
 }
 
 // ============================================================
@@ -1861,6 +1933,7 @@ model SyncLog {
   @@index([operationId])
   @@index([processedAt])
   @@index([localId, table])
+  @@map("synclog")
 }
 
 // P-RECEIPT-FIX: Audit trail dla błędów fiskalizacji — nigdy nie gubimy dowodów
@@ -1876,6 +1949,7 @@ model ReceiptErrorLog {
   @@index([orderId])
   @@index([createdAt])
   @@index([resolvedAt])
+  @@map("receipterrorlog")
 }
 
 // FISCAL-EVENTS: Kolejka zdarzeń fiskalnych (receipt, correction, refund, daily report)
@@ -1895,4 +1969,5 @@ model FiscalEvent {
   @@index([orderId, createdAt])
   @@index([status, createdAt])
   @@index([type, status])
+  @@map("fiscalevent")
 }
