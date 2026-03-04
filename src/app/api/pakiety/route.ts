@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { EventPackageType } from "@/lib/prisma";
 
 /** GET /api/pakiety?eventType= — lista pakietów menu (opcjonalnie filtrowana po typie imprezy) */
 export async function GET(request: NextRequest) {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const eventType = searchParams.get("eventType");
 
-    const where: { isActive?: boolean; eventType?: string } = { isActive: true };
+    const where: { isActive?: boolean; eventType?: EventPackageType } = { isActive: true };
     const validTypes = [
       "WESELE",
       "CHRZCINY",
@@ -25,7 +26,7 @@ export async function GET(request: NextRequest) {
           ? "URODZINY"
           : eventType;
     if (mapped && validTypes.includes(mapped)) {
-      where.eventType = mapped;
+      where.eventType = mapped as EventPackageType;
     }
 
     const packages = await prisma.eventPackage.findMany({

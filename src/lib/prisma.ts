@@ -2,6 +2,7 @@ import { PrismaClient, Prisma } from "../../prisma/generated/prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 
 export { PrismaClient, Prisma };
+export type { EventStatus, EventType, EventPackageType } from "../../prisma/generated/prisma/client";
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
 

@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/jwt";
-import type { EventStatus, EventType } from "@prisma/client";
+import type { EventStatus, EventType } from "@/lib/prisma";
 
 async function requireAuth() {
   const user = await getSessionUser();
