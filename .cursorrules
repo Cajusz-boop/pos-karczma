@@ -8,6 +8,7 @@ Checklist: CHECKLIST.md — lista zadań do odznaczania (kolejność = priorytet
 HotelSystem: C:\HotelSystem — system hotelowy do integracji (ten sam stack)
 
 Zasady:
+- NIGDY nie uruchamiaj deploy-to-hetzner.ps1 ani żadnego skryptu deploy. Deploy tylko przez: git add -A && git commit --no-verify -m "opis" && git push origin master (GitHub Actions robi build i deploy).
 - Używaj Server Components gdzie możliwe, Client Components tylko gdy interaktywność
 - Każdy API route waliduje uprawnienia przez middleware.ts (JWT w httpOnly cookie)
 - Każda krytyczna akcja → auditLog()

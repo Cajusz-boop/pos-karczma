@@ -3,6 +3,8 @@
 -- Produkty: 513 | Receptury: 450 | Składniki: ~3495
 -- =====================================================
 
+SET NAMES utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `products` (
   `id`        INT NOT NULL AUTO_INCREMENT,
   `name`      VARCHAR(200) NOT NULL,
@@ -1027,7 +1029,7 @@ INSERT IGNORE INTO `recipes` (`recipeNumber`, `name`, `basePortions`, `portionUn
 
 -- SKŁADNIKI (3495) — temp table (MariaDB)
 CREATE TEMPORARY TABLE _tmp_ing (recipeNumber INT, productName VARCHAR(200), quantity DOUBLE, unit VARCHAR(20));
-INSERT INTO _tmp_ing VALUES
+INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (1, 'polędwica wp', 0.21, 'kg'),
   (1, 'podgrzybek kostka mroż', 0.08, 'kg'),
   (1, 'ser gouda', 0.052, 'kg'),

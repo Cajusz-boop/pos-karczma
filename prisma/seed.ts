@@ -103,10 +103,10 @@ async function main() {
     const existing = await prisma.user.findFirst({ where: { name: u.name } });
     const pinHash = await hashPin(u.pin);
     if (existing) {
-      await prisma.user.update({ where: { id: existing.id }, data: { pin: pinHash, roleId: u.roleId, isOwner: u.isOwner } });
+      await prisma.user.update({ where: { id: existing.id }, data: { pin: pinHash, roleId: u.roleId, isOwner: u.isOwner, isActive: true } });
     } else {
       await prisma.user.create({
-        data: { name: u.name, pin: pinHash, roleId: u.roleId, isOwner: u.isOwner },
+        data: { name: u.name, pin: pinHash, roleId: u.roleId, isOwner: u.isOwner, isActive: true },
       });
     }
   }

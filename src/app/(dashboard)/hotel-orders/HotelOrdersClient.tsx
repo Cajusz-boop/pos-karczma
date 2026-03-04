@@ -24,6 +24,7 @@ import {
   Loader2,
   AlertTriangle,
   CheckCircle2,
+  History,
 } from "lucide-react";
 
 interface HotelRoom {
@@ -85,7 +86,10 @@ export function HotelOrdersClient() {
     staleTime: 15_000,
   });
 
-  const rooms = data?.rooms ?? [];
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const rooms = (data?.rooms ?? []).filter(
+    (r) => r.checkIn && r.checkIn.slice(0, 10) === todayStr
+  );
   const apiError = data?.error;
 
   const handleRoomClick = (room: HotelRoom) => {
@@ -193,7 +197,7 @@ export function HotelOrdersClient() {
   if (isLoading) {
     return (
       <div className="flex h-[calc(100vh-4rem)] flex-col">
-        <Header time={time} onBack={() => router.push("/pos")} />
+        <Header time={time} onBack={() => router.push("/pos")} onHistory={() => router.push("/hotel-orders/historia")} />
         <div className="flex flex-1 items-center justify-center">
           <div className="text-center">
             <Loader2 className="mx-auto mb-4 h-10 w-10 animate-spin text-primary" />
@@ -207,7 +211,7 @@ export function HotelOrdersClient() {
   if (error || apiError) {
     return (
       <div className="flex h-[calc(100vh-4rem)] flex-col">
-        <Header time={time} onBack={() => router.push("/pos")} />
+        <Header time={time} onBack={() => router.push("/pos")} onHistory={() => router.push("/hotel-orders/historia")} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
           <AlertTriangle className="h-12 w-12 text-destructive" />
           <p className="text-lg font-medium text-destructive">
@@ -228,13 +232,12 @@ export function HotelOrdersClient() {
   if (rooms.length === 0) {
     return (
       <div className="flex h-[calc(100vh-4rem)] flex-col">
-        <Header time={time} onBack={() => router.push("/pos")} />
+        <Header time={time} onBack={() => router.push("/pos")} onHistory={() => router.push("/hotel-orders/historia")} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
           <Hotel className="h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium">Brak zajętych pokoi</p>
+          <p className="text-lg font-medium">Brak pokoi na dziś</p>
           <p className="max-w-md text-sm text-muted-foreground">
-            Obecnie żaden pokój hotelowy nie ma aktywnej rezerwacji.
-            Zamówienia na pokój są możliwe tylko dla gości z aktywnym meldunkiem.
+            Żaden pokój nie ma rezerwacji z zameldowaniem dzisiaj.
           </p>
           <Button onClick={() => router.push("/pos")} variant="outline">
             Powrót do POS
@@ -244,15 +247,20 @@ export function HotelOrdersClient() {
     );
   }
 
+  const goToHistory = (roomNumber?: string) => {
+    const q = roomNumber ? `?roomNumber=${encodeURIComponent(roomNumber)}` : "";
+    router.push(`/hotel-orders/historia${q}`);
+  };
+
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
-      <Header time={time} onBack={() => router.push("/pos")} />
+      <Header time={time} onBack={() => router.push("/pos")} onHistory={() => goToHistory()} />
 
       <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-4">
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Wybierz pokój</h2>
           <p className="text-sm text-muted-foreground">
-            {rooms.length} {rooms.length === 1 ? "pokój" : rooms.length < 5 ? "pokoje" : "pokoi"} z aktywną rezerwacją
+            {rooms.length} {rooms.length === 1 ? "pokój" : rooms.length < 5 ? "pokoje" : "pokoi"} z zameldowaniem na dziś
           </p>
         </div>
 
@@ -260,24 +268,35 @@ export function HotelOrdersClient() {
           {rooms
             .sort((a, b) => a.roomNumber.localeCompare(b.roomNumber, undefined, { numeric: true }))
             .map((room) => (
-              <button
-                key={room.reservationId}
-                onClick={() => handleRoomClick(room)}
-                className={cn(
-                  "relative flex flex-col items-center justify-center rounded-xl border-2 p-3 transition-all duration-150 active:scale-95 shadow-lg",
-                  "min-h-[140px] sm:min-h-[150px]",
-                  getRoomStatusColor(room.status)
-                )}
-              >
-                {room.status === "CHECKED_IN" && (
-                  <span className="absolute right-2 top-2">
-                    <CheckCircle2 className="h-4 w-4" />
-                  </span>
-                )}
+              <div key={room.reservationId} className="relative">
+                <button
+                  onClick={() => handleRoomClick(room)}
+                  className={cn(
+                    "relative flex w-full flex-col items-center justify-center rounded-xl border-2 p-3 transition-all duration-150 active:scale-95 shadow-lg",
+                    "min-h-[140px] sm:min-h-[150px]",
+                    getRoomStatusColor(room.status)
+                  )}
+                >
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goToHistory(room.roomNumber);
+                    }}
+                    className="absolute left-2 top-2 rounded p-1 opacity-70 hover:opacity-100 hover:bg-white/20"
+                    title="Historia zamówień"
+                  >
+                    <History className="h-4 w-4" />
+                  </button>
+                  {room.status === "CHECKED_IN" && (
+                    <span className="absolute right-2 top-2">
+                      <CheckCircle2 className="h-4 w-4" />
+                    </span>
+                  )}
 
-                <span className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
-                  {room.roomNumber}
-                </span>
+                  <span className="font-mono text-3xl font-black tabular-nums sm:text-4xl">
+                    {room.roomNumber}
+                  </span>
 
                 <div className="mt-2 flex flex-col items-center gap-0.5 text-center">
                   <span className="flex items-center gap-1 text-xs font-medium">
@@ -301,16 +320,23 @@ export function HotelOrdersClient() {
                     {room.status === "CHECKED_IN" ? "Zameldowany" : room.status === "CONFIRMED" ? "Potwierdzony" : room.status}
                   </span>
                 )}
-              </button>
+                </button>
+              </div>
             ))}
         </div>
       </div>
 
       <div className="flex items-center justify-between border-t bg-card px-4 py-3">
-        <Button variant="outline" onClick={() => router.push("/pos")}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Powrót
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => router.push("/pos")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Powrót
+          </Button>
+          <Button variant="outline" onClick={() => goToHistory()} className="gap-2">
+            <History className="h-4 w-4" />
+            Historia
+          </Button>
+        </div>
         <span className="text-sm text-muted-foreground">
           {currentUser?.name}
         </span>
@@ -351,6 +377,19 @@ export function HotelOrdersClient() {
                 Rachunek zostanie dopisany do rezerwacji gościa.
               </p>
 
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start gap-2 text-muted-foreground"
+                onClick={() => {
+                  if (selectedRoom) goToHistory(selectedRoom.roomNumber);
+                  setSelectedRoom(null);
+                }}
+              >
+                <History className="h-4 w-4" />
+                Zobacz historię zamówień pokoju
+              </Button>
+
               {createError && (
                 <p className="text-sm text-destructive">{createError}</p>
               )}
@@ -382,7 +421,15 @@ export function HotelOrdersClient() {
   );
 }
 
-function Header({ time, onBack }: { time: string; onBack: () => void }) {
+function Header({
+  time,
+  onBack,
+  onHistory,
+}: {
+  time: string;
+  onBack: () => void;
+  onHistory?: () => void;
+}) {
   return (
     <div className="flex items-center gap-3 border-b bg-card px-3 py-2 sm:px-4">
       <Button variant="ghost" size="icon" onClick={onBack} className="shrink-0">
@@ -396,6 +443,12 @@ function Header({ time, onBack }: { time: string; onBack: () => void }) {
         <span className="text-sm font-semibold sm:text-base">Zamówienie na pokój</span>
       </div>
       <span className="flex-1" />
+      {onHistory && (
+        <Button variant="ghost" size="sm" onClick={onHistory} className="gap-1.5">
+          <History className="h-4 w-4" />
+          <span className="hidden sm:inline">Historia</span>
+        </Button>
+      )}
       <span className="font-mono text-lg font-semibold tabular-nums text-foreground">
         {time}
       </span>

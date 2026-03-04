@@ -29,7 +29,16 @@ Credentials w `.env.deploy.hetzner` - klucz SSH: `~/.ssh/hetzner_key`
 
 ## Deployment
 
-- **Kod**: push do GitHub → webhook auto-deploy LUB `.\scripts\deploy-to-hetzner.ps1`
+**NIGDY nie używaj** `deploy-to-hetzner.ps1` ani żadnego skryptu deploy.
+
+**Jedyna metoda deployu:**
+```
+git add -A
+git commit --no-verify -m "opis"
+git push origin master
+```
+GitHub Actions automatycznie builduje i deployuje na Hetzner.
+
 - **Migracje bazy**: wymagają ręcznego wykonania przez SSH
 - **PM2**: `pm2 restart pos-karczma` / `pm2 logs pos-karczma`
 - **Konfiguracja**: `.env.deploy.hetzner` (gitignored, zawiera wszystkie credentials)

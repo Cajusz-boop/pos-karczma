@@ -1,8 +1,9 @@
 # Deploy POS Karczma na Hetzner VPS
 # Uruchom: powershell -ExecutionPolicy Bypass -File .\scripts\deploy-to-hetzner.ps1
-# Opcja: -FullZip - wymusza pelny transfer
+# Opcje: -FullZip - pelny transfer
+#        -ImportReceptury - po deploy uruchamia import receptur (zalecane przy pierwszym deployu)
 
-param([switch]$FullZip)
+param([switch]$FullZip, [switch]$ImportReceptury)
 
 $ErrorActionPreference = "Continue"
 Write-Host "=== deploy-to-hetzner.ps1 (POS Karczma) ===" -ForegroundColor Green
@@ -111,6 +112,14 @@ if (-not $FullZip) {
     $prismaPath = Join-Path $ProjectRoot "prisma"
     if (Test-Path $prismaPath) {
         Get-ChildItem -Path $prismaPath -Recurse -File -Exclude $excludePatterns | Where-Object { $_.Name -match '^[\x20-\x7E]+$' } | ForEach-Object { [void]$allFiles.Add($_.FullName) }
+    }
+    $scriptsPath = Join-Path $ProjectRoot "scripts"
+    if (Test-Path $scriptsPath) {
+        Get-ChildItem -Path $scriptsPath -Recurse -File -Exclude $excludePatterns | Where-Object { $_.Name -match '^[\x20-\x7E]+$' } | ForEach-Object { [void]$allFiles.Add($_.FullName) }
+    }
+    @("package.json", "package-lock.json") | ForEach-Object {
+        $f = Join-Path $ProjectRoot $_
+        if (Test-Path $f) { [void]$allFiles.Add((Resolve-Path $f).Path) }
     }
 
     $manifestLines = @()
@@ -254,7 +263,7 @@ if (-not $FullZip) {
     if (Test-Path $tarFile) { Remove-Item $tarFile -Force }
 
     Write-Host "Pakowanie..." -ForegroundColor Yellow
-    tar -czf $tarFile -C $ProjectRoot --exclude=".git" ".next/standalone" ".next/static" "public" "prisma"
+    tar -czf $tarFile -C $ProjectRoot --exclude=".git" --exclude="node_modules" ".next/standalone" ".next/static" "public" "prisma" "scripts" "package.json" "package-lock.json"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "[BLAD] tar nie powiodl sie!" -ForegroundColor Red
         exit 1
@@ -332,6 +341,26 @@ echo "PRISMA_OK"
 "@
 
 $prismaCmd | ssh -i $keyPath $SSH_TARGET "bash -s"
+
+# === 5b/6 Import receptur (opcjonalnie) ===
+if ($ImportReceptury) {
+    Write-Host "" ; Write-Host "=== 5b/6 Import receptur ===" -ForegroundColor Cyan
+    $importCmd = @"
+cd $REMOTE_PATH || exit 1
+export DATABASE_URL="$DB_URL"
+if [ -f scripts/import-receptury.ts ] && [ -f scripts/receptury_import_v2.sql ]; then
+    [ ! -d node_modules ] && echo "npm install (brak node_modules)..." && npm install --omit=dev
+    echo "Import receptur..."
+    npx tsx scripts/import-receptury.ts scripts/receptury_import_v2.sql
+    echo ""
+    echo "Weryfikacja:"
+    npx tsx scripts/check-receptury-prod.ts
+else
+    echo "[BLAD] Brak scripts/ - uruchom deploy z -FullZip"
+fi
+"@
+    $importCmd | ssh -i $keyPath $SSH_TARGET "bash -s"
+}
 
 # === 6/6 Restart PM2 ===
 Write-Host "" ; Write-Host "=== 6/6 Restart PM2 ===" -ForegroundColor Cyan

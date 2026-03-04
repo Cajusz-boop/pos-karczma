@@ -14,20 +14,31 @@ import mariadb from "mariadb";
 const sqlPath = process.argv[2] ?? join(process.cwd(), "scripts", "receptury_import_v2.sql");
 
 async function main() {
-  const dbUrl = process.env.DATABASE_URL?.replace(/^mysql:\/\//, "mariadb://");
-  if (!dbUrl) {
-    console.error("Brak DATABASE_URL w .env");
-    process.exit(1);
-  }
+  let config: { host: string; port: number; user: string; password: string | undefined; database: string };
 
-  const u = new URL(dbUrl.replace("mariadb://", "http://"));
-  const config = {
-    host: u.hostname,
-    port: u.port ? parseInt(u.port, 10) : 3306,
-    user: u.username,
-    password: u.password || undefined,
-    database: u.pathname.replace(/^\//, "").replace(/\?.*$/, ""),
-  };
+  if (process.env.MYSQL_HOST && process.env.MYSQL_USER && process.env.MYSQL_DATABASE) {
+    config = {
+      host: process.env.MYSQL_HOST,
+      port: parseInt(process.env.MYSQL_PORT || "3306", 10),
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD || undefined,
+      database: process.env.MYSQL_DATABASE,
+    };
+  } else {
+    const dbUrl = process.env.DATABASE_URL?.replace(/^mysql:\/\//, "mariadb://");
+    if (!dbUrl) {
+      console.error("Brak DATABASE_URL lub MYSQL_* w .env");
+      process.exit(1);
+    }
+    const u = new URL(dbUrl.replace("mariadb://", "http://"));
+    config = {
+      host: u.hostname,
+      port: u.port ? parseInt(u.port, 10) : 3306,
+      user: u.username,
+      password: u.password || undefined,
+      database: u.pathname.replace(/^\//, "").replace(/\?.*$/, ""),
+    };
+  }
 
   console.log(`Import do ${config.database} @ ${config.host}:${config.port}`);
   console.log(`Plik: ${sqlPath}`);

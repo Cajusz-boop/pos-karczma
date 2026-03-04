@@ -22,7 +22,9 @@
     "test:watch": "vitest",
     "db:config:export": "npx tsx prisma/config-export.ts",
     "db:config:import": "npx tsx prisma/config-import.ts",
-    "receptury:import": "npx tsx scripts/import-receptury.ts"
+    "receptury:import": "npx tsx scripts/import-receptury.ts",
+    "receptury:check": "npx tsx scripts/check-receptury-prod.ts",
+    "hotel:setup:prod": "npx tsx scripts/setup-hotel-config-production.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
