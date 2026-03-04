@@ -268,7 +268,7 @@ export function HotelOrdersClient() {
           {rooms
             .sort((a, b) => a.roomNumber.localeCompare(b.roomNumber, undefined, { numeric: true }))
             .map((room) => (
-              <div key={room.reservationId} className="relative">
+              <div key={`${room.roomNumber}-${room.reservationId}`} className="relative">
                 <button
                   onClick={() => handleRoomClick(room)}
                   className={cn(
