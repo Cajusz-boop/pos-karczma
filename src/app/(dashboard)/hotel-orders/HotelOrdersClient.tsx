@@ -86,7 +86,26 @@ export function HotelOrdersClient() {
     staleTime: 15_000,
   });
 
-  const rooms = data?.rooms ?? [];
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const rooms = (data?.rooms ?? [])
+    .filter((r) => {
+      const ci = r.checkIn?.slice(0, 10) ?? "";
+      const co = r.checkOut?.slice(0, 10) ?? "";
+      return ci && co && ci <= todayStr && todayStr <= co;
+    })
+    .reduce<HotelRoom[]>((acc, r) => {
+      const existing = acc.find((x) => x.roomNumber === r.roomNumber);
+      if (!existing) return [...acc, r];
+      if (r.status === "CHECKED_IN" && existing.status !== "CHECKED_IN") {
+        return acc.map((x) => (x.roomNumber === r.roomNumber ? r : x));
+      }
+      if (r.status === "CHECKED_IN" && existing.status === "CHECKED_IN") {
+        return acc.map((x) =>
+          x.roomNumber === r.roomNumber && r.checkIn >= existing.checkIn ? r : x
+        );
+      }
+      return acc;
+    }, []);
   const apiError = data?.error;
 
   const handleRoomClick = (room: HotelRoom) => {
@@ -232,9 +251,9 @@ export function HotelOrdersClient() {
         <Header time={time} onBack={() => router.push("/pos")} onHistory={() => router.push("/hotel-orders/historia")} />
         <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
           <Hotel className="h-12 w-12 text-muted-foreground" />
-          <p className="text-lg font-medium">Brak zajętych pokoi</p>
+          <p className="text-lg font-medium">Brak pokoi z gośćmi na dziś</p>
           <p className="max-w-md text-sm text-muted-foreground">
-            Obecnie żaden pokój nie ma gości. Pokoje pojawią się automatycznie po zameldowaniu.
+            Żaden pokój nie ma gości przebywających dziś. Pokoje pojawią się po zameldowaniu.
           </p>
           <Button onClick={() => router.push("/pos")} variant="outline">
             Powrót do POS
@@ -257,7 +276,7 @@ export function HotelOrdersClient() {
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Wybierz pokój</h2>
           <p className="text-sm text-muted-foreground">
-            {rooms.length} {rooms.length === 1 ? "pokój zajęty" : rooms.length < 5 ? "pokoje zajęte" : "pokoi zajętych"}
+            {rooms.length} {rooms.length === 1 ? "pokój z gośćmi dziś" : rooms.length < 5 ? "pokoje z gośćmi dziś" : "pokoi z gośćmi dziś"}
           </p>
         </div>
 
