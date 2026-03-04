@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useMemo } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ChevronRight,
@@ -120,6 +120,7 @@ const CATEGORY_COLORS = [
 ];
 
 export function OrderPageView(props: OrderPageViewProps) {
+  const router = useRouter();
   const {
     orderNumber,
     orderNumberLabel,
@@ -291,11 +292,14 @@ export function OrderPageView(props: OrderPageViewProps) {
 
         {/* Receipt header */}
         <div className="flex items-center gap-2 border-b px-3 py-2">
-          <Link href={isHotelOrder ? "/hotel-orders" : "/pos"} className="shrink-0">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={() => router.push(isHotelOrder ? "/hotel-orders" : "/pos")}
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-sm font-semibold">
               {isHotelOrder && hotelRoomNumber ? (

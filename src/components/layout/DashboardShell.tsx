@@ -46,6 +46,17 @@ const ADMIN_NAV = [
   { href: "/settings", label: "Ustawienia", icon: Settings },
 ];
 
+const WAITER_NAV = [
+  { href: "/pos", label: "POS", icon: LayoutDashboard },
+  { href: "/kitchen", label: "Kuchnia (KDS)", icon: ChefHat },
+  { href: "/orders", label: "Zamówienia", icon: ShoppingCart },
+];
+
+const ADMIN_ONLY_PATHS = [
+  "/delivery", "/products", "/time-tracking", "/banquets", "/reservations",
+  "/warehouse", "/invoices", "/day-close", "/reports", "/manager", "/users", "/settings",
+];
+
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -56,8 +67,11 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isOwner = currentUser?.isOwner ?? false;
+  const roleName = currentUser?.roleName ?? "";
+  const isAdmin = isOwner || roleName === "ADMIN";
   const isPosView = pathname === "/pos" || pathname.startsWith("/pos/");
   const isKitchenView = pathname === "/kitchen";
+  const navItems = isAdmin ? ADMIN_NAV : WAITER_NAV;
 
   useEffect(() => {
     setMounted(true);
@@ -83,7 +97,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       router.replace("/login");
       return;
     }
-  }, [mounted, currentUser, router]);
+    if (!isAdmin && ADMIN_ONLY_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+      router.replace("/pos");
+    }
+  }, [mounted, currentUser, router, isAdmin, pathname]);
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -181,7 +198,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
         <nav className="flex flex-1 flex-col gap-0.5 p-2">
-          {ADMIN_NAV.map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
@@ -226,7 +243,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
               <Menu className="h-5 w-5" />
             </button>
             <span className="font-medium">{currentUser.name}</span>
-            {currentUser.isOwner && (
+            {isAdmin && (
               <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                 Admin
               </span>

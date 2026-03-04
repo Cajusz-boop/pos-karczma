@@ -124,7 +124,7 @@ type OpenOrderRow = {
 export function OrderPageClient({ orderId }: { orderId: string }) {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { orderNumber, tableNumber, items, setOrder, addItem, updateQuantity, updateNote, removeItem } =
+  const { orderId: storeOrderId, orderNumber, tableNumber, items, setOrder, addItem, updateQuantity, updateNote, removeItem } =
     useOrderStore();
 
   const [categoryStack, setCategoryStack] = useState<string[]>([]);
@@ -162,6 +162,7 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   const [closeZeroDialogOpen, setCloseZeroDialogOpen] = useState(false);
   const [sendSuccessShown, setSendSuccessShown] = useState(false);
   const prevOrderStatusRef = useRef<string | null>(null);
+  const lastAddProductRef = useRef<{ productId: string; at: number } | null>(null);
   const currentUser = useAuthStore((s) => s.currentUser);
 
   // Hotel order params from URL
@@ -335,21 +336,22 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
   }, [orderData?.status]);
 
   useEffect(() => {
-    if (orderData) {
-      const lines: OrderItemLine[] = orderData.items.map((i) => ({
-        id: i.id,
-        productId: i.productId,
-        productName: i.productName,
-        quantity: i.quantity,
-        unitPrice: i.unitPrice,
-        taxRateId: i.taxRateId,
-        modifiersJson: Array.isArray(i.modifiersJson) ? i.modifiersJson : undefined,
-        note: i.note ?? undefined,
-        courseNumber: i.courseNumber,
-        status: i.status === "CANCELLED" ? "CANCELLED" : i.status === "SENT" ? "SENT" : "ORDERED",
-      }));
-      setOrder(orderData.id, orderData.orderNumber, orderData.tableNumber ?? null, lines);
-    }
+    if (!orderData) return;
+    const lines: OrderItemLine[] = orderData.items.map((i) => ({
+      id: i.id,
+      productId: i.productId,
+      productName: i.productName,
+      quantity: i.quantity,
+      unitPrice: i.unitPrice,
+      taxRateId: i.taxRateId,
+        taxRatePercent: i.taxRatePercent ?? 23,
+        taxRateSymbol: i.taxRateSymbol ?? "?",
+      modifiersJson: Array.isArray(i.modifiersJson) ? i.modifiersJson : undefined,
+      note: i.note ?? undefined,
+      courseNumber: i.courseNumber,
+      status: i.status === "CANCELLED" ? "CANCELLED" : i.status === "SENT" ? "SENT" : "ORDERED",
+    }));
+    setOrder(orderData.id, orderData.orderNumber, orderData.tableNumber ?? null, lines);
   }, [orderId, orderData, setOrder]);
 
   const currentCategoryId = categoryStack[categoryStack.length - 1] ?? null;
@@ -417,17 +419,19 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
 
   const sendMutation = useMutation({
     mutationFn: async () => {
+      // B2: Use server ID for API — orderId from URL may be "server-{id}" for synced orders
+      const apiOrderId = localOrder?._serverId ?? (orderId?.startsWith("server-") ? orderId.slice(7) : orderId);
       const payload = items.map((it) => ({
-        id: it.id,
+        id: it.id?.startsWith("server-") ? it.id.slice(7) : it.id,
         productId: it.productId,
-        quantity: it.quantity,
-        unitPrice: it.unitPrice,
+        quantity: Number(it.quantity) || 1,
+        unitPrice: Number(it.unitPrice) || 0,
         taxRateId: it.taxRateId,
         modifiersJson: it.modifiersJson,
         note: it.note,
-        courseNumber: it.courseNumber,
+        courseNumber: it.courseNumber ?? 1,
       }));
-      const res = await fetch(`/api/orders/${orderId}/send`, {
+      const res = await fetch(`/api/orders/${apiOrderId}/send`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: payload }),
@@ -440,10 +444,11 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["order", orderId] });
       queryClient.invalidateQueries({ queryKey: ["rooms"] });
+      const apiOrderId = localOrder?._serverId ?? (orderId?.startsWith("server-") ? orderId.slice(7) : orderId);
       fetch("/api/print/kitchen", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId }),
+        body: JSON.stringify({ orderId: apiOrderId }),
       }).catch(() => {});
       setSendSuccessShown(true);
       setTimeout(() => setSendSuccessShown(false), 2500);
@@ -470,6 +475,13 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
     p.modifierGroups.filter((g) => g.isRequired && g.modifiers.length > 0);
 
   const tryAddProduct = (product: ProductRow) => {
+    const now = Date.now();
+    const last = lastAddProductRef.current;
+    if (last && last.productId === product.id && now - last.at < 400) {
+      return;
+    }
+    lastAddProductRef.current = { productId: product.id, at: now };
+
     const required = requiredGroups(product);
     if (required.length > 0) {
       // Auto-apply defaults: if all required groups have exactly 1 choice (minSelect=1, maxSelect=1)
@@ -499,6 +511,8 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
           quantity: 1,
           unitPrice: totalPrice,
           taxRateId: product.taxRateId,
+          taxRatePercent: product.taxRate?.ratePercent ?? 23,
+          taxRateSymbol: product.taxRate?.fiscalSymbol ?? "?",
           modifiersJson: mods.length ? mods : undefined,
           courseNumber: 1,
         });
@@ -540,6 +554,8 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       quantity: 1,
       unitPrice: totalPrice,
       taxRateId: product.taxRateId,
+      taxRatePercent: product.taxRate?.ratePercent ?? 23,
+      taxRateSymbol: product.taxRate?.fiscalSymbol ?? "?",
       modifiersJson: mods.length ? mods : undefined,
       courseNumber: 1,
     });
@@ -572,6 +588,8 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       quantity: 1,
       unitPrice: totalPrice,
       taxRateId: product.taxRateId,
+      taxRatePercent: product.taxRate?.ratePercent ?? 23,
+      taxRateSymbol: product.taxRate?.fiscalSymbol ?? "?",
       modifiersJson: mods.length ? mods : undefined,
       courseNumber: 1,
     });
@@ -588,6 +606,8 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
       quantity: 1,
       unitPrice: suggested.priceGross,
       taxRateId: suggested.taxRateId,
+      taxRatePercent: 23,
+      taxRateSymbol: "?",
       courseNumber: 1,
     });
   };
@@ -1035,22 +1055,39 @@ export function OrderPageClient({ orderId }: { orderId: string }) {
           <PaymentDialog
             open={paymentDialogOpen}
             onOpenChange={setPaymentDialogOpen}
-            order={orderData ? {
-              id: orderData.id,
-              orderNumber: orderData.orderNumber,
-              userId: orderData.userId,
-              items: orderData.items
+            order={orderData ? (() => {
+              // BUG-01/BUG-02: Prefer store items (live state); merge both sources to avoid 0 zł
+              const storeItems = items
                 .filter((i) => i.status !== "CANCELLED")
-                .map((i) => ({
-                  id: i.id,
+                .map((i, idx) => ({
+                  id: i.id ?? `store-${idx}-${i.productId}`,
                   productName: i.productName,
-                  quantity: i.quantity,
-                  unitPrice: i.unitPrice,
-                  taxRatePercent: i.taxRatePercent ?? 0,
+                  quantity: Number(i.quantity) || 0,
+                  unitPrice: Number(i.unitPrice) || 0,
+                  taxRatePercent: i.taxRatePercent ?? 23,
                   taxRateSymbol: i.taxRateSymbol ?? "?",
-                })),
-              discountJson: orderData.discountJson,
-            } : null}
+                }));
+              const dexieItems = orderData.items
+                .filter((i) => i.status !== "CANCELLED")
+                .map((i, idx) => ({
+                  id: i.id ?? `dexie-${idx}-${i.productId}`,
+                  productName: i.productName,
+                  quantity: Number(i.quantity) || 0,
+                  unitPrice: Number(i.unitPrice) || 0,
+                  taxRatePercent: i.taxRatePercent ?? 23,
+                  taxRateSymbol: i.taxRateSymbol ?? "?",
+                }));
+              const useStore = storeItems.length > 0 && storeOrderId === (orderData.id ?? orderId);
+              const billItems = useStore ? storeItems : dexieItems;
+              const serverId = localOrder?._serverId ?? (orderData.id?.startsWith("server-") ? orderData.id.slice(7) : orderData.id);
+              return {
+                id: serverId,
+                orderNumber: orderData.orderNumber,
+                userId: orderData.userId,
+                items: billItems,
+                discountJson: orderData.discountJson,
+              };
+            })() : null}
             currentUserId={currentUser?.id ?? null}
             onSuccess={() => queryClient.invalidateQueries({ queryKey: ["order", orderId] })}
           />

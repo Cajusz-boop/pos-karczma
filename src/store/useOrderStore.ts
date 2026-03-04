@@ -7,6 +7,8 @@ export interface OrderItemLine {
   quantity: number;
   unitPrice: number;
   taxRateId: string;
+  taxRatePercent?: number;
+  taxRateSymbol?: string;
   modifiersJson?: Array<{ modifierId: string; name: string; priceDelta: number }>;
   note?: string;
   courseNumber: number;
@@ -51,13 +53,16 @@ export const useOrderStore = create<OrderState>((set) => ({
       const items = [...s.items];
       const line = items[index];
       if (!line || line.status === "SENT") return s;
-      const q = Math.max(0, line.quantity + delta);
+      // B6: Use Number() to avoid string concatenation (e.g. "2" + 1 = "21")
+      const currentQty = Number(line.quantity);
+      if (isNaN(currentQty) || currentQty < 0) return s;
+      const q = Math.max(0, currentQty + delta);
       if (q === 0) {
         items.splice(index, 1);
-        return { items };
+        return { ...s, items };
       }
       items[index] = { ...line, quantity: q };
-      return { items };
+      return { ...s, items };
     }),
 
   updateNote: (index, note) =>

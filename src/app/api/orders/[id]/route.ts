@@ -13,12 +13,29 @@ export async function PATCH(
     const body = await request.json();
     const { discountJson } = body as { discountJson?: { type: string; value: number; reason?: string; authorizedBy?: string } };
 
-    const order = await prisma.order.findUnique({ where: { id } });
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: { where: { status: { not: "CANCELLED" } }, select: { quantity: true, unitPrice: true } },
+      },
+    });
     if (!order) {
       return NextResponse.json({ error: "Zamówienie nie istnieje" }, { status: 404 });
     }
     if (order.status === "CLOSED") {
       return NextResponse.json({ error: "Zamówienie już zamknięte" }, { status: 400 });
+    }
+    if (discountJson) {
+      const subtotal = order.items.reduce((s, i) => s + Number(i.quantity) * Number(i.unitPrice), 0);
+      if (discountJson.type === "PERCENT" && (discountJson.value > 100 || discountJson.value < 0)) {
+        return NextResponse.json({ error: "Rabat procentowy musi być między 0 a 100" }, { status: 400 });
+      }
+      if (discountJson.type === "AMOUNT" && (discountJson.value > subtotal || discountJson.value < 0)) {
+        return NextResponse.json(
+          { error: `Rabat kwotowy nie może przekraczać sumy zamówienia (${subtotal.toFixed(2)} zł)` },
+          { status: 400 }
+        );
+      }
     }
 
     const oldDiscount = order.discountJson as object | null;

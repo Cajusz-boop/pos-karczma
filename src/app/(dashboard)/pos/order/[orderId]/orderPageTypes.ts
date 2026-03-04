@@ -31,7 +31,7 @@ export type ProductRow = {
   category: { id: string; name: string; parentId: string | null; color: string | null; icon: string | null };
   priceGross: number;
   taxRateId: string;
-  taxRate: { id: string; fiscalSymbol: string };
+  taxRate: { id: string; fiscalSymbol: string; ratePercent: number };
   isAvailable: boolean;
   color: string | null;
   sortOrder: number;

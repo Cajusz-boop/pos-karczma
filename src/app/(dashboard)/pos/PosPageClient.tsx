@@ -751,10 +751,15 @@ export function PosPageClient() {
   const alerts = (alertsData?.alerts ?? []).filter(a => !dismissedAlerts.has(a.id));
 
   useEffect(() => {
-    if (rooms.length && !selectedRoomId) setSelectedRoomId(rooms[0].id);
+    if (rooms.length && !selectedRoomId) {
+      setSelectedRoomId(rooms[0].id);
+    }
   }, [rooms, selectedRoomId]);
 
-  const selectedRoom = rooms.find((r) => r.id === selectedRoomId) ?? rooms[0];
+  const selectedRoom = useMemo(() => {
+    const found = rooms.find((r) => r.id === selectedRoomId);
+    return found ?? rooms[0] ?? null;
+  }, [rooms, selectedRoomId]);
 
   // Data comes from Dexie — no prefetch needed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -977,6 +982,7 @@ export function PosPageClient() {
             return (
               <button
                 key={room.id}
+                type="button"
                 onClick={() => setSelectedRoomId(room.id)}
                 className={cn(
                   "relative rounded-lg px-3 py-2 text-sm font-semibold transition-all sm:px-4 sm:py-2.5 sm:text-base",

@@ -99,6 +99,7 @@ export function useProductsForPos(): {
           taxRate: {
             id: taxRate?.id ?? p.taxRateId,
             fiscalSymbol: taxRate?.fiscalSymbol ?? "?",
+            ratePercent: taxRate?.ratePercent ?? 23,
           },
           isAvailable: p.isAvailable,
           color: p.color ?? null,

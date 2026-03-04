@@ -156,6 +156,8 @@ export function PaymentDialog({
 
   const bill = useMemo(() => (order ? computeBill(order) : null), [order]);
   const totalToPay = bill?.grossTotal ?? 0;
+  const hasValidTotal = totalToPay > 0.001;
+  const isLocalOrder = order?.id?.startsWith?.("local-") ?? false;
 
   const handlePolcardSuccess = useCallback((result: { id: string; transactionRef?: string }) => {
     setCardOrBlikConfirmed(true);
@@ -187,11 +189,13 @@ export function PaymentDialog({
   const change = step === "cash" ? Math.max(0, effectiveCashPln - totalToPay) : 0;
 
   const canConfirm =
-    (step === "cash" && effectiveCashPln >= totalToPay - 0.01) ||
+    hasValidTotal &&
+    !isLocalOrder &&
+    ((step === "cash" && effectiveCashPln >= totalToPay - 0.01) ||
     ((step === "card" || step === "blik") && cardOrBlikConfirmed) ||
     (step === "mix" && paidByMix >= totalToPay - 0.01) ||
     (step === "room" && selectedRoom !== null) ||
-    (step === "voucher" && voucherValid && voucherBalance !== null);
+    (step === "voucher" && voucherValid && voucherBalance !== null));
 
   const resetState = () => {
     setStep("method");
@@ -222,18 +226,34 @@ export function PaymentDialog({
   const applyDiscount = async () => {
     if (!order || !discountValue.trim()) return;
     const value = parseFloat(discountValue.replace(",", "."));
-    if (isNaN(value) || value < 0) return;
+    if (isNaN(value) || value < 0) {
+      setError("Wprowadź poprawną wartość rabatu");
+      return;
+    }
+    if (discountType === "PERCENT" && value > 100) {
+      setError("Rabat procentowy nie może przekraczać 100%");
+      return;
+    }
+    if (bill && discountType === "AMOUNT" && value > bill.subtotalGross) {
+      setError(`Rabat kwotowy nie może przekraczać sumy zamówienia (${bill.subtotalGross.toFixed(2)} zł)`);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
+      const discountPayload = { type: discountType, value, reason: "Rabat ręczny" };
       const res = await fetch(`/api/orders/${order.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          discountJson: { type: discountType, value, reason: "Rabat ręczny" },
-        }),
+        body: JSON.stringify({ discountJson: discountPayload }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "Błąd rabatu");
+      await db.transaction("rw", [db.orders], async () => {
+        const local = await db.orders.where("_serverId").equals(order.id).first();
+        if (local) {
+          await db.orders.update(local._localId, { discountJson: discountPayload });
+        }
+      });
       setDiscountOpen(false);
       setDiscountValue("");
       onSuccess();
@@ -597,6 +617,16 @@ export function PaymentDialog({
         {/* Header with total */}
         <div className="mb-2 text-center">
           <p className="text-sm text-muted-foreground">Zamówienie #{order.orderNumber}</p>
+          {!hasValidTotal && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 mb-1">
+              Brak pozycji do zapłaty — dodaj produkty do zamówienia.
+            </p>
+          )}
+          {isLocalOrder && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 mb-1">
+              Poczekaj na synchronizację zamówienia z serwerem.
+            </p>
+          )}
           <p className="text-4xl font-black tabular-nums sm:text-5xl">
             {totalToPay.toFixed(2)} <span className="text-2xl sm:text-3xl">zł</span>
           </p>
