@@ -348,6 +348,8 @@ model Modifier {
   group       ModifierGroup @relation(fields: [groupId], references: [id])
   groupId     String
   sortOrder   Int           @default(0)
+
+  @@map("modifier")
 }
 
 model ProductModifierGroup {
@@ -357,6 +359,7 @@ model ProductModifierGroup {
   modifierGroupId String
 
   @@id([productId, modifierGroupId])
+  @@map("productmodifiergroup")
 }
 
 model Allergen {
@@ -377,6 +380,7 @@ model ProductAllergen {
   allergenId String
 
   @@id([productId, allergenId])
+  @@map("productallergen")
 }
 
 // ============================================================
