@@ -567,6 +567,7 @@ model Payment {
 
   @@index([orderId])
   @@index([createdAt])
+  @@map("payment")
 }
 
 enum PaymentMethod {
@@ -1192,6 +1193,7 @@ model PrinterCategory {
   categoryId String
 
   @@id([printerId, categoryId])
+  @@map("printercategory")
 }
 
 model PrintLog {
@@ -1253,6 +1255,7 @@ model Reservation {
   createdAt   DateTime          @default(now())
 
   banquetEvent BanquetEvent?
+  @@map("reservation")
 }
 
 enum ReservationType {
@@ -1400,6 +1403,8 @@ model AuditLog {
   newValue    Json?
   metadata    Json?    // {reason, authorizedBy, ipAddress}
   timestamp   DateTime @default(now())
+
+  @@map("auditlog")
 }
 
 model DailyReport {
@@ -1666,6 +1671,7 @@ model ProductSuggestion {
 
   @@unique([productId, suggestedId])
   @@index([productId, isActive, priority])
+  @@map("productsuggestion")
 }
 
 // ============================================================
@@ -1814,6 +1820,8 @@ model UserPosPreference {
   customColors      Json?     // {background, accent, text}
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+
+  @@map("userpospreference")
 }
 
 // ============================================================
