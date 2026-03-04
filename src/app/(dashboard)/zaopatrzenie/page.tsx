@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { format, startOfWeek, addWeeks, subWeeks } from "date-fns";
 import { pl } from "date-fns/locale";

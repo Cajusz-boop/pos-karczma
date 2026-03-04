@@ -1,8 +1,6 @@
 import { OrderPageClient } from "./OrderPageClient";
 
-export async function generateStaticParams() {
-  return [{ orderId: "_" }];
-}
+export const dynamic = "force-dynamic";
 
 export default async function PosOrderPage({
   params,

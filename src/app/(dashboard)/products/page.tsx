@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAllProducts } from "@/hooks/useProducts";
 import { useAllCategories } from "@/hooks/useCategories";

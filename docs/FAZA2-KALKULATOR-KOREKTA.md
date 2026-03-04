@@ -190,9 +190,9 @@ model StockMinimum {
 
 ## 8. Checklist implementacji
 
-- [ ] Model Event z fazy2a (lub jego ekwiwalent) istnieje w schema.prisma
-- [ ] EventPackage ma relację `events Event[]` (nie `reservations`)
-- [ ] EventPackageItem używa `recipeDishId` → RecipeDish (nie `recipeId` → Recipe)
-- [ ] StockMinimum używa `productId` → RecipeProduct
-- [ ] Kalkulator pobiera `events` WHERE `status='CONFIRMED'`
-- [ ] Dokumentacja i prompty używają nazw RecipeDish i RecipeProduct
+- [x] Model Event z fazy2a (lub jego ekwiwalent) istnieje w schema.prisma
+- [x] EventPackage ma relację `events Event[]` (nie `reservations`)
+- [x] EventPackageItem używa `recipeDishId` → RecipeDish (nie `recipeId` → Recipe)
+- [x] StockMinimum używa `productId` → RecipeProduct
+- [x] Kalkulator pobiera `events` WHERE `status='CONFIRMED'`
+- [x] Dokumentacja i prompty używają nazw RecipeDish i RecipeProduct

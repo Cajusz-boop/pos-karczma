@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 /** GET /api/procurement/stock-minimums — stany minimalne */
 export async function GET() {
   try {

@@ -1,8 +1,6 @@
 import DisplayPageClient from "./DisplayPageClient";
 
-export async function generateStaticParams() {
-  return [{ id: "_" }];
-}
+export const dynamic = "force-dynamic";
 
 export default async function DisplayPage({
   params,

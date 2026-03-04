@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 /** GET /api/procurement/packages — lista pakietów menu (?all=1 zwraca też nieaktywne) */
 export async function GET(req: NextRequest) {
   try {

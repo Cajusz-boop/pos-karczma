@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getUpcomingEventOrders } from "@/lib/hotelSystemApi";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export interface ProcurementItem {
   productId: number;
   productName: string;

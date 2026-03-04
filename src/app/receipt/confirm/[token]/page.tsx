@@ -1,8 +1,6 @@
 import { ReceiptConfirmClient } from "./ReceiptConfirmClient";
 
-export function generateStaticParams() {
-  return [{ token: "_" }];
-}
+export const dynamic = "force-dynamic";
 
 export default function ReceiptConfirmPage() {
   return <ReceiptConfirmClient />;

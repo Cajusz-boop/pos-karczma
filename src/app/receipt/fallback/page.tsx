@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { useLocale } from "@/lib/i18n/use-locale";
 import { translations } from "@/lib/i18n/translations";

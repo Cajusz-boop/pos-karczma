@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Monitor, Trash2, ExternalLink, Volume2, VolumeX, Eye, EyeOff } from "lucide-react";

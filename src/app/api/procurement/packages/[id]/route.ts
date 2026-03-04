@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 /** PUT /api/procurement/packages/[id] — edytuj pakiet */
 export async function PUT(
   req: NextRequest,

@@ -1,8 +1,6 @@
 import PrinterTemplatesClient from "./PrinterTemplatesClient";
 
-export async function generateStaticParams() {
-  return [{ id: "_" }];
-}
+export const dynamic = "force-dynamic";
 
 export default function PrinterTemplatesPage({
   params,
