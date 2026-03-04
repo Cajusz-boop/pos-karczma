@@ -79,7 +79,10 @@ jobs:
               echo "Health OK"
               exit 0
             fi
-            echo "Proba $i/5..."
+            echo "Proba $i/5 - odpytywanie serwera o status:"
+            ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+              ${{ secrets.HETZNER_USER }}@${{ secrets.HETZNER_HOST }} \
+              "curl -s -w '\nHTTP_CODE:%{http_code}' --max-time 10 http://127.0.0.1:3001/api/health || true"
           done
           echo "UWAGA: Health check nie przeszedl"
           exit 1
