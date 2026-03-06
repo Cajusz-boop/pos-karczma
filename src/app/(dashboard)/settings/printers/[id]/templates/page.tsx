@@ -1,6 +1,10 @@
 import PrinterTemplatesClient from "./PrinterTemplatesClient";
 
-export const dynamic = "force-dynamic";
+export const dynamic = process.env.CAPACITOR_BUILD === "1" ? undefined : "force-dynamic";
+
+export function generateStaticParams() {
+  return [{ id: "0" }];
+}
 
 export default function PrinterTemplatesPage({
   params,

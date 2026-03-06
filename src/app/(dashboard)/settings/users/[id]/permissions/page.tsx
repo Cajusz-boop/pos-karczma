@@ -1,6 +1,9 @@
 import UserPermissionsClient from "./UserPermissionsClient";
 
-export const dynamic = "force-dynamic";
+// Dla builda Capacitor (output: export) — jedna placeholder strona.
+export function generateStaticParams() {
+  return [{ id: "0" }];
+}
 
 export default function UserPermissionsPage({
   params,

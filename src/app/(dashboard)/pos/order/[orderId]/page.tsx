@@ -1,6 +1,9 @@
 import { OrderPageClient } from "./OrderPageClient";
 
-export const dynamic = "force-dynamic";
+// Dla builda Capacitor (output: export) — jedna placeholder strona.
+export function generateStaticParams() {
+  return [{ orderId: "0" }];
+}
 
 export default async function PosOrderPage({
   params,

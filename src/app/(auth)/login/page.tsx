@@ -1,7 +1,8 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import { LoginClient } from "./LoginClient";
 
-export const dynamic = "force-dynamic";
+export const dynamic = process.env.CAPACITOR_BUILD === "1" ? undefined : "force-dynamic";
 
 export default function LoginPage() {
   return (
@@ -22,7 +23,9 @@ export default function LoginPage() {
         </h1>
       </div>
       <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-lg">
-        <LoginClient />
+        <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" />}>
+          <LoginClient />
+        </Suspense>
       </div>
     </div>
   );

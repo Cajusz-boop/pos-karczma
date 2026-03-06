@@ -4,7 +4,11 @@ type Props = {
   params: Promise<{ qrId: string }>;
 };
 
-export const dynamic = "force-dynamic";
+export const dynamic = process.env.CAPACITOR_BUILD === "1" ? undefined : "force-dynamic";
+
+export function generateStaticParams() {
+  return [{ qrId: "0" }];
+}
 
 export default async function ReceiptByQrPage({ params }: Props) {
   const { qrId } = await params;

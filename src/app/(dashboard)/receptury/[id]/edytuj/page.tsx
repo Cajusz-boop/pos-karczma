@@ -1,10 +1,9 @@
-"use client";
+import EdytujRecepturaRedirect from "./EdytujRecepturaRedirect";
 
-import { useParams, redirect } from "next/navigation";
+export function generateStaticParams() {
+  return [{ id: "0" }];
+}
 
-/** Stary adres edycji — przekierowanie do jednego okna receptury /receptury/[id] */
-export default function EdytujRecepturaRedirect() {
-  const params = useParams();
-  const id = params.id as string;
-  redirect(`/receptury/${id}`);
+export default function EdytujRecepturaPage() {
+  return <EdytujRecepturaRedirect />;
 }
