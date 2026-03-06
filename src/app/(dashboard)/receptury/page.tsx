@@ -15,6 +15,12 @@ import { cn } from "@/lib/utils";
 
 const CHEF_LOGIN_LINK = "https://pos.karczma-labedz.pl/login?redirect=/receptury";
 
+interface RecipeIngredient {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
 interface RecipeListItem {
   id: number;
   name: string;
@@ -24,6 +30,7 @@ interface RecipeListItem {
   ingredientCount: number;
   isArchived?: boolean;
   tags?: { id: number; name: string; color: string }[];
+  ingredients?: RecipeIngredient[];
 }
 
 async function fetchRecipes(params: { status?: string; tag?: string; search?: string; archived?: string }) {
@@ -241,6 +248,7 @@ export default function RecepturyPage() {
             <RecipeCard
               key={r.id}
               readOnly={!currentUser}
+              allTags={tags}
               recipe={{
                 id: r.id,
                 name: r.name,
@@ -250,6 +258,7 @@ export default function RecepturyPage() {
                 ingredientCount: r.ingredientCount,
                 isArchived: r.isArchived,
                 tags: r.tags ?? [],
+                ingredients: r.ingredients ?? [],
               }}
             />
           ))}

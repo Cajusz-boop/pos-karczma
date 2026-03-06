@@ -369,12 +369,18 @@ export function LoginClient() {
         roleName: data.user.roleName,
         isOwner: data.user.isOwner,
       };
-      await cacheSession(user, pin);
+      try {
+        await cacheSession(user, pin);
+      } catch (cacheErr) {
+        console.warn("[Login] Nie udało się zapisać sesji offline:", cacheErr);
+      }
       setCurrentUser(user);
       closeDialog();
       await checkShiftAndRedirect(user);
-    } catch {
-      setError("Błąd połączenia");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Błąd połączenia";
+      console.error("[Login PIN]", e);
+      setError(process.env.NODE_ENV === "development" ? msg : "Błąd połączenia");
     } finally {
       setLoading(false);
     }

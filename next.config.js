@@ -83,6 +83,7 @@ const nextConfig = {
       transform: 'lucide-react/dist/esm/icons/{{kebabCase member}}',
     },
   },
+
 };
 
 module.exports = withBundleAnalyzer(nextConfig);

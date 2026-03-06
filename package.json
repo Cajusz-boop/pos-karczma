@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "predev": "npx tsx scripts/setup-env.ts && prisma generate && prisma db push && npx tsx scripts/sync-config-on-start.ts",
+    "predev": "npx tsx scripts/setup-env.ts && prisma generate && npx tsx scripts/fix-recipe-status-before-push.ts && prisma migrate deploy && npx tsx scripts/sync-config-on-start.ts",
     "dev": "next dev",
+    "dev:clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\" && npm run dev",
     "dev:turbo": "next dev --turbo",
     "build": "next build",
     "build:cap": "npx tsx scripts/build-capacitor.ts",

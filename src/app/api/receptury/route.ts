@@ -41,6 +41,13 @@ export async function GET(request: NextRequest) {
       include: {
         _count: { select: { ingredients: true } },
         recipeTags: { include: { tag: true } },
+        ingredients: {
+          orderBy: { sortOrder: "asc" },
+          include: {
+            product: { select: { name: true } },
+            subRecipe: { select: { name: true } },
+          },
+        },
       },
       orderBy: { name: "asc" },
     });
@@ -57,6 +64,11 @@ export async function GET(request: NextRequest) {
         isArchived: r.isArchived,
         ingredientCount: r._count.ingredients,
         tags: r.recipeTags.map((rt) => ({ id: rt.tag.id, name: rt.tag.name, color: rt.tag.color })),
+        ingredients: r.ingredients.map((i) => ({
+          name: i.product?.name ?? i.subRecipe?.name ?? "?",
+          quantity: i.quantity,
+          unit: i.unit,
+        })),
         createdAt: r.createdAt,
       }))
     );

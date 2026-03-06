@@ -1529,7 +1529,9 @@ INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (94, 'przyprawa pieprz czarny mielony', 0.02, 'kg'),
   (94, 'sól', 0.02, 'kg'),
   (98, 'polędwica wp', 0.25, 'kg'),
-  (98, 'pieprz zielony w zalewie', 0.005, 'kg'),
+  (98, 'pieprz zielony w zalewie', 0.005, 'kg');
+
+INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (98, 'śmietana 34%', 0.02, 'litr'),
   (98, 'ziemniaki', 0.1, 'kg'),
   (98, 'masło', 0.05, 'kg'),
@@ -2029,7 +2031,9 @@ INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (164, 'majonez', 0.1, 'litr'),
   (165, 'schab b.k', 0.059, 'kg'),
   (165, 'przyprawa pieprz czarny mielony', 0.0001, 'kg'),
-  (165, 'sól', 0.0007, 'kg'),
+  (165, 'sól', 0.0007, 'kg');
+
+INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (165, 'przyprawa liść laurowy', 2.8e-05, 'kg'),
   (165, 'przyprawa majeranek', 0.00022, 'kg'),
   (166, 'śledź matjas', 0.05, 'kg'),
@@ -2529,7 +2533,9 @@ INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (233, 'pietruszka natka', 0.0008, 'kg'),
   (233, 'przyprawa pieprz czarny mielony', 2.7e-05, 'kg'),
   (233, 'sól', 5.4e-05, 'kg'),
-  (233, 'miód lipowy', 0.0019, 'kg'),
+  (233, 'miód lipowy', 0.0019, 'kg');
+
+INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (233, 'czosnek', 8.4e-05, 'kg'),
   (233, 'sól', 2.5e-05, 'kg'),
   (233, 'przyprawa pieprz czarny mielony', 8.4e-06, 'kg'),
@@ -3029,7 +3035,9 @@ INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (305, 'śmietana 36%', 1.0, 'kg'),
   (305, 'jaja', 0, 'szt'),
   (305, 'cukier puder', 0.06, 'kg'),
-  (305, 'kakao', 0.012, 'kg'),
+  (305, 'kakao', 0.012, 'kg');
+
+INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (306, 'jaja', 3.0, 'szt'),
   (306, 'mąka tortowa typ 450', 0.06, 'kg'),
   (306, 'skrobia ziemniaczana', 0.06, 'kg'),
@@ -3529,7 +3537,9 @@ INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (365, 'rolada drobiowa 2020 wesele (cala rolada - 10 porcji) - REC ( 220 | 201-250 | )', 1.2, 'porcji'),
   (365, 'W Pieczeń z karkówki w sosie własnym i kaszą pęczak 2023 wesele - REC ( 116 | 101-150 | )', 0.18, 'kg'),
   (365, 'Schab ze śliwką 2022 - REC ( 384 | 351-400 | )', 0.18, 'kg'),
-  (366, 'filet.pierś z kurczaka', 0.1, 'kg'),
+  (366, 'filet.pierś z kurczaka', 0.1, 'kg');
+
+INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (366, 'sól', 0.002, 'kg'),
   (366, 'przyprawa pieprz czarny mielony', 0.001, 'kg'),
   (366, 'bułka tarta', 0.02, 'kg'),
@@ -4029,7 +4039,9 @@ INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (513, 'proszek do pieczenia', 0.01, 'kg'),
   (513, 'śmietana 36%', 1.5, 'litr'),
   (513, 'ser mascarpone', 0.5, 'kg'),
-  (513, 'maliny mroż', 0.5, 'kg'),
+  (513, 'maliny mroż', 0.5, 'kg');
+
+INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (513, 'borówka amerykańska', 0.5, 'kg'),
   (514, 'serek waniliowy', 1.0, 'kg'),
   (514, 'śmietana 36%', 0.5, 'litr'),
@@ -4525,7 +4537,9 @@ INSERT INTO _tmp_ing (recipeNumber, productName, quantity, unit) VALUES
   (1000, 'precelki', 0.3, 'kg'),
   (1000, 'herbatniki maślane', 0.25, 'kg'),
   (1000, 'masło', 0.1, 'kg')
-);
+););
+
+
 
 INSERT INTO `recipe_ingredients` (`recipeId`, `productId`, `quantity`, `unit`)
 SELECT r.id, p.id, t.quantity, t.unit FROM _tmp_ing t
